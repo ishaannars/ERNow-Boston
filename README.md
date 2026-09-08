@@ -1,70 +1,130 @@
-# ERNow Boston — Publication Build
+# ERNow Boston
 
-ERNow Boston is a consumer-facing emergency-department access forecasting prototype. The consumer provides only a location. ERNow then compares six Boston emergency departments using a zero-cost estimated travel time, current/fresh public demand signals, recent CMS ED-throughput data, and legacy CMS wait-to-provider benchmarks.
+ERNow Boston is a location-based emergency department comparison tool built to help users understand which nearby Boston ERs may offer the best combination of **estimated wait time and route access**.
 
-## Consumer flow
+The app does not claim to provide live hospital queue times. Instead, it combines historical hospital performance with current public signals such as weather, time of day, illness activity, local events, and recent hospital demand to produce a transparent estimate.
 
-1. Emergency safety warning appears first.
-2. User taps **Get My Location**.
-3. ERNow automatically refreshes all available current signals.
-4. Hospitals are ranked by **modeled time until initial evaluation = estimated travel time + modeled wait to first provider evaluation**.
-5. The closest ER is always surfaced separately as a safety reference.
-6. A separate Methodology & Data Sources page explains all sources, freshness, assumptions, and limitations.
+## What the app does
 
-## What every hospital card shows
+A user shares their location, and ERNow:
 
-- modeled wait-to-provider range
-- estimated travel time and distance
-- current relative wait pressure
-- 2019 historical wait-to-provider benchmark (CMS-derived OP-20)
-- latest available historical ED duration (CMS OP-18b)
+1. Finds the six Boston emergency departments included in the project
+2. Estimates route time and distance from the user
+3. Estimates ER wait as a range
+4. Factors in current local demand conditions
+5. Ranks hospitals using wait, access, and other relevant signals
+6. Always shows the closest ER separately as a safety reference
 
-## Dynamic inputs
+## What each hospital card shows
 
-- **Travel estimate:** recalculated from the user’s location, straight-line distance, and the current Boston hour/day. It is intentionally not labeled as live traffic.
-- **Weather:** latest NWS observation and active alerts; refreshed frequently (10-minute observation cache / 5-minute alert cache).
-- **Time/day/holiday:** computed immediately from Boston local time.
-- **Respiratory illness:** latest CDC Massachusetts ARI level. This source is updated weekly and is intentionally labeled "latest weekly," not live.
-- **Events:** current City of Boston event feed, with optional Ticketmaster Discovery API coverage for broader major-event detection.
+Each hospital card includes:
 
-## Historical inputs
+- **Estimated ER wait**
+- **Estimated route time and distance**
+- **Current demand conditions**
+- **Historical wait**
+- **Typical visit duration**
 
-- **CMS OP-18b:** latest available public arrival-to-departure ED duration baseline.
-- **Legacy CMS OP-20:** 2019 arrival-to-provider historical benchmark for the six hospitals. It is never presented as a current wait time.
+The goal is to keep the main experience simple while still giving enough context to understand why one hospital may rank above another.
 
-## Ranking model
+## How the estimate works
 
-The publication build no longer uses an arbitrary 60/30/10 normalized score. It ranks directly in minutes:
+ERNow uses a mix of historical hospital data and current contextual data.
 
-`modeled access time = estimated travel time + modeled wait to provider`
+Historical and hospital-specific inputs include:
 
-The modeled wait starts with the hospital's historical OP-20 wait benchmark, receives a small hospital-specific recalibration from its latest relative CMS OP-18b throughput, and then bounded adjustments from current time/day/holiday, NWS weather, CDC respiratory activity, and high-impact event signals.
+- historical wait-to-provider performance
+- recent ER visit duration
+- recent reported ED demand
+- hospital throughput and utilization measures
 
-The output is intentionally shown as a wide range because ERNow cannot observe live waiting-room census, triage severity, staffing, open treatment rooms, boarding, or ambulance arrivals.
+Current inputs include:
 
-## Optional secret
+- time of day
+- day of week
+- holidays
+- weather conditions
+- respiratory illness activity
+- major Boston events
+- route access from the user’s location
 
-ERNow works without paid API credentials. The only optional secret is for broader event coverage:
+Recent hospital demand is used inside the model but is not shown as a separate consumer-facing score.
 
-```toml
-TICKETMASTER_API_KEY = "your-ticketmaster-discovery-api-key"
-```
+## Current vs. historical data
 
-The app still runs without it using the City of Boston event feed. Never commit real keys to GitHub.
+Some inputs change frequently, while others come from the latest available public reporting period.
+
+Examples of frequently changing inputs:
+
+- current time and day
+- weather
+- local events
+- route estimate
+
+Examples of periodically updated inputs:
+
+- respiratory illness activity
+- hospital ED demand
+- hospital throughput
+- ER visit duration
+
+Historical wait data is used as a hospital-specific reference point when more recent standardized wait-to-provider data is not publicly available.
+
+## Typical visit duration
+
+The “Typical visit duration” shown on each hospital card is based on the CMS measure:
+
+**OP-18b — Median Time from Emergency Department Arrival to Departure for Discharged Emergency Department Patients**
+
+This is not the same as wait time. It represents the typical total time a discharged patient spends in the emergency department from arrival to departure.
+
+ERNow uses this as a hospital throughput signal alongside other inputs.
+
+## Travel estimate
+
+Route access is estimated from the user’s location.
+
+Distance depends entirely on where the user is located and is not something ERNow can control.
+
+Route time is shown as an estimate and should not be interpreted as live traffic unless a live traffic source is added in a future version.
+
+## Limitations
+
+ERNow does not have access to:
+
+- live waiting-room counts
+- triage severity
+- real-time staffing
+- open treatment rooms
+- boarding levels
+- live ambulance arrivals
+
+Because of this, ERNow provides estimates rather than confirmed live hospital wait times.
+
+For a possible medical emergency, users should call 911 or seek the nearest appropriate emergency care rather than delaying care based on ERNow rankings.
+
+## Data sources
+
+The project uses public data from sources including:
+
+- Centers for Medicare & Medicaid Services (CMS)
+- Massachusetts hospital and capacity reporting
+- National Weather Service
+- Centers for Disease Control and Prevention
+- City of Boston public event data
+
+See `DATA_SOURCES.md` and the in-app **Methodology** page for more detail on each source and how it is used.
+
+## Tech stack
+
+- Python
+- Pandas
+- Streamlit
+- REST APIs
+- Public healthcare datasets
 
 ## Run locally
 
 ```bash
 pip install -r requirements.txt
 streamlit run app.py
-```
-
-## Portfolio framing
-
-**ERNow Boston — Emergency Department Access Forecasting Platform | Python, Pandas, Streamlit, REST APIs**
-
-Built and deployed a location-first healthcare analytics application that compares Boston emergency departments using estimated travel calculation, current weather, temporal/calendar signals, public respiratory surveillance, local events, CMS ED-throughput metrics, and archived wait-to-provider benchmarks; designed transparent uncertainty ranges, data-freshness labeling, and emergency-routing safety guardrails.
-
-## Important disclaimer
-
-ERNow is a portfolio forecasting prototype, not a clinical decision tool and not a confirmed live hospital wait-time service. For a possible medical emergency, call 911 or seek the nearest appropriate emergency care rather than driving farther based on ERNow rankings.
