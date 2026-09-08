@@ -1,9 +1,7 @@
 from pathlib import Path
-from math import radians, sin, cos, sqrt, atan2
 from datetime import datetime, date, timedelta
 from zoneinfo import ZoneInfo
 import os
-import re
 import xml.etree.ElementTree as ET
 
 import pandas as pd
@@ -11,7 +9,7 @@ import requests
 import streamlit as st
 from streamlit_geolocation import streamlit_geolocation
 
-st.set_page_config(page_title="ERFlow Boston", page_icon="🏥", layout="wide")
+st.set_page_config(page_title="ERNow Boston", page_icon="🏥", layout="wide")
 DATA_PATH = Path(__file__).parent / "data" / "boston_er_data.csv"
 EASTERN = ZoneInfo("America/New_York")
 
@@ -33,25 +31,57 @@ URLS = {
     "nws_alerts": "https://api.weather.gov/alerts/active",
     "boston_events": "https://www.boston.gov/rss/events",
     "ticketmaster": "https://app.ticketmaster.com/discovery/v2/events.json",
+    "osrm": "https://router.project-osrm.org/route/v1/driving/{olon},{olat};{dlon},{dlat}",
 }
 
 HEADERS = {
-    "User-Agent": "ERFlow-Boston/1.0 portfolio-project contact=erflow-boston",
+    "User-Agent": "ERNow-Boston/1.0 portfolio-project contact=ernow-boston",
     "Accept": "application/geo+json, application/json",
 }
 
 st.markdown(
     """
 <style>
-.block-container {padding-top: 1rem; max-width: 1180px;}
-.er-card {border:1px solid rgba(128,128,128,.28); border-radius:16px; padding:1rem 1.05rem; margin-bottom:.85rem;}
-.er-best {border:2px solid #2e7d32;}
-.er-title {font-size:1.24rem; font-weight:700;}
-.er-rank {font-size:1.45rem; font-weight:800; margin-right:.4rem;}
-.er-pill {display:inline-block; padding:.24rem .55rem; border-radius:999px; background:rgba(128,128,128,.12); margin:.14rem .2rem .14rem 0; font-size:.84rem;}
-.er-big {font-size:1.15rem; font-weight:700; margin:.45rem 0;}
-.er-subtle {opacity:.75; font-size:.9rem;}
-.feed-ok {font-weight:600;}
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  --ivory:#F8F4E6;
+  --shell:#FFFDF5;
+  --ink:#1C1B19;
+  --soft-ink:#403A32;
+  --tea:#B9AD91;
+  --moss:#48513C;
+  --beni:#8C2F2F;
+}
+html, body, [class*="css"], .stApp {font-family:'Instrument Sans','Helvetica Neue',Arial,sans-serif;}
+.stApp {background:var(--ivory); color:var(--ink);}
+.block-container {padding-top:.8rem; padding-bottom:2rem; max-width:960px;}
+[data-testid="stSidebar"], [data-testid="collapsedControl"] {display:none !important;}
+
+.safety-banner {
+  display:block; width:100%; box-sizing:border-box; overflow:visible;
+  background:var(--beni); color:#FFFFFF !important; border-radius:16px; padding:16px 19px;
+  font-size:1rem; line-height:1.5; font-weight:650; margin:0 0 .9rem 0;
+}
+.safety-banner, .safety-banner * {color:#FFFFFF !important; opacity:1 !important;}
+.nav-wrap {border-bottom:1px solid var(--tea); padding-bottom:.55rem; margin-bottom:1.15rem;}
+.brand-sub {color:var(--soft-ink); margin-top:-.35rem; margin-bottom:1.1rem; font-size:.98rem;}
+.er-card {
+  background:var(--shell); border:1px solid var(--tea); border-radius:16px;
+  padding:1.05rem 1.1rem; margin-bottom:.8rem;
+}
+.er-best {border:2px solid var(--moss);}
+.best-label {color:var(--moss); font-size:.76rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; margin-bottom:.25rem;}
+.er-title {font-size:1.15rem; font-weight:650; color:var(--ink);}
+.er-rank {font-size:1.12rem; font-weight:700; margin-right:.4rem; color:var(--moss);}
+.er-wait-label {font-size:.82rem; color:var(--soft-ink); margin-top:.6rem;}
+.er-wait {font-size:1.65rem; font-weight:700; letter-spacing:-.02em; margin:.08rem 0 .45rem 0; color:var(--ink);}
+.er-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.38rem 1.1rem;margin-top:.15rem;}
+.er-metric {font-size:.93rem; color:var(--soft-ink);}
+.er-metric b {color:var(--ink); font-weight:600;}
+.er-context {font-size:.82rem; color:var(--soft-ink); margin-top:.65rem; padding-top:.55rem; border-top:1px solid #DDD4BE;}
+.er-reason {font-size:.82rem; color:var(--moss); font-weight:600; margin-top:.5rem;}
+@media (max-width:650px){.er-grid{grid-template-columns:1fr}.er-wait{font-size:1.5rem}}
 </style>
 """,
     unsafe_allow_html=True,
@@ -79,21 +109,17 @@ def safe_get(url, *, params=None, headers=None, timeout=8):
 @st.cache_data(ttl=3600)
 def load_fallback_data():
     df = pd.read_csv(DATA_PATH, dtype={"cms_provider_id": str})
-    for col in ["typical_ed_minutes", "legacy_wait_to_provider_min"]:
+    numeric = ["typical_ed_minutes", "legacy_wait_to_provider_min", "recent_ed_visits", "recent_occupancy_pct"]
+    for col in numeric:
         df[col] = pd.to_numeric(df[col], errors="coerce")
     return df
 
 
 @st.cache_data(ttl=21600, show_spinner=False)
-def fetch_cms_baselines(provider_ids):
+def fetch_cms_metrics(provider_ids):
     rows = []
     for provider_id in provider_ids:
-        params = {
-            "size": 50,
-            "offset": 0,
-            "filter[Facility ID]": provider_id,
-            "filter[Measure ID]": "OP_18b",
-        }
+        params = {"size": 100, "offset": 0, "filter[Facility ID]": provider_id}
         r = safe_get(URLS["cms"], params=params, timeout=10)
         if not r:
             continue
@@ -103,19 +129,22 @@ def fetch_cms_baselines(provider_ids):
             continue
         if isinstance(payload, dict):
             payload = payload.get("data", payload.get("results", []))
+        record = {"cms_provider_id": str(provider_id)}
         for item in payload if isinstance(payload, list) else []:
-            if str(item.get("Facility ID", "")) == str(provider_id) and item.get("Measure ID") == "OP_18b":
-                try:
-                    score = float(item.get("Score"))
-                except (TypeError, ValueError):
-                    continue
-                rows.append({
-                    "cms_provider_id": str(provider_id),
-                    "cms_current_baseline": score,
-                    "cms_start_date": item.get("Start Date", ""),
-                    "cms_end_date": item.get("End Date", ""),
-                })
-                break
+            if str(item.get("Facility ID", "")) != str(provider_id):
+                continue
+            mid = item.get("Measure ID")
+            try:
+                score = float(item.get("Score"))
+            except (TypeError, ValueError):
+                continue
+            if mid == "OP_18b":
+                record["cms_current_baseline"] = score
+                record["cms_start_date"] = item.get("Start Date", "")
+                record["cms_end_date"] = item.get("End Date", "")
+            elif mid == "OP_22":
+                record["left_before_seen_pct"] = score
+        rows.append(record)
     return pd.DataFrame(rows)
 
 
@@ -125,8 +154,7 @@ def fetch_current_weather(lat, lon):
     if not point:
         return None
     try:
-        props = point.json().get("properties", {})
-        stations_url = props.get("observationStations")
+        stations_url = point.json().get("properties", {}).get("observationStations")
     except ValueError:
         return None
     if not stations_url:
@@ -155,7 +183,6 @@ def fetch_current_weather(lat, lon):
                 "timestamp": p.get("timestamp"),
                 "temperature_c": ((p.get("temperature") or {}).get("value")),
                 "wind_kmh": ((p.get("windSpeed") or {}).get("value")),
-                "station": station.get("properties", {}).get("stationIdentifier", "NWS station"),
             }
     return None
 
@@ -173,33 +200,21 @@ def fetch_nws_alerts(lat, lon):
 
 def current_weather_factor(obs, alerts):
     factor = 1.0
-    reasons = []
     if obs:
         text = (obs.get("description") or "").lower()
         temp_c = obs.get("temperature_c")
         wind = obs.get("wind_kmh")
         if any(k in text for k in ["snow", "ice", "sleet", "freezing"]):
             factor *= 1.08
-            reasons.append("winter weather")
         elif any(k in text for k in ["thunder", "heavy rain", "rain", "showers"]):
             factor *= 1.03
-            reasons.append("rain/storm")
         if isinstance(temp_c, (int, float)) and (temp_c >= 35 or temp_c <= -7):
             factor *= 1.04
-            reasons.append("temperature extreme")
         if isinstance(wind, (int, float)) and wind >= 50:
             factor *= 1.03
-            reasons.append("strong wind")
-    if alerts:
-        severe = 0
-        for alert in alerts:
-            sev = str(alert.get("properties", {}).get("severity", "")).lower()
-            if sev in {"severe", "extreme"}:
-                severe += 1
-        if severe:
-            factor *= 1.05
-            reasons.append("active severe weather alert")
-    return min(factor, 1.15), reasons or ["normal current weather"]
+    if any(str(a.get("properties", {}).get("severity", "")).lower() in {"severe", "extreme"} for a in alerts):
+        factor *= 1.05
+    return min(factor, 1.15)
 
 
 @st.cache_data(ttl=3600, show_spinner=False)
@@ -222,7 +237,6 @@ def fetch_cdc_ari():
 
 def illness_factor(ari):
     label = ((ari or {}).get("label") or "").strip().lower()
-    # Intentionally small: statewide weekly surveillance is useful context but not a live ED census.
     mapping = {"minimal": 0.99, "very low": 0.99, "low": 1.00, "moderate": 1.02, "high": 1.04, "very high": 1.06}
     return mapping.get(label, 1.0), (label.title() if label else "Unavailable")
 
@@ -234,10 +248,7 @@ def nth_weekday(year, month, weekday, n):
 
 
 def last_weekday(year, month, weekday):
-    if month == 12:
-        d = date(year + 1, 1, 1) - timedelta(days=1)
-    else:
-        d = date(year, month + 1, 1) - timedelta(days=1)
+    d = (date(year + (month == 12), 1 if month == 12 else month + 1, 1) - timedelta(days=1))
     return d - timedelta(days=(d.weekday() - weekday) % 7)
 
 
@@ -270,109 +281,96 @@ def holiday_name(d):
 
 def temporal_factor(now_dt):
     factor = 1.0
-    reasons = []
     h, wd = now_dt.hour, now_dt.weekday()
-    # Conservative bounded effects; these are model coefficients, not source measurements.
     if 16 <= h < 23:
         factor *= 1.08
-        reasons.append("evening")
     elif 0 <= h < 6:
         factor *= 0.96
-        reasons.append("overnight")
     if wd == 0:
         factor *= 1.04
-        reasons.append("Monday")
     elif wd >= 5:
         factor *= 1.02
-        reasons.append("weekend")
     hname = holiday_name(now_dt.date())
     if hname:
         factor *= 1.04 if "Marathon" not in hname else 1.07
-        reasons.append(hname)
-    return factor, reasons or ["typical time/day"]
+    return factor
 
 
 @st.cache_data(ttl=900, show_spinner=False)
 def fetch_boston_events(today_iso):
     r = safe_get(URLS["boston_events"], headers={"User-Agent": HEADERS["User-Agent"]}, timeout=8)
     if not r:
-        return {"status": "unavailable", "titles": []}
+        return []
     try:
         root = ET.fromstring(r.content)
     except ET.ParseError:
-        return {"status": "unavailable", "titles": []}
+        return []
     target = datetime.fromisoformat(today_iso)
-    tokens = {
-        target.strftime("%B %d, %Y").replace(" 0", " "),
-        target.strftime("%Y-%m-%d"),
-    }
+    tokens = {target.strftime("%B %d, %Y").replace(" 0", " "), target.strftime("%Y-%m-%d")}
     titles = []
     for item in root.findall(".//item"):
         text = " ".join((c.text or "") for c in list(item))
         if any(tok.lower() in text.lower() for tok in tokens):
-            title = item.findtext("title") or "Boston event"
-            titles.append(title.strip())
-    return {"status": "current", "titles": titles}
+            titles.append((item.findtext("title") or "Boston event").strip())
+    return titles
 
 
 @st.cache_data(ttl=900, show_spinner=False)
 def fetch_ticketmaster_events(now_iso, end_iso, api_key):
     if not api_key:
-        return None
+        return []
     params = {
-        "apikey": api_key,
-        "city": "Boston",
-        "stateCode": "MA",
-        "countryCode": "US",
-        "startDateTime": now_iso,
-        "endDateTime": end_iso,
-        "size": 50,
-        "sort": "date,asc",
+        "apikey": api_key, "city": "Boston", "stateCode": "MA", "countryCode": "US",
+        "startDateTime": now_iso, "endDateTime": end_iso, "size": 50, "sort": "date,asc",
     }
     r = safe_get(URLS["ticketmaster"], params=params, timeout=10)
+    if not r:
+        return []
+    try:
+        return r.json().get("_embedded", {}).get("events", [])
+    except ValueError:
+        return []
+
+
+def event_factor(city_titles, ticketmaster_events):
+    keywords = ["marathon", "parade", "festival", "fireworks", "road closure", "race", "concert", "game", "championship"]
+    titles = list(city_titles) + [e.get("name", "") for e in ticketmaster_events]
+    high = [t for t in titles if any(k in t.lower() for k in keywords)]
+    if len(high) >= 3:
+        return 1.04
+    if high:
+        return 1.02
+    return 1.0
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def route_estimate(origin_lat, origin_lon, dest_lat, dest_lon):
+    url = URLS["osrm"].format(olon=origin_lon, olat=origin_lat, dlon=dest_lon, dlat=dest_lat)
+    r = safe_get(url, params={"overview": "false", "alternatives": "false", "steps": "false"}, timeout=10)
     if not r:
         return None
     try:
         payload = r.json()
-        return payload.get("_embedded", {}).get("events", [])
-    except ValueError:
+        route = payload.get("routes", [])[0]
+        return {"minutes": route["duration"] / 60.0, "miles": route["distance"] / 1609.344}
+    except (ValueError, IndexError, KeyError, TypeError):
         return None
 
 
-def event_factor(city_events, ticketmaster_events):
-    # Only high-impact signals affect the model; ordinary meetings/classes are ignored.
-    keywords = ["marathon", "parade", "festival", "fireworks", "road closure", "race", "concert", "game", "championship"]
-    titles = list((city_events or {}).get("titles", []))
-    if ticketmaster_events:
-        titles += [e.get("name", "") for e in ticketmaster_events]
-    high_impact = [t for t in titles if any(k in t.lower() for k in keywords)]
-    if len(high_impact) >= 3:
-        return 1.04, high_impact[:3]
-    if high_impact:
-        return 1.02, high_impact[:3]
-    return 1.0, []
-
-
-def haversine_miles(lat1, lon1, lat2, lon2):
-    r = 3958.8
-    p1, p2 = radians(lat1), radians(lat2)
-    dphi = radians(lat2 - lat1)
-    dlambda = radians(lon2 - lon1)
-    a = sin(dphi / 2) ** 2 + cos(p1) * cos(p2) * sin(dlambda / 2) ** 2
-    return 2 * r * atan2(sqrt(a), sqrt(1 - a))
-
-
-def proxy_drive_minutes(distance_miles, hour, weekday):
-    base = 5 + distance_miles * 3.6
-    if weekday < 5 and (7 <= hour < 10 or 16 <= hour < 19):
-        return base * 1.35
-    if 10 <= hour < 16:
-        return base * 1.15
-    if 19 <= hour < 22:
-        return base * 1.10
-    if weekday >= 5:
-        return base * 1.08
-    return base
+def recent_demand_factor(row, med_volume, med_occupancy, med_lwbs):
+    # Relative hospital-demand adjustment using recent reported utilization only.
+    # Bounded intentionally because these are historical operational signals, not a live census.
+    factor = 1.0
+    if pd.notna(row.get("recent_ed_visits")) and med_volume:
+        volume_ratio = float(row["recent_ed_visits"]) / med_volume
+        factor *= max(0.96, min(1.06, 1 + 0.04 * (volume_ratio - 1)))
+    if pd.notna(row.get("recent_occupancy_pct")) and med_occupancy:
+        occ_diff = (float(row["recent_occupancy_pct"]) - med_occupancy) / 10.0
+        factor *= max(0.97, min(1.05, 1 + 0.02 * occ_diff))
+    if pd.notna(row.get("left_before_seen_pct")) and med_lwbs:
+        lwbs_ratio = float(row["left_before_seen_pct"]) / med_lwbs
+        factor *= max(0.97, min(1.05, 1 + 0.025 * (lwbs_ratio - 1)))
+    return max(0.92, min(1.12, factor))
 
 
 def fmt_minutes(v):
@@ -382,95 +380,94 @@ def fmt_minutes(v):
     return f"{m} min" if m < 60 else f"{m // 60}h {m % 60}m"
 
 
-def build_consumer_model(df, origin_lat, origin_lon, now_dt, weather_obs, alerts, ari, city_events, tm_events):
-    wf, weather_reasons = current_weather_factor(weather_obs, alerts)
+def current_condition_label(dynamic_factor):
+    if dynamic_factor >= 1.08:
+        return "Elevated"
+    if dynamic_factor <= 0.96:
+        return "Lower than typical"
+    return "Typical"
+
+
+def build_model(df, origin_lat, origin_lon, now_dt, weather_obs, alerts, ari, city_events, tm_events):
+    wf = current_weather_factor(weather_obs, alerts)
     inf, illness_label = illness_factor(ari)
-    tf, time_reasons = temporal_factor(now_dt)
-    ef, high_events = event_factor(city_events, tm_events)
-    dynamic_factor = max(0.85, min(1.25, wf * inf * tf * ef))
+    tf = temporal_factor(now_dt)
+    ef = event_factor(city_events, tm_events)
+    dynamic_factor = max(0.86, min(1.24, wf * inf * tf * ef))
 
-    median_ed = df["typical_ed_minutes"].median()
+    med_ed = df["typical_ed_minutes"].median()
+    med_volume = df["recent_ed_visits"].median()
+    med_occupancy = df["recent_occupancy_pct"].median()
+    med_lwbs = df["left_before_seen_pct"].median() if "left_before_seen_pct" in df and df["left_before_seen_pct"].notna().any() else None
+
     rows = []
-    for idx, row in df.reset_index(drop=True).iterrows():
-        straight = haversine_miles(origin_lat, origin_lon, row["latitude"], row["longitude"])
-        # Zero-cost travel estimate. This is intentionally NOT labeled live traffic.
-        # It uses current Boston hour/day plus straight-line distance as a transparent proxy.
-        drive = proxy_drive_minutes(straight, now_dt.hour, now_dt.weekday())
-        route_dist = straight
-        travel_source = "Estimated travel"
-        traffic_delay = None
+    for _, row in df.iterrows():
+        route = route_estimate(origin_lat, origin_lon, row["latitude"], row["longitude"])
+        if route is None:
+            # If road routing fails, keep the hospital visible but do not fake a route time.
+            drive_min, route_miles = float("nan"), float("nan")
+        else:
+            drive_min, route_miles = route["minutes"], route["miles"]
 
-        legacy_wait = float(row["legacy_wait_to_provider_min"])
+        historical_wait = float(row["legacy_wait_to_provider_min"])
         recent_ed = float(row["typical_ed_minutes"])
-        # Recalibrate the legacy wait benchmark modestly using the hospital's current relative throughput.
-        throughput_relative = recent_ed / median_ed if median_ed else 1.0
+        throughput_relative = recent_ed / med_ed if med_ed else 1.0
         throughput_factor = max(0.90, min(1.12, throughput_relative ** 0.30))
-        wait_mid = legacy_wait * throughput_factor * dynamic_factor
-        # Wide interval because OP-20 is legacy data and live queue/staffing/triage are unavailable.
+        hospital_demand = recent_demand_factor(row, med_volume, med_occupancy, med_lwbs)
+
+        wait_mid = historical_wait * throughput_factor * hospital_demand * dynamic_factor
         wait_low = max(5, wait_mid * 0.65)
         wait_high = max(wait_low + 10, wait_mid * 1.55)
-        access_low = drive + wait_low
-        access_high = drive + wait_high
-        access_mid = drive + wait_mid
+        access_mid = (drive_min if pd.notna(drive_min) else 999) + wait_mid
 
         rows.append({
             **row.to_dict(),
-            "distance_miles": straight,
-            "route_distance_miles": route_dist,
-            "drive_eta_min": drive,
-            "travel_source": travel_source,
-            "traffic_delay_min": traffic_delay,
+            "route_time_min": drive_min,
+            "route_distance_miles": route_miles,
             "modeled_wait_mid": wait_mid,
             "modeled_wait_low": wait_low,
             "modeled_wait_high": wait_high,
             "access_mid": access_mid,
-            "access_low": access_low,
-            "access_high": access_high,
             "dynamic_factor": dynamic_factor,
-            "throughput_factor": throughput_factor,
+            "hospital_demand_factor": hospital_demand,
         })
 
-    out = pd.DataFrame(rows).sort_values(["access_mid", "drive_eta_min", "distance_miles"]).reset_index(drop=True)
+    out = pd.DataFrame(rows).sort_values(["access_mid", "modeled_wait_mid"]).reset_index(drop=True)
     out["rank"] = range(1, len(out) + 1)
-    context = {
-        "weather_reasons": weather_reasons,
-        "illness_label": illness_label,
-        "time_reasons": time_reasons,
-        "high_events": high_events,
-        "dynamic_factor": dynamic_factor,
-    }
-    return out, context
+    return out, {"dynamic_factor": dynamic_factor, "illness_label": illness_label}
 
 
-def congestion_label(row, ranked):
-    q1 = ranked["modeled_wait_mid"].quantile(0.33)
-    q2 = ranked["modeled_wait_mid"].quantile(0.67)
-    if row["modeled_wait_mid"] <= q1:
-        return "Lower modeled wait"
-    if row["modeled_wait_mid"] <= q2:
-        return "Moderate modeled wait"
-    return "Higher modeled wait"
-
-
-# Safety must be the first visible element.
-st.error(
-    "🚨 **If this may be a medical emergency, call 911 or go to the nearest appropriate emergency department. "
-    "Do not delay care or drive farther because ERFlow ranks another hospital higher. Do not use this app while driving.**"
+st.markdown(
+    """
+<div class="safety-banner">
+🚨 <strong>Possible emergency?</strong> Call 911 or go to the nearest appropriate emergency department.
+Do not delay care or drive farther because of an ERNow estimate, and do not use this app while driving.
+</div>
+""",
+    unsafe_allow_html=True,
 )
 
-st.title("ERFlow Boston")
-st.caption("One input: your location. ERFlow compares nearby Boston ERs using modeled wait-to-provider, current time-sensitive travel estimates, and the freshest public demand signals available.")
+st.markdown('<div class="nav-wrap">', unsafe_allow_html=True)
+nav1, nav2, _ = st.columns([1, 1, 4])
+with nav1:
+    st.page_link("app.py", label="ERNow", icon="🏥", use_container_width=True)
+with nav2:
+    st.page_link("pages/1_Methodology.py", label="Methodology", icon="📘", use_container_width=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
-st.subheader("Where are you right now?")
+st.title("ERNow Boston")
+st.markdown('<div class="brand-sub">Nearby Boston emergency departments, ranked using estimated ER wait and road-route access.</div>', unsafe_allow_html=True)
+
+st.subheader("Your location")
 location = streamlit_geolocation()
 origin_lat = origin_lon = None
 location_label = None
 if isinstance(location, dict) and location.get("latitude") is not None and location.get("longitude") is not None:
     origin_lat, origin_lon = float(location["latitude"]), float(location["longitude"])
     location_label = "Your current location"
-    st.success("Location received. ERFlow is recalculating now.")
+    st.success("Location received — results updated.")
 else:
-    with st.expander("Location blocked? Use a Boston area instead"):
+    with st.expander("Location blocked? Choose a Boston area"):
         fallback = st.selectbox("Boston area", list(FALLBACK_ORIGINS.keys()))
         if st.button("Use this area", use_container_width=True):
             st.session_state["fallback_origin"] = fallback
@@ -480,100 +477,72 @@ else:
         location_label = fallback
 
 if origin_lat is None:
-    st.info("Use **Get My Location** above. No other consumer input is required.")
+    st.info("Use **Get My Location**. That's the only input ERNow needs.")
     st.stop()
 
 now_dt = datetime.now(EASTERN)
 df = load_fallback_data()
-cms = fetch_cms_baselines(tuple(df["cms_provider_id"].tolist()))
+cms = fetch_cms_metrics(tuple(df["cms_provider_id"].tolist()))
 if not cms.empty:
     df = df.merge(cms, on="cms_provider_id", how="left")
-    m = df["cms_current_baseline"].notna()
+    m = df["cms_current_baseline"].notna() if "cms_current_baseline" in df else pd.Series(False, index=df.index)
     df.loc[m, "typical_ed_minutes"] = df.loc[m, "cms_current_baseline"]
-    df.loc[m, "source_label"] = "Latest available CMS OP-18b public release"
 
 weather_obs = fetch_current_weather(origin_lat, origin_lon)
 alerts = fetch_nws_alerts(origin_lat, origin_lon)
 ari = fetch_cdc_ari()
 city_events = fetch_boston_events(now_dt.date().isoformat())
-
 tm_key = secret_or_env("TICKETMASTER_API_KEY")
-
 tm_events = fetch_ticketmaster_events(
     now_dt.astimezone(ZoneInfo("UTC")).strftime("%Y-%m-%dT%H:%M:%SZ"),
     (now_dt + timedelta(hours=6)).astimezone(ZoneInfo("UTC")).strftime("%Y-%m-%dT%H:%M:%SZ"),
     tm_key,
-) if tm_key else None
+) if tm_key else []
 
-ranked, context = build_consumer_model(df, origin_lat, origin_lon, now_dt, weather_obs, alerts, ari, city_events, tm_events)
-closest = ranked.loc[ranked["drive_eta_min"].idxmin()]
-lowest_wait = ranked.loc[ranked["modeled_wait_mid"].idxmin()]
+ranked, context = build_model(df, origin_lat, origin_lon, now_dt, weather_obs, alerts, ari, city_events, tm_events)
 
-st.caption(f"Calculated at **{now_dt.strftime('%-I:%M %p')}** Boston time for **{location_label}**")
-
-# Freshness/status strip: consumer-readable and honest.
-status_cols = st.columns(5)
-with status_cols[0]:
-    st.metric("Travel estimate", "CURRENT", help="Zero-cost travel estimate recalculated from your location and the current Boston hour/day. It does not use live traffic.")
-with status_cols[1]:
-    weather_label = "CURRENT" if weather_obs else "UNAVAILABLE"
-    st.metric("Weather", weather_label)
-with status_cols[2]:
-    st.metric("Time/day", "CURRENT")
-with status_cols[3]:
-    st.metric("Illness", "LATEST WEEKLY" if ari else "UNAVAILABLE", help="CDC respiratory surveillance is published weekly, not live minute-by-minute.")
-with status_cols[4]:
-    event_ok = (city_events or {}).get("status") == "current" or tm_events is not None
-    st.metric("Events", "CURRENT" if event_ok else "UNAVAILABLE")
-
+weather_status = weather_obs.get("description", "Unavailable") if weather_obs else "Unavailable"
+event_status = "Major event signal" if event_factor(city_events, tm_events) > 1 else "No major event signal"
+st.caption(
+    f"Updated **{now_dt.strftime('%-I:%M %p')}** · {location_label} · "
+    f"Weather: **{weather_status}** · Respiratory activity: **{context['illness_label']}** · Events: **{event_status}**"
+)
 
 st.divider()
-st.subheader("ER comparison — lowest modeled time to initial evaluation first")
-st.caption(
-    "Ranking = **estimated travel time + modeled wait to first provider evaluation**. The wait model starts from the 2019 CMS OP-20 historical wait benchmark, modestly recalibrates it with the latest CMS ED-throughput baseline, then applies current external demand signals. It is not a confirmed live hospital queue."
-)
+st.subheader("Nearby ERs")
+st.caption("Ranked by estimated ER wait plus estimated road-route time. Route estimates do not include live traffic.")
 
 for _, row in ranked.iterrows():
     best = " er-best" if int(row["rank"]) == 1 else ""
+    best_label = '<div class="best-label">Best overall estimate</div>' if int(row["rank"]) == 1 else ""
     wait_range = f"{fmt_minutes(row['modeled_wait_low'])}–{fmt_minutes(row['modeled_wait_high'])}"
-    access_range = f"{fmt_minutes(row['access_low'])}–{fmt_minutes(row['access_high'])}"
-    traffic_note = row["travel_source"]
-    cong = congestion_label(row, ranked)
+    route_time = f"~{fmt_minutes(row['route_time_min'])}" if pd.notna(row["route_time_min"]) else "Unavailable"
+    route_dist = f"{row['route_distance_miles']:.1f} mi" if pd.notna(row["route_distance_miles"]) else "—"
+    current_demand = current_condition_label(row["dynamic_factor"])
+    reason = "Ranking combines estimated ER wait, recent hospital demand, current local conditions, route access, and other relevant factors. Estimates are not live hospital queue times."
+
     card = f"""
 <div class="er-card{best}">
+  {best_label}
   <div><span class="er-rank">#{int(row['rank'])}</span><span class="er-title">{row['hospital']}</span></div>
-  <div class="er-big">Modeled time until initial evaluation: {access_range}</div>
-  <div>
-    <span class="er-pill"><b>Modeled wait to provider:</b> {wait_range}</span>
-    <span class="er-pill"><b>Travel:</b> {fmt_minutes(row['drive_eta_min'])} · {row['route_distance_miles']:.1f} mi · {traffic_note}</span>
-    <span class="er-pill"><b>Current wait pressure:</b> {cong}</span>
-    <span class="er-pill"><b>Historical wait benchmark:</b> {fmt_minutes(row['legacy_wait_to_provider_min'])} (2019)</span>
-    <span class="er-pill"><b>Recent historical ED duration:</b> {fmt_minutes(row['typical_ed_minutes'])}</span>
+  <div class="er-wait-label">Estimated ER wait</div>
+  <div class="er-wait">{wait_range}</div>
+  <div class="er-grid">
+    <div class="er-metric"><b>Estimated route:</b> {route_time} · {route_dist}</div>
+    <div class="er-metric"><b>Current demand conditions:</b> {current_demand}</div>
+    <div class="er-metric"><b>Historical wait:</b> {fmt_minutes(row['legacy_wait_to_provider_min'])}</div>
+    <div class="er-metric"><b>Typical visit duration:</b> {fmt_minutes(row['typical_ed_minutes'])}</div>
   </div>
-  <div class="er-subtle">The 2019 wait benchmark is legacy CMS data. Recent ED duration is CMS OP-18b arrival-to-departure, not a live wait. Current factors adjust the model but cannot observe the hospital's live queue, triage mix, staffing, or boarding.</div>
+  <div class="er-reason">{reason}</div>
 </div>
 """
     st.markdown(card, unsafe_allow_html=True)
 
-st.info(
-    f"**Closest by estimated travel time:** {closest['hospital']} — {fmt_minutes(closest['drive_eta_min'])}.  \n"
-    f"**Lowest modeled wait to provider:** {lowest_wait['hospital']} — {fmt_minutes(lowest_wait['modeled_wait_low'])}–{fmt_minutes(lowest_wait['modeled_wait_high'])}.  \n"
-    "For a potentially serious emergency, do not drive farther based on these modeled comparisons."
-)
-
-with st.expander("What is affecting the model right now?"):
-    weather_text = weather_obs.get("description") if weather_obs else "Unavailable"
-    weather_time = weather_obs.get("timestamp") if weather_obs else ""
-    ari_week = (ari or {}).get("week_end", "Unavailable")
-    event_names = context["high_events"] or ["No high-impact event adjustment detected"]
-    st.write(f"**Weather:** {weather_text}" + (f" · observation {weather_time}" if weather_time else ""))
-    st.write(f"**Time/day:** {', '.join(context['time_reasons'])}")
-    st.write(f"**Respiratory activity:** {context['illness_label']} · latest CDC week ending {ari_week}")
-    st.write(f"**High-impact events:** {', '.join(event_names)}")
-    st.write("**Travel:** Zero-cost estimated travel time based on current hour/day and distance. ERFlow does not claim this is live traffic.")
+with st.expander("What changes the estimate right now?"):
+    st.write("ERNow automatically uses the current Boston time/day, holiday status, National Weather Service conditions and alerts, current Boston event signals, and the latest Massachusetts respiratory-illness activity available from CDC.")
+    st.caption("Recent hospital demand and capacity data are used in the model but are not shown as if they were live conditions.")
 
 st.subheader("Map")
 st.map(ranked[["hospital", "latitude", "longitude"]], latitude="latitude", longitude="longitude", size=95)
 
-st.page_link("pages/1_Methodology_and_Data_Sources.py", label="How ERFlow works · Methodology & data sources", icon="📚")
-st.caption("ERFlow Boston • Portfolio forecasting prototype • Not a clinical decision tool or confirmed live hospital wait-time service.")
+st.caption("ERNow Boston · Forecasting prototype · Not a clinical decision tool or confirmed live hospital wait-time service.")
