@@ -1,7 +1,7 @@
-hospital,city,address,latitude,longitude,cms_provider_id,typical_ed_minutes,source_label,legacy_wait_to_provider_min,legacy_wait_source
-Tufts Medical Center,Boston,"800 Washington St, Boston, MA 02111",42.3495,-71.0634,220116,211,CMS OP_18b-derived typical median,28.0,"CMS-derived Hospital Compare snapshot, updated 2019-01-12 (Healthcarecomps mirror)"
-Boston Medical Center,Boston,"1 Boston Medical Center Pl, Boston, MA 02118",42.3356,-71.0723,220031,241,CMS OP_18b-derived typical median,70.0,"CMS-derived Hospital Compare snapshot, updated 2019-01-12 (Healthcarecomps mirror)"
-Brigham and Women's Faulkner Hospital,Boston,"1153 Centre St, Boston, MA 02130",42.3017,-71.1271,220119,255,CMS OP_18b-derived typical median,16.0,"CMS-derived Hospital Compare snapshot, updated 2019-01-12 (Healthcarecomps mirror)"
-Massachusetts General Hospital,Boston,"55 Fruit St, Boston, MA 02114",42.3631,-71.0686,220071,283,CMS OP_18b-derived typical median,28.0,"CMS-derived Hospital Compare snapshot, updated 2019-01-12 (Healthcarecomps mirror)"
-Brigham and Women's Hospital,Boston,"75 Francis St, Boston, MA 02115",42.336,-71.1073,220110,309,CMS OP_18b-derived typical median,24.0,"CMS-derived Hospital Compare snapshot, updated 2019-01-12 (Healthcarecomps mirror)"
-Beth Israel Deaconess Medical Center,Boston,"330 Brookline Ave, Boston, MA 02215",42.3354,-71.105,220086,348,CMS OP_18b-derived typical median,48.0,"CMS-derived Hospital Compare snapshot, updated 2019-01-12 (Healthcarecomps mirror)"
+hospital,city,address,latitude,longitude,cms_provider_id,typical_ed_minutes,source_label,legacy_wait_to_provider_min,legacy_wait_source,recent_ed_visits,recent_occupancy_pct
+Tufts Medical Center,Boston,"800 Washington St, Boston, MA 02111",42.3495,-71.0634,220116,211,CMS OP_18b-derived typical median,28.0,"Archived CMS Hospital Compare OP-20 historical benchmark",45652,84.2
+Boston Medical Center,Boston,"1 Boston Medical Center Pl, Boston, MA 02118",42.3356,-71.0723,220031,241,CMS OP_18b-derived typical median,70.0,"Archived CMS Hospital Compare OP-20 historical benchmark",113480,91.6
+Brigham and Women's Faulkner Hospital,Boston,"1153 Centre St, Boston, MA 02130",42.3017,-71.1271,220119,255,CMS OP_18b-derived typical median,16.0,"Archived CMS Hospital Compare OP-20 historical benchmark",46750,85.0
+Massachusetts General Hospital,Boston,"55 Fruit St, Boston, MA 02114",42.3631,-71.0686,220071,283,CMS OP_18b-derived typical median,28.0,"Archived CMS Hospital Compare OP-20 historical benchmark",118067,93.4
+Brigham and Women's Hospital,Boston,"75 Francis St, Boston, MA 02115",42.336,-71.1073,220110,309,CMS OP_18b-derived typical median,24.0,"Archived CMS Hospital Compare OP-20 historical benchmark",59141,94.2
+Beth Israel Deaconess Medical Center,Boston,"330 Brookline Ave, Boston, MA 02215",42.3354,-71.105,220086,348,CMS OP_18b-derived typical median,48.0,"Archived CMS Hospital Compare OP-20 historical benchmark",35201,80.7
