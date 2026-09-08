@@ -1,18 +1,22 @@
 import pandas as pd
 import streamlit as st
 
-st.set_page_config(page_title="ERNow Methodology", page_icon="📘", layout="wide")
+st.set_page_config(page_title="ERNow Methodology", page_icon="✚", layout="wide")
 
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap');
-:root{--ivory:#F8F4E6;--shell:#FFFDF5;--ink:#1C1B19;--soft:#403A32;--tea:#B9AD91;--moss:#48513C;--beni:#8C2F2F;}
+:root{--ivory:#F8F4E6;--shell:#FFFDF5;--ink:#1C1B19;--soft:#403A32;--tea:#B9AD91;--moss:#48513C;--beni:#8C2F2F;--kakishibu:#A85B45;--kakishibu-wash:rgba(168,91,69,.10);}
 html, body, [class*="css"], .stApp{font-family:'Instrument Sans','Helvetica Neue',Arial,sans-serif;}
 .stApp{background:var(--ivory);color:var(--ink)}
-.block-container{padding-top:.8rem;padding-bottom:2rem;max-width:900px}
+.block-container{padding-top:5.4rem!important;padding-bottom:2rem;max-width:900px}
 [data-testid="stSidebar"],[data-testid="collapsedControl"]{display:none!important}
 .safety-banner{display:block;width:100%;box-sizing:border-box;overflow:visible;background:var(--beni);color:#FFFFFF!important;border-radius:16px;padding:16px 19px;font-size:1rem;line-height:1.5;font-weight:650;margin:0 0 .9rem 0}.safety-banner,.safety-banner *{color:#FFFFFF!important;opacity:1!important}
 .nav-wrap{border-bottom:1px solid var(--tea);padding-bottom:.55rem;margin-bottom:1.15rem}
+[data-testid="stPageLink-NavLink"]{background:var(--shell)!important;border:1px solid var(--tea)!important;border-radius:10px!important;color:var(--ink)!important;font-weight:650!important}
+[data-testid="stPageLink-NavLink"]:hover{border-color:var(--kakishibu)!important;background:var(--kakishibu-wash)!important}
+.material-symbols-rounded{color:var(--beni)!important}
+@media(max-width:650px){.block-container{padding-top:4.8rem!important}}
 </style>
 """, unsafe_allow_html=True)
 
@@ -26,9 +30,9 @@ ERNow estimates must never be used to delay emergency care.
 st.markdown('<div class="nav-wrap">', unsafe_allow_html=True)
 nav1, nav2, _ = st.columns([1, 1, 4])
 with nav1:
-    st.page_link("app.py", label="ERNow", icon="🏥", use_container_width=True)
+    st.page_link("app.py", label="ERNow", icon=":material/emergency:", use_container_width=True)
 with nav2:
-    st.page_link("pages/1_Methodology.py", label="Methodology", icon="📘", use_container_width=True)
+    st.page_link("pages/1_Methodology.py", label="Methodology", icon=":material/menu_book:", use_container_width=True)
 st.markdown('</div>', unsafe_allow_html=True)
 
 st.title("Methodology")

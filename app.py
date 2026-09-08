@@ -9,7 +9,7 @@ import requests
 import streamlit as st
 from streamlit_geolocation import streamlit_geolocation
 
-st.set_page_config(page_title="ERNow Boston", page_icon="🏥", layout="wide")
+st.set_page_config(page_title="ERNow Boston", page_icon="✚", layout="wide")
 DATA_PATH = Path(__file__).parent / "data" / "boston_er_data.csv"
 EASTERN = ZoneInfo("America/New_York")
 
@@ -52,10 +52,12 @@ st.markdown(
   --tea:#B9AD91;
   --moss:#48513C;
   --beni:#8C2F2F;
+  --kakishibu:#A85B45;
+  --kakishibu-wash:rgba(168,91,69,.10);
 }
 html, body, [class*="css"], .stApp {font-family:'Instrument Sans','Helvetica Neue',Arial,sans-serif;}
 .stApp {background:var(--ivory); color:var(--ink);}
-.block-container {padding-top:.8rem; padding-bottom:2rem; max-width:960px;}
+.block-container {padding-top:5.4rem !important; padding-bottom:2rem; max-width:960px;}
 [data-testid="stSidebar"], [data-testid="collapsedControl"] {display:none !important;}
 
 .safety-banner {
@@ -65,6 +67,11 @@ html, body, [class*="css"], .stApp {font-family:'Instrument Sans','Helvetica Neu
 }
 .safety-banner, .safety-banner * {color:#FFFFFF !important; opacity:1 !important;}
 .nav-wrap {border-bottom:1px solid var(--tea); padding-bottom:.55rem; margin-bottom:1.15rem;}
+[data-testid="stPageLink-NavLink"] {background:var(--shell)!important;border:1px solid var(--tea)!important;border-radius:10px!important;color:var(--ink)!important;font-weight:650!important;}
+[data-testid="stPageLink-NavLink"]:hover {border-color:var(--kakishibu)!important;background:var(--kakishibu-wash)!important;}
+.material-symbols-rounded {color:var(--beni)!important;}
+.location-confirm {background:var(--kakishibu-wash);border-bottom:2px solid var(--kakishibu);border-radius:10px 10px 4px 4px;padding:.72rem .9rem;margin:.35rem 0 .75rem 0;color:var(--ink);font-weight:600;}
+.location-confirm .sub {color:var(--soft-ink);font-size:.84rem;font-weight:500;margin-left:.35rem;}
 .brand-sub {color:var(--soft-ink); margin-top:-.35rem; margin-bottom:1.1rem; font-size:.98rem;}
 .er-card {
   background:var(--shell); border:1px solid var(--tea); border-radius:16px;
@@ -81,7 +88,7 @@ html, body, [class*="css"], .stApp {font-family:'Instrument Sans','Helvetica Neu
 .er-metric b {color:var(--ink); font-weight:600;}
 .er-context {font-size:.82rem; color:var(--soft-ink); margin-top:.65rem; padding-top:.55rem; border-top:1px solid #DDD4BE;}
 .er-reason {font-size:.82rem; color:var(--moss); font-weight:600; margin-top:.5rem;}
-@media (max-width:650px){.er-grid{grid-template-columns:1fr}.er-wait{font-size:1.5rem}}
+@media (max-width:650px){.block-container{padding-top:4.8rem!important}.er-grid{grid-template-columns:1fr}.er-wait{font-size:1.5rem}}
 </style>
 """,
     unsafe_allow_html=True,
@@ -185,6 +192,25 @@ def fetch_current_weather(lat, lon):
                 "wind_kmh": ((p.get("windSpeed") or {}).get("value")),
             }
     return None
+
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def fetch_location_name(lat, lon):
+    r = safe_get(URLS["nws_points"].format(lat=f"{lat:.4f}", lon=f"{lon:.4f}"), timeout=8)
+    if not r:
+        return "Current location"
+    try:
+        props = r.json().get("properties", {})
+        rel = (props.get("relativeLocation") or {}).get("properties", {})
+        city = rel.get("city")
+        state = rel.get("state")
+        if city and state:
+            return f"{city}, {state}"
+        if city:
+            return city
+    except (ValueError, AttributeError):
+        pass
+    return "Current location"
 
 
 @st.cache_data(ttl=300, show_spinner=False)
@@ -450,22 +476,28 @@ Do not delay care or drive farther because of an ERNow estimate, and do not use 
 st.markdown('<div class="nav-wrap">', unsafe_allow_html=True)
 nav1, nav2, _ = st.columns([1, 1, 4])
 with nav1:
-    st.page_link("app.py", label="ERNow", icon="🏥", use_container_width=True)
+    st.page_link("app.py", label="ERNow", icon=":material/emergency:", use_container_width=True)
 with nav2:
-    st.page_link("pages/1_Methodology.py", label="Methodology", icon="📘", use_container_width=True)
+    st.page_link("pages/1_Methodology.py", label="Methodology", icon=":material/menu_book:", use_container_width=True)
 st.markdown('</div>', unsafe_allow_html=True)
 
 st.title("ERNow Boston")
 st.markdown('<div class="brand-sub">Nearby Boston emergency departments, ranked using estimated ER wait and road-route access.</div>', unsafe_allow_html=True)
 
 st.subheader("Your location")
-location = streamlit_geolocation()
+location_slot = st.empty()
+with location_slot.container():
+    location = streamlit_geolocation()
 origin_lat = origin_lon = None
 location_label = None
 if isinstance(location, dict) and location.get("latitude") is not None and location.get("longitude") is not None:
     origin_lat, origin_lon = float(location["latitude"]), float(location["longitude"])
-    location_label = "Your current location"
-    st.success("Location received — results updated.")
+    location_slot.empty()
+    location_label = fetch_location_name(origin_lat, origin_lon)
+    st.markdown(
+        f'<div class="location-confirm">Location detected: {location_label}<span class="sub">Results updated from your current location.</span></div>',
+        unsafe_allow_html=True,
+    )
 else:
     with st.expander("Location blocked? Choose a Boston area"):
         fallback = st.selectbox("Boston area", list(FALLBACK_ORIGINS.keys()))
