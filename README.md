@@ -115,16 +115,5 @@ The project uses public data from sources including:
 
 See `DATA_SOURCES.md` and the in-app **Methodology** page for more detail on each source and how it is used.
 
-## Tech stack
-
-- Python
-- Pandas
-- Streamlit
-- REST APIs
-- Public healthcare datasets
-
-## Run locally
-
-```bash
 pip install -r requirements.txt
 streamlit run app.py
