@@ -2,13 +2,13 @@
 
 **Live app:** https://ernowboston.streamlit.app/
 
-![ERNow Boston results](assets/ernow-1.png)
+![ERNow Boston results](ernow-1.png)
 
 ERNow Boston is a location-based healthcare forecasting app that ranks six Boston emergency departments using **estimated ER wait time and travel access**.
 
 It combines public hospital data with current contextual signals such as weather, seasonal respiratory illness, major local events, time of day, and road routing. ERNow does **not** claim to provide live hospital queue times. 
 
-![ERNow Boston homepage](assets/ernow-2.png)
+![ERNow Boston homepage](ernow-2.png)
 
 ## What it does
 
