@@ -51,6 +51,10 @@ For a possible medical emergency, call **911** or go to the nearest appropriate 
 
 Python · Pandas · Streamlit · REST APIs · Public healthcare data · Geolocation · Road routing
 
+## License
+
+Copyright © 2026 Ishaan Narasimhan. All rights reserved. See `LICENSE`.
+
 ## Run locally
 
 ```bash
