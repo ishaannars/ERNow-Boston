@@ -42,8 +42,20 @@ URLS = {
 }
 
 HEADERS = {
-    "User-Agent": "ERNow-Boston/1.0 portfolio-project contact=ernow-boston",
+    "User-Agent": "ERNow-Boston/1.1 portfolio-project contact=ernow-boston",
     "Accept": "application/json, application/xml, text/xml, text/html;q=0.9, */*;q=0.8",
+}
+
+MAJOR_CITY_EVENT_KEYWORDS = {
+    "marathon", "parade", "fireworks", "championship", "road closure", "road closures",
+    "street closure", "street closures", "head of the charles", "first night",
+    "boston calling", "major festival", "large festival", "race day", "celebration",
+    "demonstration", "rally", "protest", "citywide", "major event",
+}
+
+MAJOR_TICKETMASTER_VENUES = {
+    "td garden", "fenway park", "mgm music hall at fenway", "leader bank pavilion",
+    "aggannis arena", "agganis arena", "house of blues boston",
 }
 
 st.markdown(
@@ -65,6 +77,12 @@ html,body,[class*="css"],.stApp{font-family:'Instrument Sans','Helvetica Neue',A
 .location-confirm{background:var(--kakishibu-wash);border-bottom:2px solid var(--kakishibu);border-radius:10px 10px 4px 4px;padding:.72rem .9rem;margin:.35rem 0 .75rem 0;color:var(--ink);font-weight:600}
 .location-confirm .sub{color:var(--soft-ink);font-size:.84rem;font-weight:500;margin-left:.35rem}
 .brand-sub{color:var(--soft-ink);margin-top:-.35rem;margin-bottom:1.1rem;font-size:.98rem}
+.model-bar{background:var(--shell);border:1px solid var(--tea);border-left:4px solid var(--moss);border-radius:14px;padding:.82rem 1rem;margin:.35rem 0 1.05rem 0}
+.model-line-1{display:flex;align-items:center;gap:.5rem;color:var(--ink);font-size:.96rem;font-weight:700}
+.model-line-2{color:var(--soft-ink);font-size:.88rem;font-weight:600;margin-top:.26rem}
+.model-line-3{color:var(--soft-ink);font-size:.78rem;line-height:1.42;margin-top:.2rem}
+.model-dot{width:9px;height:9px;border-radius:50%;background:var(--moss);display:inline-block;box-shadow:0 0 0 rgba(72,81,60,.45);animation:modelPulse 1.65s infinite}
+@keyframes modelPulse{0%{box-shadow:0 0 0 0 rgba(72,81,60,.45);opacity:1}70%{box-shadow:0 0 0 7px rgba(72,81,60,0);opacity:.72}100%{box-shadow:0 0 0 0 rgba(72,81,60,0);opacity:1}}
 .er-card{background:var(--shell);border:1px solid var(--tea);border-radius:16px;padding:1.05rem 1.1rem;margin-bottom:.8rem}
 .er-best{border:2px solid var(--moss)}
 .best-label{color:var(--moss);font-size:.76rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.25rem}
@@ -76,11 +94,12 @@ html,body,[class*="css"],.stApp{font-family:'Instrument Sans','Helvetica Neue',A
 .er-metric{font-size:.93rem;color:var(--soft-ink)}
 .er-metric b{color:var(--ink);font-weight:600}
 .er-reason{font-size:.82rem;color:var(--moss);font-weight:600;margin-top:.5rem}
-@media(max-width:650px){.block-container{padding-top:4.8rem!important}.er-grid{grid-template-columns:1fr}.er-wait{font-size:1.5rem}}
+@media(max-width:650px){.block-container{padding-top:4.8rem!important}.er-grid{grid-template-columns:1fr}.er-wait{font-size:1.5rem}.model-line-3{font-size:.76rem}}
 </style>
 """,
     unsafe_allow_html=True,
 )
+
 
 def secret_or_env(name):
     try:
@@ -90,6 +109,7 @@ def secret_or_env(name):
         pass
     return os.getenv(name)
 
+
 def safe_get(url, *, params=None, headers=None, timeout=8):
     try:
         r = requests.get(url, params=params, headers=headers or HEADERS, timeout=timeout)
@@ -98,9 +118,11 @@ def safe_get(url, *, params=None, headers=None, timeout=8):
     except requests.RequestException:
         return None
 
+
 def clean_text(value):
     text = unescape(re.sub(r"<[^>]+>", " ", value or ""))
     return re.sub(r"\s+", " ", text).strip()
+
 
 @st.cache_data(ttl=3600)
 def load_fallback_data():
@@ -108,6 +130,7 @@ def load_fallback_data():
     for col in ["typical_ed_minutes", "legacy_wait_to_provider_min", "recent_ed_visits", "recent_occupancy_pct"]:
         df[col] = pd.to_numeric(df[col], errors="coerce")
     return df
+
 
 @st.cache_data(ttl=21600, show_spinner=False)
 def fetch_cms_metrics(provider_ids):
@@ -136,6 +159,7 @@ def fetch_cms_metrics(provider_ids):
                 record["left_before_seen_pct"] = score
         rows.append(record)
     return pd.DataFrame(rows)
+
 
 @st.cache_data(ttl=600, show_spinner=False)
 def fetch_current_weather(lat, lon):
@@ -171,6 +195,7 @@ def fetch_current_weather(lat, lon):
             }
     return None
 
+
 @st.cache_data(ttl=3600, show_spinner=False)
 def fetch_location_name(lat, lon):
     r = safe_get(URLS["nws_points"].format(lat=f"{lat:.4f}", lon=f"{lon:.4f}"), timeout=8)
@@ -183,6 +208,7 @@ def fetch_location_name(lat, lon):
     except (ValueError, AttributeError):
         return "Current location"
 
+
 @st.cache_data(ttl=300, show_spinner=False)
 def fetch_nws_alerts(lat, lon):
     r = safe_get(URLS["nws_alerts"], params={"point": f"{lat:.4f},{lon:.4f}"}, timeout=8)
@@ -192,6 +218,7 @@ def fetch_nws_alerts(lat, lon):
         return r.json().get("features", [])
     except ValueError:
         return []
+
 
 def current_weather_factor(obs, alerts):
     factor = 1.0
@@ -210,6 +237,7 @@ def current_weather_factor(obs, alerts):
         factor *= 1.05
     return min(factor, 1.15)
 
+
 @st.cache_data(ttl=3600, show_spinner=False)
 def fetch_cdc_ari():
     params = {"$select": "week_end,geography,label", "$where": "geography='Massachusetts'", "$order": "week_end DESC", "$limit": 1}
@@ -222,21 +250,26 @@ def fetch_cdc_ari():
         return None
     return rows[0] if rows else None
 
+
 def illness_factor(ari):
     label = ((ari or {}).get("label") or "").strip().lower()
     mapping = {"minimal": 0.99, "very low": 0.99, "low": 1.00, "moderate": 1.02, "high": 1.04, "very high": 1.06}
     return mapping.get(label, 1.0), (label.title() if label else "Unavailable")
 
+
 def nth_weekday(year, month, weekday, n):
     d = date(year, month, 1)
     return d + timedelta(days=((weekday - d.weekday()) % 7) + 7 * (n - 1))
+
 
 def last_weekday(year, month, weekday):
     d = date(year + (month == 12), 1 if month == 12 else month + 1, 1) - timedelta(days=1)
     return d - timedelta(days=(d.weekday() - weekday) % 7)
 
+
 def observed_fixed(d):
     return d - timedelta(days=1) if d.weekday() == 5 else d + timedelta(days=1) if d.weekday() == 6 else d
+
 
 def holiday_name(d):
     y = d.year
@@ -256,6 +289,7 @@ def holiday_name(d):
     }
     return holidays.get(d)
 
+
 def temporal_factor(now_dt):
     factor = 1.0
     h, wd = now_dt.hour, now_dt.weekday()
@@ -272,6 +306,12 @@ def temporal_factor(now_dt):
         factor *= 1.07 if "Marathon" in hname else 1.04
     return factor
 
+
+def is_major_city_event(title, text=""):
+    haystack = clean_text(f"{title} {text}").lower()
+    return any(keyword in haystack for keyword in MAJOR_CITY_EVENT_KEYWORDS)
+
+
 @st.cache_data(ttl=1800, show_spinner=False)
 def fetch_city_events(today_iso):
     r = safe_get(URLS["boston_events"], timeout=8)
@@ -287,9 +327,10 @@ def fetch_city_events(today_iso):
     for item in root.findall(".//item"):
         text = " ".join((c.text or "") for c in list(item))
         title = (item.findtext("title") or "").strip()
-        if title and any(tok.lower() in text.lower() for tok in tokens):
+        if title and any(tok.lower() in text.lower() for tok in tokens) and is_major_city_event(title, text):
             out.append(title)
     return out
+
 
 @st.cache_data(ttl=1800, show_spinner=False)
 def fetch_tdgarden_events(today_iso):
@@ -311,6 +352,7 @@ def fetch_tdgarden_events(today_iso):
                 events.append(f"{title} — TD Garden")
     return list(dict.fromkeys(events))
 
+
 @st.cache_data(ttl=1800, show_spinner=False)
 def fetch_red_sox_home_games(today_iso):
     r = safe_get(URLS["mlb_schedule"], params={"sportId": 1, "teamId": 111, "date": today_iso, "hydrate": "venue"}, timeout=8)
@@ -327,6 +369,7 @@ def fetch_red_sox_home_games(today_iso):
                 away = game.get("teams", {}).get("away", {}).get("team", {}).get("name", "opponent")
                 events.append(f"Red Sox vs. {away} — Fenway Park")
     return events
+
 
 @st.cache_data(ttl=21600, show_spinner=False)
 def fetch_boston_news_event_layer(now_iso):
@@ -361,18 +404,37 @@ def fetch_boston_news_event_layer(now_iso):
                 events.append(title)
     return list(dict.fromkeys(events))[:4]
 
+
 @st.cache_data(ttl=900, show_spinner=False)
 def fetch_ticketmaster_events(now_iso, end_iso, api_key):
     if not api_key:
         return []
-    params = {"apikey": api_key, "city": "Boston", "stateCode": "MA", "countryCode": "US", "startDateTime": now_iso, "endDateTime": end_iso, "size": 50, "sort": "date,asc"}
+    params = {
+        "apikey": api_key,
+        "city": "Boston",
+        "stateCode": "MA",
+        "countryCode": "US",
+        "startDateTime": now_iso,
+        "endDateTime": end_iso,
+        "size": 50,
+        "sort": "date,asc",
+    }
     r = safe_get(URLS["ticketmaster"], params=params, timeout=10)
     if not r:
         return []
     try:
-        return [e.get("name", "") for e in r.json().get("_embedded", {}).get("events", []) if e.get("name")]
+        source_events = r.json().get("_embedded", {}).get("events", [])
     except ValueError:
         return []
+    events = []
+    for event in source_events:
+        name = clean_text(event.get("name", ""))
+        venues = event.get("_embedded", {}).get("venues", [])
+        venue = clean_text(venues[0].get("name", "")) if venues else ""
+        if name and venue.lower() in MAJOR_TICKETMASTER_VENUES:
+            events.append(f"{name} — {venue}")
+    return events
+
 
 def major_event_titles(now_dt):
     day = now_dt.date().isoformat()
@@ -398,12 +460,14 @@ def major_event_titles(now_dt):
             cleaned.append(event)
     return cleaned[:6]
 
+
 def event_factor(events):
     if len(events) >= 3:
         return 1.04
     if events:
         return 1.02
     return 1.0
+
 
 @st.cache_data(ttl=300, show_spinner=False)
 def route_estimate(origin_lat, origin_lon, dest_lat, dest_lon):
@@ -417,6 +481,7 @@ def route_estimate(origin_lat, origin_lon, dest_lat, dest_lon):
     except (ValueError, IndexError, KeyError, TypeError):
         return None
 
+
 def recent_demand_factor(row, med_volume, med_occupancy, med_lwbs):
     factor = 1.0
     if pd.notna(row.get("recent_ed_visits")) and med_volume:
@@ -427,11 +492,13 @@ def recent_demand_factor(row, med_volume, med_occupancy, med_lwbs):
         factor *= max(0.97, min(1.05, 1 + 0.025 * (float(row["left_before_seen_pct"]) / med_lwbs - 1)))
     return max(0.92, min(1.12, factor))
 
+
 def fmt_minutes(v):
     if pd.isna(v):
         return "—"
     m = max(0, int(round(v)))
     return f"{m} min" if m < 60 else f"{m // 60}h {m % 60}m"
+
 
 def current_condition_label(dynamic_factor):
     if dynamic_factor >= 1.08:
@@ -439,6 +506,7 @@ def current_condition_label(dynamic_factor):
     if dynamic_factor <= 0.96:
         return "Lower than typical"
     return "Typical"
+
 
 def build_model(df, origin_lat, origin_lon, now_dt, weather_obs, alerts, ari, major_events):
     wf = current_weather_factor(weather_obs, alerts)
@@ -473,20 +541,34 @@ def build_model(df, origin_lat, origin_lon, now_dt, weather_obs, alerts, ari, ma
     out["rank"] = range(1, len(out) + 1)
     return out, {"dynamic_factor": dynamic_factor, "illness_label": illness_label}
 
+
 st.markdown("""
 <div class="safety-banner">🚨 <strong>Possible emergency?</strong> Call 911 or go to the nearest appropriate emergency department. Do not delay care or drive farther because of an ERNow estimate, and do not use this app while driving.</div>
 """, unsafe_allow_html=True)
 
 st.markdown('<div class="nav-wrap">', unsafe_allow_html=True)
-nav1, nav2, _ = st.columns([1, 1, 4])
+nav1, nav2, nav3, _ = st.columns([1, 1.15, 1, 3.85])
 with nav1:
     st.page_link("app.py", label="ERNow", icon=":material/emergency:", use_container_width=True)
 with nav2:
     st.page_link("pages/1_Methodology.py", label="Methodology", icon=":material/menu_book:", use_container_width=True)
+with nav3:
+    st.page_link("pages/2_Model_Lab.py", label="Model Lab", icon=":material/monitoring:", use_container_width=True)
 st.markdown('</div>', unsafe_allow_html=True)
 
 st.title("ERNow Boston")
 st.markdown('<div class="brand-sub">Find nearby Boston ERs using estimated wait times and travel time from your location.</div>', unsafe_allow_html=True)
+
+st.markdown(
+    """
+<div class="model-bar">
+  <div class="model-line-1"><span class="model-dot"></span>Learning model active</div>
+  <div class="model-line-2">ERNow evaluates hospital throughput, utilization, time, weather, respiratory illness, major events, and route access.</div>
+  <div class="model-line-3">Current rankings use transparent bounded forecasting rules; the supervised learning pipeline trains and compares predictive models only when validated historical wait observations are available.</div>
+</div>
+""",
+    unsafe_allow_html=True,
+)
 
 st.subheader("Your location")
 location_slot = st.empty()

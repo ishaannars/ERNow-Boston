@@ -28,11 +28,13 @@ ERNow estimates must never be used to delay emergency care.
 """, unsafe_allow_html=True)
 
 st.markdown('<div class="nav-wrap">', unsafe_allow_html=True)
-nav1, nav2, _ = st.columns([1, 1, 4])
+nav1, nav2, nav3, _ = st.columns([1, 1.15, 1, 3.85])
 with nav1:
     st.page_link("app.py", label="ERNow", icon=":material/emergency:", use_container_width=True)
 with nav2:
     st.page_link("pages/1_Methodology.py", label="Methodology", icon=":material/menu_book:", use_container_width=True)
+with nav3:
+    st.page_link("pages/2_Model_Lab.py", label="Model Lab", icon=":material/monitoring:", use_container_width=True)
 st.markdown('</div>', unsafe_allow_html=True)
 
 st.title("Methodology")
@@ -74,18 +76,26 @@ ERNow uses the latest Massachusetts **CDC Acute Respiratory Illness (ARI)** surv
 **Major events nearby — official schedules plus a local-news check.**  
 ERNow checks multiple sources rather than relying on one calendar. The current build uses the **City of Boston event feed**, **TD Garden's official event schedule**, and **MLB's official schedule for Red Sox home games at Fenway Park**. It also checks recent **Boston.com local/traffic RSS coverage** for major event or closure stories, and can use Ticketmaster when an API key is configured.
 
-Only events plausibly large enough to affect traffic or emergency-department demand should influence the model. If the homepage says **None detected**, that means no qualifying event was found by the sources checked; it is not a guarantee that no event exists.
+City event-feed items are filtered for higher-impact event terms before they affect the forecast. TD Garden events and Red Sox home games are treated as major venue events. If the homepage says **None detected**, that means no qualifying event was found by the sources checked; it is not a guarantee that no event exists.
 """)
 
-st.subheader("How the model uses the data")
+st.subheader("How the current forecast works")
 st.markdown("""
 1. Start with each hospital's historical wait-to-provider baseline.
 2. Recalibrate with newer hospital throughput, including **Typical visit duration (CMS OP-18b)**.
 3. Apply a bounded hospital-specific adjustment for recent reported demand/utilization.
-4. Apply bounded contextual adjustments for time/day, holidays, weather, seasonal respiratory illness, and major events.
+4. Apply bounded contextual adjustments for time/day, holidays, weather, seasonal respiratory illness, and qualifying major events.
 5. Return a **range**, not a single precise minute.
 6. Rank hospitals using estimated wait together with estimated road-route access.
 """)
+
+st.subheader("Learning-model layer")
+st.write(
+    "ERNow now includes a separate supervised-learning pipeline in **Model Lab**. It is designed to train on labeled historical wait observations, engineer temporal/context features, compare a simple baseline with linear, Ridge, and Random Forest models, and evaluate them on a chronological holdout period using MAE, RMSE, and R²."
+)
+st.write(
+    "The learned model does **not** replace the consumer forecast unless validated historical targets are available and the model demonstrates better out-of-time performance. ERNow does not create synthetic wait labels or publish invented accuracy metrics."
+)
 
 st.subheader("Important limitations")
 st.markdown("""
@@ -95,6 +105,7 @@ st.markdown("""
 - Distance depends on the user's location.
 - Route time does not include live traffic, road incidents, parking, or ambulance transport conditions.
 - Event and news sources can miss events, change format, or become temporarily unavailable.
+- Model feature importance describes a fitted model and does not establish causation.
 
 For a serious or time-sensitive emergency, call 911 or use the nearest appropriate emergency department rather than choosing a farther hospital because of an ERNow estimate.
 """)
@@ -103,12 +114,13 @@ with st.expander("Data freshness and source detail"):
     fresh = pd.DataFrame([
         ["Weather", "National Weather Service", "Current observation + active alerts", "Official nearby observation; exact-block conditions can vary"],
         ["Seasonal respiratory illness", "CDC Massachusetts ARI", "Latest published reporting period", "Statewide surveillance, not live hospital demand"],
-        ["Major events", "City of Boston + TD Garden + MLB + Boston.com local/traffic; optional Ticketmaster", "Official schedules checked at use; local-news layer cached up to 6 hours", "Detection aid, not a guarantee"],
+        ["Major events", "City of Boston + TD Garden + MLB + Boston.com local/traffic; optional Ticketmaster", "Official schedules checked at use; local-news layer cached up to 6 hours", "Filtered contextual signal, not a guarantee"],
         ["Route", "OpenStreetMap/OSRM road routing", "At search / short cache", "Road route; no live traffic"],
         ["Time / day / holiday", "Boston clock + calendar rules", "Immediate", "Current"],
         ["Hospital utilization", "Massachusetts CHIA / public reporting", "Latest reported period", "Recent, not live"],
         ["ER visit duration", "CMS OP-18b", "Latest public reporting period", "Hospital throughput signal"],
         ["Historical wait", "Archived CMS Hospital Compare OP-20", "Archived", "Historical baseline only"],
+        ["Supervised model evaluation", "Validated labeled history when supplied", "Chronological train/holdout split", "No training metrics are shown without real targets"],
     ], columns=["Factor", "Source", "Freshness", "Meaning"])
     st.dataframe(fresh, use_container_width=True, hide_index=True)
 
