@@ -1,0 +1,7 @@
+Place CMS/NBER Hospital Compare archive ZIP files in this folder.
+
+Each ZIP should contain:
+Timely_and_Effective_Care-Hospital.csv
+
+Then run:
+python cms_history_pipeline.py
