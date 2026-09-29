@@ -11,10 +11,11 @@ import pandas as pd
 import requests
 import streamlit as st
 from streamlit_geolocation import streamlit_geolocation
-from historical_modeling import current_throughput_forecast
+from historical_modeling import current_throughput_forecast, history_status, train_historical_models
 
 st.set_page_config(page_title="ERNow Boston", page_icon="✚", layout="wide")
 DATA_PATH = Path(__file__).parent / "data" / "boston_er_data.csv"
+HOSPITAL_DATA = DATA_PATH
 EASTERN = ZoneInfo("America/New_York")
 
 FALLBACK_ORIGINS = {
@@ -617,137 +618,564 @@ def build_model(df, origin_lat, origin_lon, now_dt, weather_obs, alerts, ari, ma
         "learned_model_promoted": learned_promoted,
     }
 
+
+st.markdown("""
+<style>
+/* Same typography and spacing system across ERNow, Methodology, and Forecast Model. */
+html, body, [class*="css"], .stApp,
+.stMarkdown, .stMarkdown p, .stMarkdown li,
+[data-testid="stCaptionContainer"], .stAlert p,
+[data-testid="stButton"] button {
+  font-family:'Instrument Sans','Helvetica Neue',Arial,sans-serif !important;
+}
+
+[data-testid="stAppViewContainer"],
+[data-testid="stAppViewBlockContainer"],
+section.main, .stApp, html, body {
+  background:var(--ivory) !important;
+}
+
+.ernow-nav-rule {
+  border-top:1px solid var(--tea);
+  margin:.15rem 0 .55rem 0;
+}
+
+[data-testid="stButton"] > button {
+  background:var(--shell);
+  border:1px solid var(--tea);
+  border-radius:10px;
+  color:var(--ink);
+  min-height:2.2rem;
+  font-weight:600;
+  white-space:nowrap;
+}
+
+[data-testid="stButton"] > button:hover {
+  border-color:var(--kakishibu);
+  color:var(--ink);
+  background:var(--kakishibu-wash);
+}
+
+.ds-card {
+  background:var(--shell);
+  border:1px solid var(--tea);
+  border-left:4px solid var(--moss);
+  border-radius:14px;
+  padding:.92rem 1rem;
+  margin:.55rem 0 1.1rem;
+}
+.ds-title {font-weight:700;margin-bottom:.28rem}
+.ds-sub {color:var(--soft-ink);font-size:.90rem;line-height:1.5}
+.ds-tags {display:flex;flex-wrap:wrap;gap:.38rem .44rem;margin-top:.5rem}
+.ds-tag {
+  font-size:.71rem;
+  border:1px solid var(--tea);
+  background:var(--ivory);
+  border-radius:999px;
+  padding:.22rem .46rem;
+  font-weight:600;
+  color:var(--soft-ink);
+}
+
+.status-card {
+  background:var(--shell);
+  border:1px solid var(--tea);
+  border-left:4px solid var(--moss);
+  border-radius:14px;
+  padding:.9rem 1rem;
+  margin:.5rem 0 .95rem;
+}
+.status-title {font-weight:700;font-size:.98rem}
+.status-copy {color:var(--soft-ink);font-size:.88rem;margin-top:.25rem;line-height:1.48}
+.mini-grid {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:.5rem;
+  margin:.45rem 0 1rem;
+}
+.mini-card {
+  background:var(--shell);
+  border:1px solid var(--tea);
+  border-radius:12px;
+  padding:.68rem .75rem;
+}
+.mini-label {
+  font-size:.7rem;
+  color:var(--soft-ink);
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  font-weight:600;
+}
+.mini-value {
+  font-size:.95rem;
+  font-weight:600;
+  margin-top:.18rem;
+  color:var(--ink);
+  word-break:break-word;
+}
+.feature-grid {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:.5rem;
+  margin:.4rem 0 .8rem;
+}
+.feature-card {
+  background:var(--shell);
+  border:1px solid var(--tea);
+  border-radius:12px;
+  padding:.72rem .78rem;
+}
+.feature-title {font-weight:600;font-size:.86rem;margin-bottom:.18rem}
+.feature-copy {font-size:.78rem;color:var(--soft-ink);line-height:1.42}
+.callout {
+  background:var(--kakishibu-wash);
+  border-left:3px solid var(--kakishibu);
+  border-radius:10px;
+  padding:.78rem .85rem;
+  color:var(--soft-ink);
+  font-size:.84rem;
+  line-height:1.48;
+  margin:.52rem 0 .82rem;
+}
+.note {
+  background:var(--shell);
+  border:1px solid var(--tea);
+  border-radius:12px;
+  padding:.78rem .85rem;
+  color:var(--soft-ink);
+  font-size:.84rem;
+  line-height:1.5;
+  margin:.52rem 0 .82rem;
+}
+
+h1 {margin-bottom:.3rem !important}
+h2 {margin-top:1.55rem !important;margin-bottom:.42rem !important}
+h3 {margin-top:1.15rem !important;margin-bottom:.35rem !important}
+.stMarkdown p {margin:.15rem 0 .72rem !important}
+.stMarkdown ul,.stMarkdown ol {margin-top:.18rem !important;margin-bottom:.85rem !important}
+.stMarkdown li {margin-bottom:.22rem !important}
+[data-testid="stDataFrame"] {margin:.45rem 0 .85rem !important}
+
+@media(max-width:720px) {
+  .mini-grid,.feature-grid {grid-template-columns:1fr}
+}
+</style>
+""", unsafe_allow_html=True)
+
+
+def render_home():
+    st.title("ERNow Boston")
+    st.markdown('<div class="brand-sub">Compare Boston ER access in seconds — ERNow turns fragmented hospital, public-health, and routing data into one location-aware forecast.</div>', unsafe_allow_html=True)
+
+    st.markdown(
+        """
+    <div class="model-bar">
+      <div class="model-line-1"><span class="model-dot"></span>Learning model active</div>
+      <div class="model-line-2">ERNow uses a validated historical model to estimate expected ER flow, then combines that signal with current hospital conditions, weather, respiratory illness, major events, and route access.</div>
+      <div class="model-meta">
+        <span class="model-chip">6 Boston ERs</span>
+        <span class="model-chip">36 historical observations</span>
+        <span class="model-chip">2020–2025 reporting periods</span>
+        <span class="model-chip">Aug 2026 CMS archive snapshot</span>
+      </div>
+    </div>
+    """,
+        unsafe_allow_html=True,
+    )
+
+    st.subheader("Your location")
+    location_slot = st.empty()
+    with location_slot.container():
+        location = streamlit_geolocation()
+
+    origin_lat = origin_lon = None
+    location_label = None
+    if isinstance(location, dict) and location.get("latitude") is not None and location.get("longitude") is not None:
+        origin_lat, origin_lon = float(location["latitude"]), float(location["longitude"])
+        location_slot.empty()
+        location_label = fetch_location_name(origin_lat, origin_lon)
+        st.markdown(f'<div class="location-confirm">Location detected: {location_label}<span class="sub">Results updated from your current location.</span></div>', unsafe_allow_html=True)
+    else:
+        with st.expander("Location blocked? Choose a Boston area"):
+            fallback = st.selectbox("Boston area", list(FALLBACK_ORIGINS.keys()))
+            if st.button("Use this area", use_container_width=True):
+                st.session_state["fallback_origin"] = fallback
+        if st.session_state.get("fallback_origin"):
+            fallback = st.session_state["fallback_origin"]
+            origin_lat, origin_lon = FALLBACK_ORIGINS[fallback]
+            location_label = fallback
+
+    if origin_lat is None:
+        st.info("Use **Get My Location**. That's the only input ERNow needs.")
+        st.stop()
+
+    loading_slot = st.empty()
+    loading_slot.markdown('<div class="ernow-loading-wrap"><div class="ernow-loading"></div></div>', unsafe_allow_html=True)
+
+    now_dt = datetime.now(EASTERN)
+    df = load_fallback_data()
+    cms = fetch_cms_metrics(tuple(df["cms_provider_id"].tolist()))
+    if not cms.empty:
+        df = df.merge(cms, on="cms_provider_id", how="left")
+        if "cms_current_baseline" in df:
+            mask = df["cms_current_baseline"].notna()
+            df.loc[mask, "typical_ed_minutes"] = df.loc[mask, "cms_current_baseline"]
+
+    weather_obs = fetch_current_weather(origin_lat, origin_lon)
+    alerts = fetch_nws_alerts(origin_lat, origin_lon)
+    ari = fetch_cdc_ari()
+    major_events = major_event_titles(now_dt)
+    historical_layer = current_throughput_forecast()
+    ranked, context = build_model(
+        df, origin_lat, origin_lon, now_dt, weather_obs, alerts, ari, major_events,
+        historical_layer=historical_layer,
+    )
+    loading_slot.empty()
+
+    weather_status = weather_obs.get("description", "Unavailable") if weather_obs else "Unavailable"
+    event_status = "; ".join(major_events[:2]) if major_events else "None detected"
+    st.caption(
+        f"Updated **{now_dt.strftime('%-I:%M %p')}** · {location_label} · "
+        f"Weather: **{weather_status}** · Seasonal respiratory illness: **{context['illness_label']}** · Major events nearby: **{event_status}**"
+    )
+
+    st.divider()
+    st.subheader("Nearby ERs")
+    st.caption("Ranked using forecasted ER wait and travel access from your location. The wait forecast combines hospital history, the validated predictive layer, reported utilization, time, weather, respiratory illness, and major events. Travel time is personalized for each hospital and does not include live traffic.")
+
+    for _, row in ranked.iterrows():
+        best = " er-best" if int(row["rank"]) == 1 else ""
+        best_label = '<div class="best-label">Best overall estimate</div>' if int(row["rank"]) == 1 else ""
+        wait_range = f"{fmt_minutes(row['modeled_wait_low'])}–{fmt_minutes(row['modeled_wait_high'])}"
+        route_time = f"~{fmt_minutes(row['route_time_min'])}" if pd.notna(row["route_time_min"]) else "Unavailable"
+        route_dist = f"{row['route_distance_miles']:.1f} mi" if pd.notna(row["route_distance_miles"]) else "—"
+        current_demand = current_condition_label(row["dynamic_factor"])
+        directions_url = (
+            "https://www.google.com/maps/dir/?api=1"
+            f"&origin={origin_lat},{origin_lon}"
+            f"&destination={row['latitude']},{row['longitude']}"
+            "&travelmode=driving"
+        )
+        reason = "Uses hospital history, validated prediction, current conditions, and route access. Not a live queue reading."
+        card = f"""
+    <div class="er-card{best}">
+      {best_label}
+      <div><span class="er-rank">#{int(row['rank'])}</span><span class="er-title">{row['hospital']}</span></div>
+      <div class="er-wait-label">Estimated ER wait</div><div class="er-wait">{wait_range}</div>
+      <div class="er-grid">
+        <div class="er-metric"><b>From your location:</b> {route_time} · {route_dist}</div>
+        <div class="er-metric"><b>Current demand conditions:</b> {current_demand}</div>
+        <div class="er-metric"><b>Historical wait:</b> {fmt_minutes(row['legacy_wait_to_provider_min'])}</div>
+        <div class="er-metric"><b>Typical visit duration:</b> {fmt_minutes(row['typical_ed_minutes'])}</div>
+      </div>
+      <div class="er-reason">{reason}</div>
+      <div class="er-actions"><a class="er-directions" href="{directions_url}" target="_blank" rel="noopener noreferrer">Open Directions</a></div>
+    </div>"""
+        st.markdown(card, unsafe_allow_html=True)
+
+    with st.expander("What changes the estimate right now?"):
+        st.write("ERNow automatically uses the current Boston time/day, holiday status, National Weather Service observations and alerts, seasonal respiratory surveillance from CDC, and major Boston events found across official schedules plus a recent local-news check.")
+        if major_events:
+            st.caption("Major event sources detected: " + "; ".join(major_events[:4]))
+        else:
+            st.caption("No qualifying major event was detected by the current source checks. This does not guarantee that no event is occurring.")
+        st.caption("Recent hospital demand and capacity data are used in the model but are not shown as if they were live conditions.")
+
+    st.subheader("Map")
+    st.map(ranked[["hospital", "latitude", "longitude"]], latitude="latitude", longitude="longitude", size=95)
+    st.caption("ERNow Boston · Forecasting prototype · Not a clinical decision tool or confirmed live hospital wait-time service.")
+
+
+def render_methodology():
+    st.title("Methodology")
+    st.caption("How ERNow combines hospital history, current conditions, and travel access to estimate ER wait ranges.")
+
+    st.markdown("""
+    <div class="ds-card">
+      <div class="ds-title">Machine-learning layer</div>
+      <div class="ds-sub">ERNow uses a validated historical model to estimate expected ER flow. That prediction becomes one input to the public wait forecast, alongside current hospital conditions, weather, respiratory illness, major events, and route access.</div>
+      <div class="ds-tags">
+        <span class="ds-tag">6 Boston ERs</span>
+        <span class="ds-tag">36 historical observations</span>
+        <span class="ds-tag">2020–2025 reporting periods</span>
+        <span class="ds-tag">Aug 2026 CMS archive snapshot</span>
+        <span class="ds-tag">Persistence · Ridge · Random Forest</span>
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.subheader("What ERNow estimates")
+    st.write(
+        "ERNow estimates a likely ER wait range for each included Boston hospital and combines it with "
+        "travel access from the user's location. It does not claim to know a hospital's live waiting-room queue."
+    )
+
+    st.subheader("What shapes the forecast")
+    st.markdown("""
+    **Hospital history and utilization**
+    - Archived CMS wait-to-provider information.
+    - CMS OP-18b hospital-throughput history.
+    - Recent reported ED volume, occupancy, and related utilization signals.
+    - CMS Left Before Being Seen (OP-22) when available.
+
+    **Current conditions**
+    - Boston time, day of week, holidays, and season.
+    - National Weather Service observations and severe-weather alerts.
+    - CDC Massachusetts respiratory-illness surveillance.
+    - Major Boston events that may affect demand or access.
+
+    **Travel access**
+    - Road-route distance and estimated travel time from the user's location to each hospital.
+    - Travel time is personalized by hospital but does not include live traffic.
+    """)
+
+    st.subheader("Where machine learning fits")
+    st.write(
+        "The historical model learns from longitudinal CMS OP-18b data, which measures the median time discharged patients spend in the ED from arrival to departure. "
+        "It uses prior reporting periods to estimate expected ER flow for each hospital."
+    )
+    st.write(
+        "ERNow then uses that prediction as one bounded signal inside the wait forecast. The app also accounts for reported utilization, time, weather, respiratory illness, major events, and route access."
+    )
+
+    st.subheader("How the displayed wait range is built")
+    st.markdown("""
+    1. Start with each hospital's archived wait-to-provider baseline.
+    2. Add a bounded adjustment from the validated historical model and recent hospital-throughput data.
+    3. Adjust for reported utilization and current local conditions.
+    4. Return a wait range rather than an exact minute.
+    5. Combine the wait forecast with travel access from the user's location to rank nearby ERs.
+    """)
+
+    st.subheader("Why the estimate stays cautious")
+    st.write(
+        "CMS OP-18b measures total ED arrival-to-departure time for discharged patients; it is not a direct live wait-to-provider target. "
+        "The model therefore improves the forecast without being presented as a live queue measurement."
+    )
+
+    st.subheader("Accuracy and freshness")
+    st.markdown("""
+    Weather — current National Weather Service observations and alerts.  
+    Respiratory illness — latest published CDC Massachusetts ARI reporting period.  
+    Major events — current-date checks from Boston-area public sources.  
+    Route — OpenStreetMap / OSRM road routing at search time, without live traffic.  
+    Hospital utilization — latest available public Massachusetts reporting.  
+    Historical model — longitudinal CMS OP-18b reporting periods used for chronological validation.
+    """)
+
+    st.subheader("Important limitations")
+    st.markdown("""
+    - ERNow cannot see current triage severity, staffing, open treatment rooms, boarding load, ambulance arrivals, or the exact number of people waiting right now.
+    - Public hospital data can lag behind conditions inside the ER.
+    - Current-demand labels are contextual estimates, not direct live queue measurements.
+    - Travel time excludes live traffic, parking, road incidents, and ambulance transport conditions.
+    - Predictive relationships can improve forecasting, but they do not establish causation.
+
+    For a serious or time-sensitive emergency, call 911 or use the nearest appropriate emergency department rather than choosing a farther hospital because of an ERNow estimate.
+    """)
+
+    with st.expander("Source and freshness detail"):
+        fresh = pd.DataFrame([
+            ["Weather", "National Weather Service", "Current observation + alerts", "Current contextual signal"],
+            ["Respiratory illness", "CDC Massachusetts ARI", "Latest reporting period", "Statewide illness signal"],
+            ["Major events", "Boston-area public sources", "Current-date checks", "Contextual demand signal"],
+            ["Route", "OpenStreetMap / OSRM", "At search", "Personalized by hospital; no live traffic"],
+            ["Hospital utilization", "Massachusetts public reporting", "Latest reported period", "Recent, not live"],
+            ["ER throughput", "CMS OP-18b", "Longitudinal reporting periods", "Historical model target"],
+            ["Historical wait", "Archived CMS Hospital Compare OP-20", "Archived", "Historical baseline"],
+        ], columns=["Factor", "Source", "Freshness", "Meaning"])
+        st.dataframe(fresh, use_container_width=True, hide_index=True)
+
+    st.caption("ERNow is a forecasting prototype built on public or zero-cost data sources. It is not a clinical decision tool or a confirmed live wait-time service.")
+
+
+def render_forecast_model():
+    st.title("Forecast Model")
+    st.caption("How ERNow tests its historical model and uses the selected prediction inside the wait forecast.")
+
+    hist = history_status()
+    result = train_historical_models() if hist["ready"] else None
+
+    st.subheader("1. Model status")
+    if hist["ready"]:
+        hospitals = hist["data"]["hospital"].nunique()
+        start = hist["data"]["timestamp"].min().year
+        end = hist["data"]["timestamp"].max().year
+        predictor = result["selected_model"]
+        st.markdown(
+            '<div class="status-card"><div class="status-title">Learning model active</div>'
+            '<div class="status-copy">Real CMS history is loaded, later reporting periods are reserved for validation, and the best-performing historical predictor is available to help shape ERNow\'s wait forecast.</div></div>',
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            f"""<div class="mini-grid">
+            <div class="mini-card"><div class="mini-label">Historical observations</div><div class="mini-value">{hist['rows']}</div></div>
+            <div class="mini-card"><div class="mini-label">Boston ERs</div><div class="mini-value">{hospitals}</div></div>
+            <div class="mini-card"><div class="mini-label">Reporting coverage</div><div class="mini-value">{start}–{end}</div></div>
+            <div class="mini-card"><div class="mini-label">Holdout observations</div><div class="mini-value">{result['test_rows']}</div></div>
+            <div class="mini-card"><div class="mini-label">Selected predictor</div><div class="mini-value">{predictor}</div></div>
+            <div class="mini-card"><div class="mini-label">Validation</div><div class="mini-value">Earlier → later</div></div>
+            </div>""",
+            unsafe_allow_html=True,
+        )
+    else:
+        st.markdown(f'<div class="status-card"><div class="status-title">Historical model not ready</div><div class="status-copy">{hist["reason"]}</div></div>', unsafe_allow_html=True)
+
+    st.subheader("2. What the model predicts")
+    st.write(
+        "The model learns from CMS OP-18b, which measures the median time discharged patients spend in the ED from arrival to departure. "
+        "Using prior reporting periods, it estimates expected ER flow for each hospital."
+    )
+    st.write(
+        "This is not the same as predicting a live waiting-room queue. ERNow uses the historical prediction as one input inside the broader wait forecast."
+    )
+
+    st.subheader("3. Model comparison")
+    if hist["ready"]:
+        metrics = result["metrics"].copy().rename(columns={"MAE":"MAE (min)","RMSE":"RMSE (min)","R2":"R²"})
+        metrics["MAE (min)"] = metrics["MAE (min)"].round(1)
+        metrics["RMSE (min)"] = metrics["RMSE (min)"].round(1)
+        metrics["R²"] = metrics["R²"].round(3)
+        st.dataframe(metrics, use_container_width=True, hide_index=True)
+
+        if result["learned_model_promoted"]:
+            summary = f"{result['best_ml_model']} performed best on later held-out periods and cleared the promotion threshold, so ERNow uses it as the historical predictor."
+        else:
+            summary = f"{result['selected_model']} performed best on the holdout period. The strongest learned challenger was {result['best_ml_model']}, but it did not improve enough to replace the simpler predictor."
+        st.markdown(f'<div class="callout">{summary}</div>', unsafe_allow_html=True)
+        st.caption("MAE is the average error in minutes. RMSE gives more weight to larger misses. R² shows how much variation the model explains; a negative value means it performed worse than predicting the holdout average.")
+    else:
+        st.info("Generate `data/cms_op18b_history.csv` with `python cms_history_pipeline.py`.")
+
+    st.subheader("4. What the model uses")
+    st.markdown("""<div class="feature-grid">
+    <div class="feature-card"><div class="feature-title">Hospital identity</div><div class="feature-copy">Captures persistent differences across the six included Boston hospitals.</div></div>
+    <div class="feature-card"><div class="feature-title">Reporting period</div><div class="feature-copy">Year, month, and quarter help the model learn how outcomes change over time.</div></div>
+    <div class="feature-card"><div class="feature-title">Recent history</div><div class="feature-copy">Prior reporting periods and a rolling historical average give the model recent context without looking ahead.</div></div>
+    </div>""", unsafe_allow_html=True)
+    st.caption("All lagged features use only information that would have been available before the period being predicted, which prevents look-ahead leakage.")
+
+    st.subheader("5. Current hospital context")
+    base = pd.read_csv(HOSPITAL_DATA)
+    display = base[["hospital","legacy_wait_to_provider_min","typical_ed_minutes","recent_ed_visits","recent_occupancy_pct"]].rename(columns={
+        "hospital":"Hospital",
+        "legacy_wait_to_provider_min":"Historical wait (min)",
+        "typical_ed_minutes":"Typical ED stay (min)",
+        "recent_ed_visits":"Recent ED visits",
+        "recent_occupancy_pct":"Occupancy (%)",
+    })
+    st.dataframe(display, use_container_width=True, hide_index=True)
+    left,right = st.columns(2)
+    with left:
+        st.caption("Recent reported ED visits")
+        st.bar_chart(base.set_index("hospital")["recent_ed_visits"])
+    with right:
+        st.caption("Reported occupancy")
+        st.bar_chart(base.set_index("hospital")["recent_occupancy_pct"])
+
+    st.subheader("6. Validation")
+    if hist["ready"]:
+        st.write(
+            f"Training period: {result['train_start'].date()} → {result['train_end'].date()}  \n"
+            f"Holdout period: {result['test_start'].date()} → {result['test_end'].date()}"
+        )
+        st.caption("Earlier periods train the model; later periods test it. This better reflects how the model would face future data than a random split.")
+        err = result["hospital_error"].copy().rename(columns={"hospital":"Hospital","MAE":"MAE (min)","Observations":"Holdout observations"})
+        err["MAE (min)"] = err["MAE (min)"].round(1)
+        st.dataframe(err, use_container_width=True, hide_index=True)
+        st.caption("Holdout MAE by hospital")
+        st.bar_chart(result["hospital_error"].set_index("hospital")["MAE"])
+    else:
+        st.write("Earlier reporting periods train the model; later periods test it.")
+
+    st.subheader("7. How it affects your estimate")
+    st.write(
+        "The selected historical model contributes one bounded hospital-level signal. ERNow then combines that signal with recent utilization and current conditions to estimate a wait range. "
+        "Travel time from your location is added afterward to compare overall access."
+    )
+    st.markdown(
+        '<div class="note"><strong>Important boundary:</strong> the machine-learning layer improves the forecast, but it does not directly observe a hospital\'s live queue. ERNow therefore shows a wait range and route context instead of claiming an exact real-time queue minute.</div>',
+        unsafe_allow_html=True,
+    )
+
+    with st.expander("Technical details"):
+        st.markdown("""
+    **Historical target**
+    - CMS OP-18b median ED arrival-to-departure duration for discharged patients.
+
+    **Models compared**
+    - Persistence baseline
+    - Ridge regression
+    - Random Forest
+
+    **Validation**
+    - Chronological train/holdout split
+    - MAE, RMSE, and R²
+    - Hospital-level MAE
+
+    **Selection rule**
+    - A learned model replaces the baseline only when it improves holdout MAE by the configured promotion margin.
+
+    **Role in ERNow**
+    - The selected historical prediction becomes one bounded signal inside the consumer wait forecast.
+    """)
+
+    st.divider()
+    st.caption("ERNow Forecast Model · Historical CMS model validation · Not a live queue model.")
+
+
+def _set_ernow_view(view_name):
+    st.session_state["ernow_view"] = view_name
+
+
+if "ernow_view" not in st.session_state:
+    st.session_state["ernow_view"] = "ERNow"
+
 st.markdown("""
 <div class="safety-banner"><strong>Possible emergency?</strong> Call 911 or go to the nearest appropriate emergency department. Do not delay care or drive farther because of an ERNow estimate, and do not use this app while driving.</div>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="nav-wrap">', unsafe_allow_html=True)
+st.markdown('<div class="ernow-nav-rule"></div>', unsafe_allow_html=True)
+
+current_view = st.session_state["ernow_view"]
 nav1, nav2, nav3, _ = st.columns([1.10, 1.45, 1.45, 3.00])
+
 with nav1:
-    st.page_link("app.py", label="ERNow", icon=":material/emergency:", use_container_width=True)
-with nav2:
-    st.page_link("pages/1_Methodology.py", label="Methodology", icon=":material/menu_book:", use_container_width=True)
-with nav3:
-    st.page_link("pages/2_Model_Lab.py", label="Forecast Model", icon=":material/monitoring:", use_container_width=True)
-st.markdown('</div>', unsafe_allow_html=True)
-
-st.title("ERNow Boston")
-st.markdown('<div class="brand-sub">Compare Boston ER access in seconds — ERNow turns fragmented hospital, public-health, and routing data into one location-aware forecast.</div>', unsafe_allow_html=True)
-
-st.markdown(
-    """
-<div class="model-bar">
-  <div class="model-line-1"><span class="model-dot"></span>Learning model active</div>
-  <div class="model-line-2">ERNow uses a validated historical model to estimate expected ER flow, then combines that signal with current hospital conditions, weather, respiratory illness, major events, and route access.</div>
-  <div class="model-meta">
-    <span class="model-chip">6 Boston ERs</span>
-    <span class="model-chip">36 historical observations</span>
-    <span class="model-chip">2020–2025 reporting periods</span>
-    <span class="model-chip">Aug 2026 CMS archive snapshot</span>
-  </div>
-</div>
-""",
-    unsafe_allow_html=True,
-)
-
-st.subheader("Your location")
-location_slot = st.empty()
-with location_slot.container():
-    location = streamlit_geolocation()
-
-origin_lat = origin_lon = None
-location_label = None
-if isinstance(location, dict) and location.get("latitude") is not None and location.get("longitude") is not None:
-    origin_lat, origin_lon = float(location["latitude"]), float(location["longitude"])
-    location_slot.empty()
-    location_label = fetch_location_name(origin_lat, origin_lon)
-    st.markdown(f'<div class="location-confirm">Location detected: {location_label}<span class="sub">Results updated from your current location.</span></div>', unsafe_allow_html=True)
-else:
-    with st.expander("Location blocked? Choose a Boston area"):
-        fallback = st.selectbox("Boston area", list(FALLBACK_ORIGINS.keys()))
-        if st.button("Use this area", use_container_width=True):
-            st.session_state["fallback_origin"] = fallback
-    if st.session_state.get("fallback_origin"):
-        fallback = st.session_state["fallback_origin"]
-        origin_lat, origin_lon = FALLBACK_ORIGINS[fallback]
-        location_label = fallback
-
-if origin_lat is None:
-    st.info("Use **Get My Location**. That's the only input ERNow needs.")
-    st.stop()
-
-loading_slot = st.empty()
-loading_slot.markdown('<div class="ernow-loading-wrap"><div class="ernow-loading"></div></div>', unsafe_allow_html=True)
-
-now_dt = datetime.now(EASTERN)
-df = load_fallback_data()
-cms = fetch_cms_metrics(tuple(df["cms_provider_id"].tolist()))
-if not cms.empty:
-    df = df.merge(cms, on="cms_provider_id", how="left")
-    if "cms_current_baseline" in df:
-        mask = df["cms_current_baseline"].notna()
-        df.loc[mask, "typical_ed_minutes"] = df.loc[mask, "cms_current_baseline"]
-
-weather_obs = fetch_current_weather(origin_lat, origin_lon)
-alerts = fetch_nws_alerts(origin_lat, origin_lon)
-ari = fetch_cdc_ari()
-major_events = major_event_titles(now_dt)
-historical_layer = current_throughput_forecast()
-ranked, context = build_model(
-    df, origin_lat, origin_lon, now_dt, weather_obs, alerts, ari, major_events,
-    historical_layer=historical_layer,
-)
-loading_slot.empty()
-
-weather_status = weather_obs.get("description", "Unavailable") if weather_obs else "Unavailable"
-event_status = "; ".join(major_events[:2]) if major_events else "None detected"
-st.caption(
-    f"Updated **{now_dt.strftime('%-I:%M %p')}** · {location_label} · "
-    f"Weather: **{weather_status}** · Seasonal respiratory illness: **{context['illness_label']}** · Major events nearby: **{event_status}**"
-)
-
-st.divider()
-st.subheader("Nearby ERs")
-st.caption("Ranked using forecasted ER wait and travel access from your location. The wait forecast combines hospital history, the validated predictive layer, reported utilization, time, weather, respiratory illness, and major events. Travel time is personalized for each hospital and does not include live traffic.")
-
-for _, row in ranked.iterrows():
-    best = " er-best" if int(row["rank"]) == 1 else ""
-    best_label = '<div class="best-label">Best overall estimate</div>' if int(row["rank"]) == 1 else ""
-    wait_range = f"{fmt_minutes(row['modeled_wait_low'])}–{fmt_minutes(row['modeled_wait_high'])}"
-    route_time = f"~{fmt_minutes(row['route_time_min'])}" if pd.notna(row["route_time_min"]) else "Unavailable"
-    route_dist = f"{row['route_distance_miles']:.1f} mi" if pd.notna(row["route_distance_miles"]) else "—"
-    current_demand = current_condition_label(row["dynamic_factor"])
-    directions_url = (
-        "https://www.google.com/maps/dir/?api=1"
-        f"&origin={origin_lat},{origin_lon}"
-        f"&destination={row['latitude']},{row['longitude']}"
-        "&travelmode=driving"
+    st.button(
+        "ERNow",
+        icon=":material/emergency:",
+        use_container_width=True,
+        key="nav_home",
+        type="primary" if current_view == "ERNow" else "secondary",
+        on_click=_set_ernow_view,
+        args=("ERNow",),
     )
-    reason = "Uses hospital history, validated prediction, current conditions, and route access. Not a live queue reading."
-    card = f"""
-<div class="er-card{best}">
-  {best_label}
-  <div><span class="er-rank">#{int(row['rank'])}</span><span class="er-title">{row['hospital']}</span></div>
-  <div class="er-wait-label">Estimated ER wait</div><div class="er-wait">{wait_range}</div>
-  <div class="er-grid">
-    <div class="er-metric"><b>From your location:</b> {route_time} · {route_dist}</div>
-    <div class="er-metric"><b>Current demand conditions:</b> {current_demand}</div>
-    <div class="er-metric"><b>Historical wait:</b> {fmt_minutes(row['legacy_wait_to_provider_min'])}</div>
-    <div class="er-metric"><b>Typical visit duration:</b> {fmt_minutes(row['typical_ed_minutes'])}</div>
-  </div>
-  <div class="er-reason">{reason}</div>
-  <div class="er-actions"><a class="er-directions" href="{directions_url}" target="_blank" rel="noopener noreferrer">Open Directions</a></div>
-</div>"""
-    st.markdown(card, unsafe_allow_html=True)
 
-with st.expander("What changes the estimate right now?"):
-    st.write("ERNow automatically uses the current Boston time/day, holiday status, National Weather Service observations and alerts, seasonal respiratory surveillance from CDC, and major Boston events found across official schedules plus a recent local-news check.")
-    if major_events:
-        st.caption("Major event sources detected: " + "; ".join(major_events[:4]))
-    else:
-        st.caption("No qualifying major event was detected by the current source checks. This does not guarantee that no event is occurring.")
-    st.caption("Recent hospital demand and capacity data are used in the model but are not shown as if they were live conditions.")
+with nav2:
+    st.button(
+        "Methodology",
+        icon=":material/menu_book:",
+        use_container_width=True,
+        key="nav_methodology",
+        type="primary" if current_view == "Methodology" else "secondary",
+        on_click=_set_ernow_view,
+        args=("Methodology",),
+    )
 
-st.subheader("Map")
-st.map(ranked[["hospital", "latitude", "longitude"]], latitude="latitude", longitude="longitude", size=95)
-st.caption("ERNow Boston · Forecasting prototype · Not a clinical decision tool or confirmed live hospital wait-time service.")
+with nav3:
+    st.button(
+        "Forecast Model",
+        icon=":material/monitoring:",
+        use_container_width=True,
+        key="nav_model",
+        type="primary" if current_view == "Forecast Model" else "secondary",
+        on_click=_set_ernow_view,
+        args=("Forecast Model",),
+    )
+
+if current_view == "Methodology":
+    render_methodology()
+elif current_view == "Forecast Model":
+    render_forecast_model()
+else:
+    render_home()
