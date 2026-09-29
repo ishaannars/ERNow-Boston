@@ -11,6 +11,7 @@ import pandas as pd
 import requests
 import streamlit as st
 from streamlit_geolocation import streamlit_geolocation
+from historical_modeling import current_throughput_forecast
 
 st.set_page_config(page_title="ERNow Boston", page_icon="✚", layout="wide")
 DATA_PATH = Path(__file__).parent / "data" / "boston_er_data.csv"
@@ -66,12 +67,17 @@ st.markdown(
 html,body,[class*="css"],.stApp{font-family:'Instrument Sans','Helvetica Neue',Arial,sans-serif}
 .stApp{background:var(--ivory);color:var(--ink)}
 .block-container{padding-top:5.4rem!important;padding-bottom:2rem;max-width:960px}
-[data-testid="stSidebar"],[data-testid="collapsedControl"]{display:none!important}
+[data-testid="stSidebar"],
+[data-testid="collapsedControl"],
+[data-testid="stSidebarCollapsedControl"],
+button[kind="header"] {
+    display: none !important;
+}
 .safety-banner{display:block;width:100%;box-sizing:border-box;overflow:visible;background:var(--beni);color:#fff!important;border-radius:16px;padding:16px 19px;font-size:1rem;line-height:1.5;font-weight:650;margin:0 0 .9rem 0}
 .safety-banner,.safety-banner *{color:#fff!important;opacity:1!important}
 .nav-wrap{border-bottom:1px solid var(--tea);padding-bottom:.55rem;margin-bottom:1.15rem}
-[data-testid="stPageLink-NavLink"]{background:var(--shell)!important;border:1px solid var(--tea)!important;border-radius:10px!important;color:var(--ink)!important;font-weight:650!important}
-[data-testid="stPageLink-NavLink"] *{color:var(--ink)!important}
+[data-testid="stPageLink-NavLink"]{background:var(--shell)!important;border:1px solid var(--tea)!important;border-radius:10px!important;color:var(--ink)!important;font-weight:650!important;white-space:nowrap!important;overflow:visible!important;min-width:max-content!important}
+[data-testid="stPageLink-NavLink"] *{color:var(--ink)!important;white-space:nowrap!important;overflow:visible!important}
 [data-testid="stPageLink-NavLink"]:hover{border-color:var(--kakishibu)!important;background:var(--kakishibu-wash)!important}
 [data-testid="stPageLink-NavLink"] .material-symbols-rounded{color:var(--beni)!important}
 .location-confirm{background:var(--kakishibu-wash);border-bottom:2px solid var(--kakishibu);border-radius:10px 10px 4px 4px;padding:.72rem .9rem;margin:.35rem 0 .75rem 0;color:var(--ink);font-weight:600}
@@ -79,8 +85,9 @@ html,body,[class*="css"],.stApp{font-family:'Instrument Sans','Helvetica Neue',A
 .brand-sub{color:var(--soft-ink);margin-top:-.35rem;margin-bottom:1.1rem;font-size:.98rem}
 .model-bar{background:var(--shell);border:1px solid var(--tea);border-left:4px solid var(--moss);border-radius:14px;padding:.82rem 1rem;margin:.35rem 0 1.05rem 0}
 .model-line-1{display:flex;align-items:center;gap:.5rem;color:var(--ink);font-size:.96rem;font-weight:700}
-.model-line-2{color:var(--soft-ink);font-size:.88rem;font-weight:600;margin-top:.26rem}
-.model-line-3{color:var(--soft-ink);font-size:.78rem;line-height:1.42;margin-top:.2rem}
+.model-line-2{color:var(--soft-ink);font-size:.86rem;font-weight:600;margin-top:.28rem;line-height:1.4}
+.model-meta{display:flex;flex-wrap:wrap;gap:.42rem .55rem;margin-top:.55rem}
+.model-chip{font-size:.73rem;color:var(--soft-ink);background:var(--ivory);border:1px solid rgba(185,173,145,.72);border-radius:999px;padding:.24rem .5rem;font-weight:600}
 .model-dot{width:9px;height:9px;border-radius:50%;background:var(--moss);display:inline-block;box-shadow:0 0 0 rgba(72,81,60,.45);animation:modelPulse 1.65s infinite}
 @keyframes modelPulse{0%{box-shadow:0 0 0 0 rgba(72,81,60,.45);opacity:1}70%{box-shadow:0 0 0 7px rgba(72,81,60,0);opacity:.72}100%{box-shadow:0 0 0 0 rgba(72,81,60,0);opacity:1}}
 .er-card{background:var(--shell);border:1px solid var(--tea);border-radius:16px;padding:1.05rem 1.1rem;margin-bottom:.8rem}
@@ -94,7 +101,56 @@ html,body,[class*="css"],.stApp{font-family:'Instrument Sans','Helvetica Neue',A
 .er-metric{font-size:.93rem;color:var(--soft-ink)}
 .er-metric b{color:var(--ink);font-weight:600}
 .er-reason{font-size:.82rem;color:var(--moss);font-weight:600;margin-top:.5rem}
-@media(max-width:650px){.block-container{padding-top:4.8rem!important}.er-grid{grid-template-columns:1fr}.er-wait{font-size:1.5rem}.model-line-3{font-size:.76rem}}
+@media(max-width:650px){.block-container{padding-top:4.8rem!important}.er-grid{grid-template-columns:1fr}.er-wait{font-size:1.5rem}.model-line-2{font-size:.8rem}.model-chip{font-size:.69rem}}
+
+[data-testid="stAppViewContainer"], [data-testid="stAppViewBlockContainer"], section.main, .stApp, html, body {background:var(--ivory) !important;}
+[data-testid="stStatusWidget"], .stDeployButton {display:none !important;}
+[data-testid="stSpinner"] [role="status"] {display:none !important;}
+.ernow-loading-wrap{display:flex;align-items:center;justify-content:center;padding:.8rem 0 1rem 0;}
+.ernow-loading{width:30px;height:30px;border:3px solid #DDD4BE;border-top-color:var(--moss);border-radius:50%;animation:ernow-spin .8s linear infinite;}
+@keyframes ernow-spin{to{transform:rotate(360deg)}}
+
+
+.er-card{padding:.92rem 1.05rem!important;margin-bottom:.7rem!important}
+.er-grid{gap:.26rem 1.05rem!important;margin-top:.1rem!important}
+.er-wait{margin:.04rem 0 .35rem 0!important}
+.er-reason{font-size:.72rem!important;line-height:1.42!important;margin-top:.38rem!important;font-weight:550!important}
+.er-actions{margin-top:.5rem}
+.er-directions{
+  display:inline-block;
+  text-decoration:none!important;
+  background:var(--moss);
+  border:1px solid var(--moss);
+  border-radius:9px;
+  padding:.42rem .68rem;
+  color:#fff!important;
+  font-size:.78rem;
+  font-weight:650;
+}
+.er-directions:hover{
+  background:#3E4735;
+  border-color:#3E4735;
+  color:#fff!important;
+}
+
+
+/* Final spacing pass */
+.model-bar{padding:.82rem 1rem!important;margin:.35rem 0 1.15rem!important}
+.model-meta{gap:.38rem .46rem!important;margin-top:.48rem!important}
+.model-chip{padding:.22rem .48rem!important;font-size:.72rem!important;font-weight:600!important}
+.er-card{padding:1.02rem 1.08rem .92rem!important;margin-bottom:.82rem!important}
+.er-best{padding-top:1.05rem!important}
+.best-label{margin-bottom:.32rem!important}
+.er-title{line-height:1.25!important}
+.er-wait-label{margin-top:.62rem!important;margin-bottom:.02rem!important}
+.er-wait{margin:.04rem 0 .5rem!important}
+.er-grid{gap:.34rem 1.25rem!important;margin-top:.08rem!important;margin-bottom:.12rem!important}
+.er-metric{line-height:1.45!important}
+.er-metric b{font-weight:600!important}
+.er-reason{font-size:.69rem!important;line-height:1.42!important;font-weight:400!important;margin-top:.42rem!important;color:var(--soft-ink)!important}
+.er-actions{margin-top:.42rem!important}
+.er-directions{padding:.31rem .54rem!important;font-size:.70rem!important;line-height:1.2!important;border-radius:7px!important;font-weight:600!important}
+
 </style>
 """,
     unsafe_allow_html=True,
@@ -508,7 +564,7 @@ def current_condition_label(dynamic_factor):
     return "Typical"
 
 
-def build_model(df, origin_lat, origin_lon, now_dt, weather_obs, alerts, ari, major_events):
+def build_model(df, origin_lat, origin_lon, now_dt, weather_obs, alerts, ari, major_events, historical_layer=None):
     wf = current_weather_factor(weather_obs, alerts)
     inf, illness_label = illness_factor(ari)
     dynamic_factor = max(0.86, min(1.24, wf * inf * temporal_factor(now_dt) * event_factor(major_events)))
@@ -516,16 +572,29 @@ def build_model(df, origin_lat, origin_lon, now_dt, weather_obs, alerts, ari, ma
     med_volume = df["recent_ed_visits"].median()
     med_occupancy = df["recent_occupancy_pct"].median()
     med_lwbs = df["left_before_seen_pct"].median() if "left_before_seen_pct" in df and df["left_before_seen_pct"].notna().any() else None
+
+    hist_predictions = (historical_layer or {}).get("predictions", {})
+    selected_predictor = (historical_layer or {}).get("selected_model")
+    learned_promoted = bool((historical_layer or {}).get("learned_model_promoted", False))
+
     rows = []
     for _, row in df.iterrows():
         route = route_estimate(origin_lat, origin_lon, row["latitude"], row["longitude"])
         drive_min, route_miles = (float("nan"), float("nan")) if route is None else (route["minutes"], route["miles"])
+
         historical_wait = float(row["legacy_wait_to_provider_min"])
-        throughput_relative = float(row["typical_ed_minutes"]) / med_ed if med_ed else 1.0
-        throughput_factor = max(0.90, min(1.12, throughput_relative ** 0.30))
+        current_relative = float(row["typical_ed_minutes"]) / med_ed if med_ed else 1.0
+
+        predicted = hist_predictions.get(row["hospital"], {})
+        predicted_relative = float(predicted.get("relative_throughput_pressure", 1.0))
+
+        blended_throughput_relative = 0.60 * current_relative + 0.40 * predicted_relative
+        throughput_factor = max(0.90, min(1.12, blended_throughput_relative ** 0.30))
+
         hospital_demand = recent_demand_factor(row, med_volume, med_occupancy, med_lwbs)
         wait_mid = historical_wait * throughput_factor * hospital_demand * dynamic_factor
         wait_low = max(5, wait_mid * 0.65)
+
         rows.append({
             **row.to_dict(),
             "route_time_min": drive_min,
@@ -536,35 +605,46 @@ def build_model(df, origin_lat, origin_lon, now_dt, weather_obs, alerts, ari, ma
             "access_mid": (drive_min if pd.notna(drive_min) else 999) + wait_mid,
             "dynamic_factor": dynamic_factor,
             "hospital_demand_factor": hospital_demand,
+            "predicted_throughput_pressure": predicted_relative,
         })
+
     out = pd.DataFrame(rows).sort_values(["access_mid", "modeled_wait_mid"]).reset_index(drop=True)
     out["rank"] = range(1, len(out) + 1)
-    return out, {"dynamic_factor": dynamic_factor, "illness_label": illness_label}
-
+    return out, {
+        "dynamic_factor": dynamic_factor,
+        "illness_label": illness_label,
+        "historical_predictor": selected_predictor,
+        "learned_model_promoted": learned_promoted,
+    }
 
 st.markdown("""
-<div class="safety-banner">🚨 <strong>Possible emergency?</strong> Call 911 or go to the nearest appropriate emergency department. Do not delay care or drive farther because of an ERNow estimate, and do not use this app while driving.</div>
+<div class="safety-banner"><strong>Possible emergency?</strong> Call 911 or go to the nearest appropriate emergency department. Do not delay care or drive farther because of an ERNow estimate, and do not use this app while driving.</div>
 """, unsafe_allow_html=True)
 
 st.markdown('<div class="nav-wrap">', unsafe_allow_html=True)
-nav1, nav2, nav3, _ = st.columns([1, 1.15, 1, 3.85])
+nav1, nav2, nav3, _ = st.columns([1.10, 1.45, 1.45, 3.00])
 with nav1:
     st.page_link("app.py", label="ERNow", icon=":material/emergency:", use_container_width=True)
 with nav2:
     st.page_link("pages/1_Methodology.py", label="Methodology", icon=":material/menu_book:", use_container_width=True)
 with nav3:
-    st.page_link("pages/2_Model_Lab.py", label="Model Lab", icon=":material/monitoring:", use_container_width=True)
+    st.page_link("pages/2_Model_Lab.py", label="Forecast Model", icon=":material/monitoring:", use_container_width=True)
 st.markdown('</div>', unsafe_allow_html=True)
 
 st.title("ERNow Boston")
-st.markdown('<div class="brand-sub">Find nearby Boston ERs using estimated wait times and travel time from your location.</div>', unsafe_allow_html=True)
+st.markdown('<div class="brand-sub">Compare Boston ER access in seconds — ERNow turns fragmented hospital, public-health, and routing data into one location-aware forecast.</div>', unsafe_allow_html=True)
 
 st.markdown(
     """
 <div class="model-bar">
   <div class="model-line-1"><span class="model-dot"></span>Learning model active</div>
-  <div class="model-line-2">ERNow evaluates hospital throughput, utilization, time, weather, respiratory illness, major events, and route access.</div>
-  <div class="model-line-3">Current rankings use transparent bounded forecasting rules; the supervised learning pipeline trains and compares predictive models only when validated historical wait observations are available.</div>
+  <div class="model-line-2">ERNow uses a validated historical model to estimate expected ER flow, then combines that signal with current hospital conditions, weather, respiratory illness, major events, and route access.</div>
+  <div class="model-meta">
+    <span class="model-chip">6 Boston ERs</span>
+    <span class="model-chip">36 historical observations</span>
+    <span class="model-chip">2020–2025 reporting periods</span>
+    <span class="model-chip">Aug 2026 CMS archive snapshot</span>
+  </div>
 </div>
 """,
     unsafe_allow_html=True,
@@ -596,6 +676,9 @@ if origin_lat is None:
     st.info("Use **Get My Location**. That's the only input ERNow needs.")
     st.stop()
 
+loading_slot = st.empty()
+loading_slot.markdown('<div class="ernow-loading-wrap"><div class="ernow-loading"></div></div>', unsafe_allow_html=True)
+
 now_dt = datetime.now(EASTERN)
 df = load_fallback_data()
 cms = fetch_cms_metrics(tuple(df["cms_provider_id"].tolist()))
@@ -609,7 +692,12 @@ weather_obs = fetch_current_weather(origin_lat, origin_lon)
 alerts = fetch_nws_alerts(origin_lat, origin_lon)
 ari = fetch_cdc_ari()
 major_events = major_event_titles(now_dt)
-ranked, context = build_model(df, origin_lat, origin_lon, now_dt, weather_obs, alerts, ari, major_events)
+historical_layer = current_throughput_forecast()
+ranked, context = build_model(
+    df, origin_lat, origin_lon, now_dt, weather_obs, alerts, ari, major_events,
+    historical_layer=historical_layer,
+)
+loading_slot.empty()
 
 weather_status = weather_obs.get("description", "Unavailable") if weather_obs else "Unavailable"
 event_status = "; ".join(major_events[:2]) if major_events else "None detected"
@@ -620,7 +708,7 @@ st.caption(
 
 st.divider()
 st.subheader("Nearby ERs")
-st.caption("Ranked by estimated ER wait plus estimated road-route time. Route estimates do not include live traffic.")
+st.caption("Ranked using forecasted ER wait and travel access from your location. The wait forecast combines hospital history, the validated predictive layer, reported utilization, time, weather, respiratory illness, and major events. Travel time is personalized for each hospital and does not include live traffic.")
 
 for _, row in ranked.iterrows():
     best = " er-best" if int(row["rank"]) == 1 else ""
@@ -629,19 +717,26 @@ for _, row in ranked.iterrows():
     route_time = f"~{fmt_minutes(row['route_time_min'])}" if pd.notna(row["route_time_min"]) else "Unavailable"
     route_dist = f"{row['route_distance_miles']:.1f} mi" if pd.notna(row["route_distance_miles"]) else "—"
     current_demand = current_condition_label(row["dynamic_factor"])
-    reason = "Ranking combines estimated ER wait, recent hospital demand, current local conditions, route access, and other relevant factors. Estimates are not live hospital queue times."
+    directions_url = (
+        "https://www.google.com/maps/dir/?api=1"
+        f"&origin={origin_lat},{origin_lon}"
+        f"&destination={row['latitude']},{row['longitude']}"
+        "&travelmode=driving"
+    )
+    reason = "Uses hospital history, validated prediction, current conditions, and route access. Not a live queue reading."
     card = f"""
 <div class="er-card{best}">
   {best_label}
   <div><span class="er-rank">#{int(row['rank'])}</span><span class="er-title">{row['hospital']}</span></div>
   <div class="er-wait-label">Estimated ER wait</div><div class="er-wait">{wait_range}</div>
   <div class="er-grid">
-    <div class="er-metric"><b>Estimated route:</b> {route_time} · {route_dist}</div>
+    <div class="er-metric"><b>From your location:</b> {route_time} · {route_dist}</div>
     <div class="er-metric"><b>Current demand conditions:</b> {current_demand}</div>
     <div class="er-metric"><b>Historical wait:</b> {fmt_minutes(row['legacy_wait_to_provider_min'])}</div>
     <div class="er-metric"><b>Typical visit duration:</b> {fmt_minutes(row['typical_ed_minutes'])}</div>
   </div>
   <div class="er-reason">{reason}</div>
+  <div class="er-actions"><a class="er-directions" href="{directions_url}" target="_blank" rel="noopener noreferrer">Open Directions</a></div>
 </div>"""
     st.markdown(card, unsafe_allow_html=True)
 
