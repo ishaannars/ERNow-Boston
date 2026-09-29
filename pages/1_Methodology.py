@@ -1,127 +1,186 @@
 import pandas as pd
 import streamlit as st
 
-st.set_page_config(page_title="ERNow Methodology", page_icon="✚", layout="wide")
+st.set_page_config(page_title="ERNow Boston", page_icon="✚", layout="wide")
 
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap');
-:root{--ivory:#F8F4E6;--shell:#FFFDF5;--ink:#1C1B19;--soft:#403A32;--tea:#B9AD91;--moss:#48513C;--beni:#8C2F2F;--kakishibu:#A85B45;--kakishibu-wash:rgba(168,91,69,.10)}
+:root{--ivory:#F8F4E6;--shell:#FFFDF5;--ink:#1C1B19;--soft:#403A32;--tea:#B9AD91;--moss:#48513C;--beni:#8C2F2F;--kakishibu:#A85B45;--wash:rgba(168,91,69,.08)}
 html,body,[class*="css"],.stApp{font-family:'Instrument Sans','Helvetica Neue',Arial,sans-serif}
-.stApp{background:var(--ivory);color:var(--ink)}
-.block-container{padding-top:5.4rem!important;padding-bottom:2rem;max-width:900px}
-[data-testid="stSidebar"],[data-testid="collapsedControl"]{display:none!important}
-.safety-banner{display:block;width:100%;box-sizing:border-box;background:var(--beni);color:#fff!important;border-radius:16px;padding:16px 19px;font-size:1rem;line-height:1.5;font-weight:650;margin:0 0 .9rem 0}
+.stApp,[data-testid="stAppViewContainer"],[data-testid="stAppViewBlockContainer"],section.main{background:var(--ivory)!important;color:var(--ink)}
+.block-container{padding-top:5.4rem!important;padding-bottom:2rem;max-width:920px}
+[data-testid="stSidebar"],
+[data-testid="collapsedControl"],
+[data-testid="stSidebarCollapsedControl"],
+[data-testid="stStatusWidget"],
+.stDeployButton,
+button[kind="header"]{
+    display:none!important;
+}
+.safety-banner{display:block;width:100%;box-sizing:border-box;background:var(--beni);color:#fff!important;border-radius:16px;padding:16px 19px;font-size:1rem;line-height:1.5;font-weight:650;margin:0 0 .9rem}
 .safety-banner,.safety-banner *{color:#fff!important}
 .nav-wrap{border-bottom:1px solid var(--tea);padding-bottom:.55rem;margin-bottom:1.15rem}
-[data-testid="stPageLink-NavLink"]{background:var(--shell)!important;border:1px solid var(--tea)!important;border-radius:10px!important;color:var(--ink)!important;font-weight:650!important}
-[data-testid="stPageLink-NavLink"] *{color:var(--ink)!important}
+[data-testid="stPageLink-NavLink"]{background:var(--shell)!important;border:1px solid var(--tea)!important;border-radius:10px!important;color:var(--ink)!important;font-weight:650!important;white-space:nowrap!important;overflow:visible!important;min-width:max-content!important}
+[data-testid="stPageLink-NavLink"] *{color:var(--ink)!important;white-space:nowrap!important}
 [data-testid="stPageLink-NavLink"] .material-symbols-rounded{color:var(--beni)!important}
+.ds-card{background:var(--shell);border:1px solid var(--tea);border-left:4px solid var(--moss);border-radius:14px;padding:.9rem 1rem;margin:.45rem 0 1rem}
+.ds-title{font-weight:700;margin-bottom:.28rem}
+.ds-sub{color:var(--soft);font-size:.9rem;line-height:1.5}
+.ds-tags{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.55rem}
+.ds-tag{font-size:.73rem;border:1px solid var(--tea);background:var(--ivory);border-radius:999px;padding:.23rem .48rem;font-weight:600;color:var(--soft)}
+
+/* Editorial body copy only; headings/navigation remain Instrument Sans. */
+.stMarkdown p,.stMarkdown li,[data-testid="stCaptionContainer"],.stAlert p{
+  font-family:Georgia,'Times New Roman',serif!important;
+  line-height:1.62;
+}
+h1,h2,h3,h4,h5,h6,[data-testid="stPageLink-NavLink"],button,.stButton{
+  font-family:'Instrument Sans','Helvetica Neue',Arial,sans-serif!important;
+}
+
+
+/* Final page rhythm */
+.block-container{padding-top:5.15rem!important;padding-bottom:2.4rem!important}
+h1{margin-bottom:.3rem!important}
+h2{margin-top:1.55rem!important;margin-bottom:.42rem!important}
+h3{margin-top:1.15rem!important;margin-bottom:.35rem!important}
+.stMarkdown p{margin:.15rem 0 .72rem!important}
+.stMarkdown ul,.stMarkdown ol{margin-top:.18rem!important;margin-bottom:.85rem!important}
+.stMarkdown li{margin-bottom:.22rem!important}
+.stMarkdown strong{font-weight:600!important}
+[data-testid="stDataFrame"]{margin:.45rem 0 .85rem!important}
+
+.ds-card{padding:.92rem 1rem!important;margin:.55rem 0 1.1rem!important}
+.ds-tags{gap:.38rem .44rem!important;margin-top:.5rem!important}
+.ds-tag{padding:.22rem .46rem!important;font-size:.71rem!important;font-weight:600!important}
+
+
+/* Quiet body emphasis */
+.stMarkdown strong,[data-testid="stCaptionContainer"] strong,.stAlert strong{
+  font-weight:500!important;
+}
+.stMarkdown h1 strong,.stMarkdown h2 strong,.stMarkdown h3 strong,.stMarkdown h4 strong,
+h1 strong,h2 strong,h3 strong,h4 strong{
+  font-weight:700!important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
 st.markdown("""
 <div class="safety-banner">
-🚨 <strong>Possible emergency?</strong> Call 911 or go to the nearest appropriate emergency department.
-ERNow estimates must never be used to delay emergency care.
+<strong>Possible emergency?</strong> Call 911 or go to the nearest appropriate emergency department. ERNow estimates should never be used to delay emergency care.
 </div>
 """, unsafe_allow_html=True)
 
 st.markdown('<div class="nav-wrap">', unsafe_allow_html=True)
-nav1, nav2, nav3, _ = st.columns([1, 1.15, 1, 3.85])
-with nav1:
+a,b,c,_ = st.columns([1.10,1.45,1.45,3.00])
+with a:
     st.page_link("app.py", label="ERNow", icon=":material/emergency:", use_container_width=True)
-with nav2:
+with b:
     st.page_link("pages/1_Methodology.py", label="Methodology", icon=":material/menu_book:", use_container_width=True)
-with nav3:
-    st.page_link("pages/2_Model_Lab.py", label="Model Lab", icon=":material/monitoring:", use_container_width=True)
+with c:
+    st.page_link("pages/2_Model_Lab.py", label="Forecast Model", icon=":material/monitoring:", use_container_width=True)
 st.markdown('</div>', unsafe_allow_html=True)
 
 st.title("Methodology")
-st.caption("How ERNow builds its estimate, which data are current, and what the app cannot know.")
+st.caption("How ERNow combines hospital history, current conditions, and travel access to estimate ER wait ranges.")
+
+st.markdown("""
+<div class="ds-card">
+  <div class="ds-title">Machine-learning layer</div>
+  <div class="ds-sub">ERNow uses a validated historical model to estimate expected ER flow. That prediction becomes one input to the public wait forecast, alongside current hospital conditions, weather, respiratory illness, major events, and route access.</div>
+  <div class="ds-tags">
+    <span class="ds-tag">6 Boston ERs</span>
+    <span class="ds-tag">36 historical observations</span>
+    <span class="ds-tag">2020–2025 reporting periods</span>
+    <span class="ds-tag">Aug 2026 CMS archive snapshot</span>
+    <span class="ds-tag">Persistence · Ridge · Random Forest</span>
+  </div>
+</div>
+""", unsafe_allow_html=True)
 
 st.subheader("What ERNow estimates")
 st.write(
-    "ERNow estimates a likely **ER wait range** for each included Boston hospital and combines it with "
-    "**estimated road-route access** from the user's location. It does not claim to know a hospital's live waiting-room queue."
+    "ERNow estimates a likely ER wait range for each included Boston hospital and combines it with "
+    "travel access from the user's location. It does not claim to know a hospital's live waiting-room queue."
 )
 
-st.subheader("What goes into the estimate")
+st.subheader("What shapes the forecast")
 st.markdown("""
-**Hospital history and recent performance**
-- Historical wait-to-provider from archived CMS Hospital Compare reporting.
-- **CMS OP-18b — Median Time from Emergency Department Arrival to Departure for Discharged Emergency Department Patients.** This appears as **Typical visit duration** and is used as a newer hospital-throughput signal.
-- Recent reported emergency-department volume, occupancy, and other utilization signals from Massachusetts sources.
-- CMS **Left Before Being Seen (OP-22)** when available.
+**Hospital history and utilization**
+- Archived CMS wait-to-provider information.
+- CMS OP-18b hospital-throughput history.
+- Recent reported ED volume, occupancy, and related utilization signals.
+- CMS Left Before Being Seen (OP-22) when available.
 
-**Current and contextual conditions**
-- Boston time, day of week, and holiday status.
-- Weather and severe-weather alerts.
-- Seasonal respiratory illness conditions.
-- Major Boston events that may affect traffic or demand.
+**Current conditions**
+- Boston time, day of week, holidays, and season.
+- National Weather Service observations and severe-weather alerts.
+- CDC Massachusetts respiratory-illness surveillance.
+- Major Boston events that may affect demand or access.
 
-**Access**
-- Road-route distance and estimated route duration calculated from the user's location.
-- Route time is **not live traffic**.
+**Travel access**
+- Road-route distance and estimated travel time from the user's location to each hospital.
+- Travel time is personalized by hospital but does not include live traffic.
 """)
+
+st.subheader("Where machine learning fits")
+st.write(
+    "The historical model learns from longitudinal CMS OP-18b data, which measures the median time discharged patients spend in the ED from arrival to departure. "
+    "It uses prior reporting periods to estimate expected ER flow for each hospital."
+)
+st.write(
+    "ERNow then uses that prediction as one bounded signal inside the wait forecast. The app also accounts for reported utilization, time, weather, respiratory illness, major events, and route access."
+)
+
+st.subheader("How the displayed wait range is built")
+st.markdown("""
+1. Start with each hospital's archived wait-to-provider baseline.
+2. Add a bounded adjustment from the validated historical model and recent hospital-throughput data.
+3. Adjust for reported utilization and current local conditions.
+4. Return a wait range rather than an exact minute.
+5. Combine the wait forecast with travel access from the user's location to rank nearby ERs.
+""")
+
+st.subheader("Why the estimate stays cautious")
+st.write(
+    "CMS OP-18b measures total ED arrival-to-departure time for discharged patients; it is not a direct live wait-to-provider target. "
+    "The model therefore improves the forecast without being presented as a live queue measurement."
+)
 
 st.subheader("Accuracy and freshness")
 st.markdown("""
-**Weather — current official observations.**  
-ERNow uses the latest available **National Weather Service** observation near the user's coordinates and checks active NWS alerts. This is current official weather data, but the nearest reporting station may not exactly match conditions on the user's block.
-
-**Seasonal respiratory illness — latest CDC reporting period.**  
-ERNow uses the latest Massachusetts **CDC Acute Respiratory Illness (ARI)** surveillance category as a broad seasonal demand signal. It is public-health surveillance, not a live count of patients in a specific ER.
-
-**Major events nearby — official schedules plus a local-news check.**  
-ERNow checks multiple sources rather than relying on one calendar. The current build uses the **City of Boston event feed**, **TD Garden's official event schedule**, and **MLB's official schedule for Red Sox home games at Fenway Park**. It also checks recent **Boston.com local/traffic RSS coverage** for major event or closure stories, and can use Ticketmaster when an API key is configured.
-
-City event-feed items are filtered for higher-impact event terms before they affect the forecast. TD Garden events and Red Sox home games are treated as major venue events. If the homepage says **None detected**, that means no qualifying event was found by the sources checked; it is not a guarantee that no event exists.
+Weather — current National Weather Service observations and alerts.  
+Respiratory illness — latest published CDC Massachusetts ARI reporting period.  
+Major events — current-date checks from Boston-area public sources.  
+Route — OpenStreetMap / OSRM road routing at search time, without live traffic.  
+Hospital utilization — latest available public Massachusetts reporting.  
+Historical model — longitudinal CMS OP-18b reporting periods used for chronological validation.
 """)
-
-st.subheader("How the current forecast works")
-st.markdown("""
-1. Start with each hospital's historical wait-to-provider baseline.
-2. Recalibrate with newer hospital throughput, including **Typical visit duration (CMS OP-18b)**.
-3. Apply a bounded hospital-specific adjustment for recent reported demand/utilization.
-4. Apply bounded contextual adjustments for time/day, holidays, weather, seasonal respiratory illness, and qualifying major events.
-5. Return a **range**, not a single precise minute.
-6. Rank hospitals using estimated wait together with estimated road-route access.
-""")
-
-st.subheader("Learning-model layer")
-st.write(
-    "ERNow now includes a separate supervised-learning pipeline in **Model Lab**. It is designed to train on labeled historical wait observations, engineer temporal/context features, compare a simple baseline with linear, Ridge, and Random Forest models, and evaluate them on a chronological holdout period using MAE, RMSE, and R²."
-)
-st.write(
-    "The learned model does **not** replace the consumer forecast unless validated historical targets are available and the model demonstrates better out-of-time performance. ERNow does not create synthetic wait labels or publish invented accuracy metrics."
-)
 
 st.subheader("Important limitations")
 st.markdown("""
-- ERNow cannot see the number of people currently waiting, triage severity, real-time staffing, open treatment rooms, boarding load, or incoming ambulance volume.
-- Current-demand labels are **not** measurements of a hospital's live occupancy or waiting room.
-- Historical and periodically reported hospital data can differ from conditions inside the ER right now.
-- Distance depends on the user's location.
-- Route time does not include live traffic, road incidents, parking, or ambulance transport conditions.
-- Event and news sources can miss events, change format, or become temporarily unavailable.
-- Model feature importance describes a fitted model and does not establish causation.
+- ERNow cannot see current triage severity, staffing, open treatment rooms, boarding load, ambulance arrivals, or the exact number of people waiting right now.
+- Public hospital data can lag behind conditions inside the ER.
+- Current-demand labels are contextual estimates, not direct live queue measurements.
+- Travel time excludes live traffic, parking, road incidents, and ambulance transport conditions.
+- Predictive relationships can improve forecasting, but they do not establish causation.
 
 For a serious or time-sensitive emergency, call 911 or use the nearest appropriate emergency department rather than choosing a farther hospital because of an ERNow estimate.
 """)
 
-with st.expander("Data freshness and source detail"):
+with st.expander("Source and freshness detail"):
     fresh = pd.DataFrame([
-        ["Weather", "National Weather Service", "Current observation + active alerts", "Official nearby observation; exact-block conditions can vary"],
-        ["Seasonal respiratory illness", "CDC Massachusetts ARI", "Latest published reporting period", "Statewide surveillance, not live hospital demand"],
-        ["Major events", "City of Boston + TD Garden + MLB + Boston.com local/traffic; optional Ticketmaster", "Official schedules checked at use; local-news layer cached up to 6 hours", "Filtered contextual signal, not a guarantee"],
-        ["Route", "OpenStreetMap/OSRM road routing", "At search / short cache", "Road route; no live traffic"],
-        ["Time / day / holiday", "Boston clock + calendar rules", "Immediate", "Current"],
-        ["Hospital utilization", "Massachusetts CHIA / public reporting", "Latest reported period", "Recent, not live"],
-        ["ER visit duration", "CMS OP-18b", "Latest public reporting period", "Hospital throughput signal"],
-        ["Historical wait", "Archived CMS Hospital Compare OP-20", "Archived", "Historical baseline only"],
-        ["Supervised model evaluation", "Validated labeled history when supplied", "Chronological train/holdout split", "No training metrics are shown without real targets"],
+        ["Weather", "National Weather Service", "Current observation + alerts", "Current contextual signal"],
+        ["Respiratory illness", "CDC Massachusetts ARI", "Latest reporting period", "Statewide illness signal"],
+        ["Major events", "Boston-area public sources", "Current-date checks", "Contextual demand signal"],
+        ["Route", "OpenStreetMap / OSRM", "At search", "Personalized by hospital; no live traffic"],
+        ["Hospital utilization", "Massachusetts public reporting", "Latest reported period", "Recent, not live"],
+        ["ER throughput", "CMS OP-18b", "Longitudinal reporting periods", "Historical model target"],
+        ["Historical wait", "Archived CMS Hospital Compare OP-20", "Archived", "Historical baseline"],
     ], columns=["Factor", "Source", "Freshness", "Meaning"])
     st.dataframe(fresh, use_container_width=True, hide_index=True)
 
-st.caption("ERNow is a forecasting prototype using public or zero-cost data sources. It is not a clinically validated live wait-time service.")
+st.caption("ERNow is a forecasting prototype built on public or zero-cost data sources. It is not a clinical decision tool or a confirmed live wait-time service.")
