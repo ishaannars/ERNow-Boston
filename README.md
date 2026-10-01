@@ -83,14 +83,12 @@ ERNow forecasts each hospital's next-period **CMS OP-18b**: the median time disc
 
 ## What the app shows
 
-- **Expected ED visit time** for each hospital, with its tested 80% range
-- **Chance it's the fastest** option from your location
-- **Comparison with similar U.S. hospitals**
-- **Provider wait (pre-2020 data):** the last public CMS time-to-provider measure, which CMS no longer publishes, shown as-is
-- **Closest vs likely fastest overall** up front, with a one-tap switch to sort by closest
-- Personalized drive time and one-tap directions
-- Boston context (weather, respiratory illness, major events), shown but never used to adjust a number
-- Methodology and Forecast Model views with every result above
+- **Your two best options:** the closest ER and the ER likely to be fastest overall, side by side with the same three facts (drive, typical ED visit, drive + visit), plus how much time the faster one saves counting the extra drive both ways
+- **All 6 Boston ERs**, sorted by closest (default) or fastest overall, each with:
+  - typical ED visit (arrival to leaving) with a tested range, and how it compares with 25 similar U.S. hospitals
+  - drive time, drive + typical visit, chance it's the fastest (4,000 simulated trips), and how often patients left before being seen (CMS OP-22, 2024)
+- One-tap directions; Boston context (weather, respiratory illness, events) shown but never used to adjust a number
+- Methodology and Forecast Model views with every result, in plain language first
 
 ## What would make this live
 

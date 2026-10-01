@@ -486,6 +486,8 @@ def run():
             "latest_op18b": float(h["op18b"]), "period_end": str(h["op18b_period_end"].date()) if pd.notna(h["op18b_period_end"]) else "",
             "forecast_op18b": float(h["forecast"]), "lo80": float(h["lo80"]), "hi80": float(h["hi80"]),
             "peer_median_op18b": peer_med, "vs_peers_min": float(h["op18b"] - peer_med),
+            "left_without_seen_pct": float(h["op22"]) if pd.notna(h["op22"]) else None,
+            "national_median_left_without_seen_pct": float(now["op22"].median()),
             "latest_change_min": float(h["delta"]) if pd.notna(h["delta"]) else None,
             "change_flag": bool(pd.notna(h["delta"]) and abs(h["delta"]) > 2.5 * mad),
         })
