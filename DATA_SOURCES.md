@@ -42,7 +42,7 @@ No public source reliably provides all seven Boston ERs' live queue, triage mix,
 ## Added sources
 
 ### CMS Hospital Compare archives (national model)
-Six releases (2021-10 to 2026-08) of `Timely_and_Effective_Care-Hospital` and `Hospital_General_Information` for every U.S. hospital: OP-18b, OP-18c, OP-22, ED volume category, hospital type, ownership, and star rating. Used to train and test the national ED performance model (`national_model.py`). Each release is published 9–12 months after its reporting period ends.
+Ten releases (2017-10 to 2026-08) of `Timely_and_Effective_Care-Hospital` and `Hospital_General_Information` for every U.S. hospital: OP-18b, OP-18c, OP-22, ED volume category, hospital type, ownership, and star rating. Used to train and test the national ED performance model (`national_model.py`). Each release is published 9–12 months after its reporting period ends.
 
 ### CHIA Hospital Profiles, HFY 2024
 Massachusetts Center for Health Information and Analysis hospital profiles: annual ED visits and **inpatient** occupancy (from CHIA Hospital Cost Reports). Inpatient occupancy is not ED crowding; a full hospital tends to back up its ED because admitted patients wait there for a bed. Shown as annual context.

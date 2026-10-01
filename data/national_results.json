@@ -1,7 +1,11 @@
 {
-  "generated_at": "2026-10-01T14:41:14+00:00",
+  "generated_at": "2026-10-01T15:17:28+00:00",
   "target": "Next-release CMS OP-18b (median ED visit duration, discharged patients, minutes)",
   "releases": [
+    "2017-10-01",
+    "2018-10-01",
+    "2019-10-01",
+    "2020-10-01",
     "2021-10-01",
     "2022-07-01",
     "2023-10-01",
@@ -10,14 +14,14 @@
     "2026-08-01"
   ],
   "split": {
-    "train_transitions": "releases 1-3 -> next",
-    "validation_transition": "release 4 -> 5",
-    "test_transition": "release 5 -> 6",
-    "train_rows": 11900,
+    "train_transitions": "releases 1-7 -> next",
+    "validation_transition": "release 8 -> 9",
+    "test_transition": "release 9 -> 10",
+    "train_rows": 27180,
     "validation_rows": 3967,
     "test_rows": 4017,
-    "total_rows": 19884,
-    "hospitals": 4246
+    "total_rows": 35164,
+    "hospitals": 4438
   },
   "models": [
     {
@@ -29,24 +33,24 @@
     },
     {
       "model": "Ridge regression",
-      "validation_MAE": 12.661649512157378,
-      "MAE": 10.534204852155659,
-      "RMSE": 14.215611239288735,
-      "R2": 0.9219332303843687
+      "validation_MAE": 13.035530123309869,
+      "MAE": 10.725907731699687,
+      "RMSE": 14.530270314071236,
+      "R2": 0.9184390041053274
     },
     {
       "model": "Partial pooling (shrink toward state & peer means)",
-      "validation_MAE": 11.619797067486187,
-      "MAE": 9.283537018325843,
-      "RMSE": 13.11238125091102,
-      "R2": 0.9335800921419003
+      "validation_MAE": 11.603624375955716,
+      "MAE": 9.387127085141405,
+      "RMSE": 13.136292504794623,
+      "R2": 0.9333376294914525
     },
     {
       "model": "Gradient boosting",
-      "validation_MAE": 12.558560749261565,
-      "MAE": 10.216417779736851,
-      "RMSE": 14.008036859652417,
-      "R2": 0.9241964256696786
+      "validation_MAE": 12.60643801492187,
+      "MAE": 10.287480663565976,
+      "RMSE": 14.0607874643115,
+      "R2": 0.9236244378285016
     }
   ],
   "selected_model": "Persistence baseline",
@@ -56,23 +60,23 @@
   "intervals": {
     "method": "Regime-adaptive conformalized quantile regression (gradient boosting, q=0.10/0.90)",
     "target_coverage": 0.8,
-    "test_coverage": 0.8454070201643017,
-    "median_width_min": 33.91700113780297,
+    "test_coverage": 0.8473985561364202,
+    "median_width_min": 34.141942568156765,
     "test_coverage_ci95": [
-      0.8339556883246204,
-      0.8558625840179238
+      0.835698282300224,
+      0.8586071695294997
     ],
-    "backtest_coverage": 0.8290899924376103,
-    "backtest_width_min": 48.000916999598644,
-    "static_test_coverage": 0.8832462036345532,
-    "static_width_min": 37.68555681978107,
+    "backtest_coverage": 0.8306024703806403,
+    "backtest_width_min": 43.18642720907464,
+    "static_test_coverage": 0.884739855613642,
+    "static_width_min": 37.93549174239638,
     "old_fixed_band_coverage": 0.9980084640278815,
     "old_fixed_band_median_width_min": 134.1,
     "coverage_by_volume": {
-      "low": 0.8552295918367347,
-      "medium": 0.8274760383386581,
-      "high": 0.833916083916084,
-      "very high": 0.8524590163934426
+      "low": 0.8507653061224489,
+      "medium": 0.832800851970181,
+      "high": 0.8374125874125874,
+      "very high": 0.8673621460506706
     }
   },
   "ranking": {
@@ -93,39 +97,136 @@
   },
   "rolling": [
     {
+      "target_release": "2020-10-01",
+      "hospitals": 3981,
+      "persistence_MAE": 11.074101984426024,
+      "best_challenger": "Ridge regression",
+      "best_challenger_MAE": 10.754500558193339,
+      "maes": {
+        "Persistence baseline": 11.074101984426024,
+        "Ridge regression": 10.754500558193339,
+        "Partial pooling (shrink toward state & peer means)": 10.923325824043781,
+        "Gradient boosting": 11.253021521709336
+      },
+      "coverage": 0.8108515448379804,
+      "fastest_pick_accuracy": 0.7542087542087542
+    },
+    {
+      "target_release": "2021-10-01",
+      "hospitals": 3884,
+      "persistence_MAE": 15.888002059732235,
+      "best_challenger": "Ridge regression",
+      "best_challenger_MAE": 15.388647376620469,
+      "maes": {
+        "Persistence baseline": 15.888002059732235,
+        "Ridge regression": 15.388647376620469,
+        "Partial pooling (shrink toward state & peer means)": 15.44576707588844,
+        "Gradient boosting": 15.390871522312183
+      },
+      "coverage": 0.6573120494335737,
+      "fastest_pick_accuracy": 0.7133105802047781,
+      "rule_model": "Ridge regression",
+      "rule_MAE": 15.388647376620469
+    },
+    {
+      "target_release": "2022-07-01",
+      "hospitals": 3922,
+      "persistence_MAE": 12.006629270780214,
+      "best_challenger": "Gradient boosting",
+      "best_challenger_MAE": 11.673587045180849,
+      "maes": {
+        "Persistence baseline": 12.006629270780214,
+        "Ridge regression": 11.965017672309001,
+        "Partial pooling (shrink toward state & peer means)": 11.938262542768607,
+        "Gradient boosting": 11.673587045180849
+      },
+      "coverage": 0.9671086180520143,
+      "fastest_pick_accuracy": 0.7542087542087542,
+      "rule_model": "Ridge regression",
+      "rule_MAE": 11.965017672309001
+    },
+    {
+      "target_release": "2023-10-01",
+      "hospitals": 4014,
+      "persistence_MAE": 14.487792725460887,
+      "best_challenger": "Gradient boosting",
+      "best_challenger_MAE": 13.76414127951077,
+      "maes": {
+        "Persistence baseline": 14.487792725460887,
+        "Ridge regression": 14.281862626489346,
+        "Partial pooling (shrink toward state & peer means)": 14.785485187804035,
+        "Gradient boosting": 13.76414127951077
+      },
+      "coverage": 0.5455904334828101,
+      "fastest_pick_accuracy": 0.7384105960264901,
+      "rule_model": "Gradient boosting",
+      "rule_MAE": 13.76414127951077
+    },
+    {
       "target_release": "2024-10-01",
       "hospitals": 3964,
       "persistence_MAE": 13.56710393541877,
       "best_challenger": "Partial pooling (shrink toward state & peer means)",
-      "best_challenger_MAE": 14.439555140743408,
-      "coverage": 0.8355196770938446,
-      "fastest_pick_accuracy": 0.7054794520547946
+      "best_challenger_MAE": 13.383274032447723,
+      "maes": {
+        "Persistence baseline": 13.56710393541877,
+        "Ridge regression": 15.018392209031827,
+        "Partial pooling (shrink toward state & peer means)": 13.383274032447723,
+        "Gradient boosting": 14.49285622841296
+      },
+      "coverage": 0.8829465186680121,
+      "fastest_pick_accuracy": 0.7054794520547946,
+      "rule_model": "Gradient boosting",
+      "rule_MAE": 14.49285622841296
     },
     {
       "target_release": "2025-11-01",
       "hospitals": 3967,
       "persistence_MAE": 11.804638265691958,
       "best_challenger": "Partial pooling (shrink toward state & peer means)",
-      "best_challenger_MAE": 11.619797067486187,
-      "coverage": 0.8290899924376103,
-      "fastest_pick_accuracy": 0.7567567567567568
+      "best_challenger_MAE": 11.603624375955716,
+      "maes": {
+        "Persistence baseline": 11.804638265691958,
+        "Ridge regression": 13.035530123309869,
+        "Partial pooling (shrink toward state & peer means)": 11.603624375955716,
+        "Gradient boosting": 12.60643801492187
+      },
+      "coverage": 0.8306024703806403,
+      "fastest_pick_accuracy": 0.7567567567567568,
+      "rule_model": "Persistence baseline",
+      "rule_MAE": 11.804638265691958
     },
     {
       "target_release": "2026-08-01",
       "hospitals": 4017,
       "persistence_MAE": 9.421458800099577,
       "best_challenger": "Partial pooling (shrink toward state & peer means)",
-      "best_challenger_MAE": 9.260013835353998,
-      "coverage": 0.8454070201643017,
-      "fastest_pick_accuracy": 0.8293515358361775
+      "best_challenger_MAE": 9.387127085141405,
+      "maes": {
+        "Persistence baseline": 9.421458800099577,
+        "Ridge regression": 10.02329117433984,
+        "Partial pooling (shrink toward state & peer means)": 9.387127085141405,
+        "Gradient boosting": 9.780900529844843
+      },
+      "coverage": 0.8473985561364202,
+      "fastest_pick_accuracy": 0.8293515358361775,
+      "rule_model": "Persistence baseline",
+      "rule_MAE": 9.421458800099577
     }
   ],
+  "walk_forward": {
+    "years": 6,
+    "always_persistence_MAE": 12.862604176197273,
+    "rule_MAE": 12.806126603774123,
+    "years_rule_switched": 4,
+    "years_rule_worse": 1
+  },
   "confidence": {
     "resamples": 2000,
-    "mae_gain_vs_best_challenger_min": 0.13793731659056788,
+    "mae_gain_vs_best_challenger_min": 0.03362165017107121,
     "mae_gain_ci95": [
-      0.07998368581670809,
-      0.1949302499899314
+      -0.08328913790127142,
+      0.1468129216716924
     ],
     "fastest_pick_ci95": [
       0.7815699658703071,
@@ -145,61 +246,61 @@
     },
     {
       "features": "History only",
-      "test_MAE": 9.955277993576399
+      "test_MAE": 9.920164046532216
     },
     {
       "features": "+ other ED measures",
-      "test_MAE": 9.944290152275178
+      "test_MAE": 9.892967150111259
     },
     {
       "features": "+ hospital characteristics",
-      "test_MAE": 10.20527126970062
+      "test_MAE": 9.949733094617164
     },
     {
       "features": "+ geography & peers (full)",
-      "test_MAE": 10.216417779736851
+      "test_MAE": 10.287480663565976
     }
   ],
   "drivers": [
     {
       "feature": "state_mean_gap",
-      "importance_min": 0.5632388488507477
-    },
-    {
-      "feature": "lag1",
-      "importance_min": 0.3726755161203933
-    },
-    {
-      "feature": "hospital_type",
-      "importance_min": 0.1839616880912523
-    },
-    {
-      "feature": "lag2",
-      "importance_min": 0.0835764377721464
-    },
-    {
-      "feature": "op22",
-      "importance_min": 0.0831167186952392
-    },
-    {
-      "feature": "delta",
-      "importance_min": 0.059689305118942215
-    },
-    {
-      "feature": "ownership",
-      "importance_min": 0.010208487937340393
-    },
-    {
-      "feature": "state",
-      "importance_min": 0.005472673745232725
+      "importance_min": 0.7068695726258039
     },
     {
       "feature": "peer_mean_gap",
-      "importance_min": 0.004447049412840087
+      "importance_min": 0.28276074985913907
+    },
+    {
+      "feature": "op22",
+      "importance_min": 0.10154430549331543
+    },
+    {
+      "feature": "lag2",
+      "importance_min": 0.06945586619377905
     },
     {
       "feature": "op18c",
-      "importance_min": -0.016617601739655895
+      "importance_min": 0.04682972682933233
+    },
+    {
+      "feature": "delta",
+      "importance_min": 0.0036976271487905166
+    },
+    {
+      "feature": "state",
+      "importance_min": 0.00331859192071704
+    },
+    {
+      "feature": "ownership",
+      "importance_min": -0.011862025191877023
+    },
+    {
+      "feature": "lag1",
+      "importance_min": -0.01674389290918974
+    },
+    {
+      "feature": "hospital_type",
+      "importance_min": -0.038464333257002895
     }
   ],
   "structure": {
@@ -297,6 +398,6 @@
     "boston_slowest_min": 336.0,
     "data_lag_months_min": 9.00131406044678,
     "data_lag_months_max": 12.02365308804205,
-    "releases": 6
+    "releases": 10
   }
 }
