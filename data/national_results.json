@@ -1,0 +1,257 @@
+{
+  "generated_at": "2026-10-01T11:00:52+00:00",
+  "target": "Next-release CMS OP-18b (median ED visit duration, discharged patients, minutes)",
+  "releases": [
+    "2021-10-01",
+    "2022-07-01",
+    "2023-10-01",
+    "2024-10-01",
+    "2025-11-01",
+    "2026-08-01"
+  ],
+  "split": {
+    "train_transitions": "releases 1-3 -> next",
+    "validation_transition": "release 4 -> 5",
+    "test_transition": "release 5 -> 6",
+    "train_rows": 11900,
+    "validation_rows": 3967,
+    "test_rows": 4017,
+    "total_rows": 19884,
+    "hospitals": 4246
+  },
+  "models": [
+    {
+      "model": "Persistence baseline",
+      "validation_MAE": 11.804638265691958,
+      "MAE": 9.421458800099577,
+      "RMSE": 13.359713758357724,
+      "R2": 0.9310507670888934
+    },
+    {
+      "model": "Ridge regression",
+      "validation_MAE": 12.661649512157378,
+      "MAE": 10.534204852155659,
+      "RMSE": 14.215611239288735,
+      "R2": 0.9219332303843687
+    },
+    {
+      "model": "Partial pooling (shrink toward state & peer means)",
+      "validation_MAE": 11.619797067486187,
+      "MAE": 9.283537018325843,
+      "RMSE": 13.11238125091102,
+      "R2": 0.9335800921419003
+    },
+    {
+      "model": "Gradient boosting",
+      "validation_MAE": 12.558560749261565,
+      "MAE": 10.216417779736851,
+      "RMSE": 14.008036859652417,
+      "R2": 0.9241964256696786
+    }
+  ],
+  "selected_model": "Persistence baseline",
+  "best_learned_model": "Partial pooling (shrink toward state & peer means)",
+  "learned_model_promoted": false,
+  "promotion_margin": 0.02,
+  "intervals": {
+    "method": "Regime-adaptive conformalized quantile regression (gradient boosting, q=0.10/0.90)",
+    "target_coverage": 0.8,
+    "test_coverage": 0.8454070201643017,
+    "median_width_min": 33.91700113780297,
+    "backtest_coverage": 0.8290899924376103,
+    "backtest_width_min": 48.000916999598644,
+    "static_test_coverage": 0.8832462036345532,
+    "static_width_min": 37.68555681978107,
+    "old_fixed_band_coverage": 0.9980084640278815,
+    "old_fixed_band_median_width_min": 134.1,
+    "coverage_by_volume": {
+      "low": 0.8552295918367347,
+      "medium": 0.8274760383386581,
+      "high": 0.833916083916084,
+      "very high": 0.8524590163934426
+    }
+  },
+  "ranking": {
+    "selected": {
+      "national_spearman": 0.967427984120888,
+      "local_groups": 293,
+      "mean_local_spearman": 0.8581737799729799,
+      "fastest_pick_accuracy": 0.8293515358361775,
+      "fastest_pick_random_baseline": 0.24041179592012413
+    },
+    "persistence": {
+      "national_spearman": 0.967427984120888,
+      "local_groups": 293,
+      "mean_local_spearman": 0.8581737799729799,
+      "fastest_pick_accuracy": 0.8293515358361775,
+      "fastest_pick_random_baseline": 0.24041179592012413
+    }
+  },
+  "boston_backtest": {
+    "hospitals": 6,
+    "MAE_selected": 20.5,
+    "spearman_selected": 1.0,
+    "fastest_pick_correct": true
+  },
+  "ablation": [
+    {
+      "features": "Persistence (no features)",
+      "test_MAE": 9.421458800099577
+    },
+    {
+      "features": "History only",
+      "test_MAE": 9.955277993576399
+    },
+    {
+      "features": "+ other ED measures",
+      "test_MAE": 9.944290152275178
+    },
+    {
+      "features": "+ hospital characteristics",
+      "test_MAE": 10.20527126970062
+    },
+    {
+      "features": "+ geography & peers (full)",
+      "test_MAE": 10.216417779736851
+    }
+  ],
+  "drivers": [
+    {
+      "feature": "state_mean_gap",
+      "importance_min": 0.5632388488507477
+    },
+    {
+      "feature": "lag1",
+      "importance_min": 0.3726755161203933
+    },
+    {
+      "feature": "hospital_type",
+      "importance_min": 0.1839616880912523
+    },
+    {
+      "feature": "lag2",
+      "importance_min": 0.0835764377721464
+    },
+    {
+      "feature": "op22",
+      "importance_min": 0.0831167186952392
+    },
+    {
+      "feature": "delta",
+      "importance_min": 0.059689305118942215
+    },
+    {
+      "feature": "ownership",
+      "importance_min": 0.010208487937340393
+    },
+    {
+      "feature": "state",
+      "importance_min": 0.005472673745232725
+    },
+    {
+      "feature": "peer_mean_gap",
+      "importance_min": 0.004447049412840087
+    },
+    {
+      "feature": "op18c",
+      "importance_min": -0.016617601739655895
+    }
+  ],
+  "structure": {
+    "by_volume": [
+      {
+        "ed_volume": "low",
+        "hospitals": 1608,
+        "median_op18b": 120.0,
+        "median_op22": 1.0
+      },
+      {
+        "ed_volume": "medium",
+        "hospitals": 911,
+        "median_op18b": 166.0,
+        "median_op22": 2.0
+      },
+      {
+        "ed_volume": "high",
+        "hospitals": 551,
+        "median_op18b": 191.0,
+        "median_op22": 2.0
+      },
+      {
+        "ed_volume": "very high",
+        "hospitals": 702,
+        "median_op18b": 192.5,
+        "median_op22": 2.0
+      }
+    ],
+    "by_ownership": [
+      {
+        "ownership": "Government - State",
+        "hospitals": 47,
+        "median_op18b": 179.0,
+        "median_op22": 2.0
+      },
+      {
+        "ownership": "Voluntary non-profit - Church",
+        "hospitals": 246,
+        "median_op18b": 159.5,
+        "median_op22": 1.0
+      },
+      {
+        "ownership": "Voluntary non-profit - Private",
+        "hospitals": 2014,
+        "median_op18b": 159.0,
+        "median_op22": 1.0
+      },
+      {
+        "ownership": "Voluntary non-profit - Other",
+        "hospitals": 300,
+        "median_op18b": 153.0,
+        "median_op22": 1.0
+      },
+      {
+        "ownership": "Proprietary",
+        "hospitals": 599,
+        "median_op18b": 142.0,
+        "median_op22": 1.0
+      },
+      {
+        "ownership": "Physician",
+        "hospitals": 33,
+        "median_op18b": 140.0,
+        "median_op22": 1.0
+      },
+      {
+        "ownership": "Department of Defense",
+        "hospitals": 31,
+        "median_op18b": 139.0,
+        "median_op22": 2.0
+      },
+      {
+        "ownership": "Government - Hospital District or Authority",
+        "hospitals": 467,
+        "median_op18b": 128.0,
+        "median_op22": 1.0
+      },
+      {
+        "ownership": "Government - Local",
+        "hospitals": 326,
+        "median_op18b": 128.0,
+        "median_op22": 1.0
+      }
+    ],
+    "spearman_op18b_vs_left_without_being_seen": 0.5576871402108388
+  },
+  "evidence": {
+    "hospitals_latest_release": 4658,
+    "hospitals_with_op18b_latest": 4081,
+    "boston_spread_min": 128.0,
+    "boston_fastest": "Tufts Medical Center",
+    "boston_slowest": "Beth Israel Deaconess Medical Center",
+    "boston_fastest_min": 208.0,
+    "boston_slowest_min": 336.0,
+    "data_lag_months_min": 9.00131406044678,
+    "data_lag_months_max": 12.02365308804205,
+    "releases": 6
+  }
+}

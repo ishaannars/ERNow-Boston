@@ -51,3 +51,13 @@ Validation:
 - hospital-level MAE
 
 This is intentionally different from claiming live ER wait prediction.
+
+## National model (current)
+
+The app's forecast now comes from `national_model.py`, which reads every hospital in the archives (not only Boston's six). After adding archives to `data/cms_archives/`, run:
+
+```
+python national_model.py
+```
+
+It writes `data/national_results.json`, `data/boston_forecast.csv`, and `data/national_ed_panel.csv.gz`. The archive zips themselves stay out of git.

@@ -1,3 +1,4 @@
+from functools import lru_cache
 from pathlib import Path
 
 import numpy as np
@@ -87,6 +88,13 @@ def _preprocessor(numeric, categorical):
 
 
 def train_historical_models():
+    """Cached: retrains only when the history CSV changes, not on every page load."""
+    mtime = HISTORY_PATH.stat().st_mtime if HISTORY_PATH.exists() else 0.0
+    return _train_historical_models_cached(mtime)
+
+
+@lru_cache(maxsize=2)
+def _train_historical_models_cached(_history_mtime):
     status = history_status()
     if not status["ready"]:
         return None
@@ -191,7 +199,11 @@ def current_throughput_forecast():
         }
 
     history = status["data"].sort_values(["hospital", "timestamp"]).copy()
-    next_time = history["timestamp"].max() + pd.DateOffset(months=3)
+    # Step forward by the typical gap between reporting periods (about a year in this data),
+    # not a fixed quarter, so the calendar features match how the data actually arrives.
+    periods = pd.Series(sorted(history["timestamp"].dropna().unique()))
+    gap = periods.diff().dropna().median() if len(periods) > 1 else pd.Timedelta(days=365)
+    next_time = history["timestamp"].max() + gap
     rows = []
 
     for hospital, group in history.groupby("hospital"):
