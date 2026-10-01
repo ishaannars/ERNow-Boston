@@ -1,0 +1,7 @@
+{
+  "locations": 1977,
+  "closest_not_fastest_share": 0.9044006069802731,
+  "median_minutes_saved_when_different": 75.62149444394714,
+  "median_extra_drive_min_when_different": 4.650553288442186,
+  "method": "Straight-line distance x1.35 at 18 mph +3 min; typical ED visit = national-model forecast (OP-18b)."
+}

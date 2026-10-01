@@ -19,7 +19,12 @@ def main():
     df["method"] = df["method"].str.strip().str.lower()
     manual, ernow = df[df.method == "manual"]["seconds"], df[df.method == "ernow"]["seconds"]
     if manual.empty or ernow.empty:
-        raise SystemExit("Need at least one manual and one ernow run in data/decision_time_results.csv.")
+        text = "_Not yet measured. Run `python timing_test.py` (guided stopwatch, about 10 minutes)._"
+        body = README.read_text()
+        i, j = body.index(START) + len(START), body.index(END)
+        README.write_text(body[:i] + "\n" + text + "\n" + body[j:])
+        print(text)
+        return
     n = df["participant"].nunique()
     m, e = manual.median(), ernow.median()
     same = (df.pivot_table(index="participant", columns="method", values="picked_hospital", aggfunc="first")
