@@ -918,6 +918,21 @@ hr, [data-testid="stDivider"] {margin:.55rem 0 .35rem !important}
   .er-list,.evidence-grid,.model-grid{grid-template-columns:1fr !important}
   .mini-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important}
 }
+
+/* closest vs fastest answer */
+.answer-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem;margin:.3rem 0 .35rem}
+.answer-card,.answer-one{background:var(--shell);border:1px solid var(--tea);border-radius:14px;padding:.75rem .9rem}
+.answer-one{margin:.3rem 0 .35rem;border:2px solid var(--moss)}
+.answer-fast{border:2px solid var(--moss)}
+.answer-k{font-size:.64rem;text-transform:uppercase;letter-spacing:.05em;font-weight:650;color:var(--soft-ink)}
+.answer-v{font-family:'Instrument Serif',Georgia,serif;font-size:1.55rem;line-height:1.15;color:var(--ink);margin:.1rem 0 .15rem}
+.answer-sub{font-size:.82rem;color:var(--soft-ink);font-variant-numeric:tabular-nums}
+.closest-label{font-size:.62rem;padding:.08rem .42rem;border-radius:999px;border:1px solid var(--moss);color:var(--moss);font-weight:650;letter-spacing:.05em;text-transform:uppercase}
+[data-testid="stRadio"] label p{font-size:.84rem !important;font-weight:600 !important}
+.choice-callout{background:var(--shell);border:1px solid var(--tea);border-left:4px solid var(--kakishibu);border-radius:12px;padding:.7rem .85rem;margin:.2rem 0 .7rem}
+.choice-callout .v{font-family:'Instrument Serif',Georgia,serif;font-size:1.45rem;line-height:1.15;color:var(--ink)}
+.choice-callout .c{font-size:.8rem;color:var(--soft-ink);line-height:1.45;margin-top:.2rem}
+@media(max-width:650px){.answer-grid{grid-template-columns:1fr}}
 </style>
 """, unsafe_allow_html=True)
 
@@ -1003,12 +1018,48 @@ def render_home():
 
     st.divider()
     st.subheader("Nearby ERs")
-    st.caption("Sorted by drive time plus expected ED visit. Each range is a hospital's typical performance for the next CMS period, not today's live queue.")
+
+    # Two answers up front: the closest ER (what most people look for) and the one likely
+    # to get you seen and home fastest. Same hospital -> one clear answer.
+    routed = ranked[ranked["route_ok"]]
+    closest = routed.loc[routed["route_time_min"].idxmin()] if len(routed) else None
+    fastest = ranked.iloc[0]
+    if closest is not None:
+        if closest["hospital"] == fastest["hospital"]:
+            answer = (f'<div class="answer-one"><div class="answer-k">Closest and likely fastest overall</div>'
+                      f'<div class="answer-v">{html.escape(str(fastest["hospital"]))}</div>'
+                      f'<div class="answer-sub">~{fmt_minutes(fastest["route_time_min"])} drive · typical visit {fmt_range(fastest["visit_lo"], fastest["visit_hi"])}</div></div>')
+        else:
+            extra = fastest["route_time_min"] - closest["route_time_min"]
+            saved = closest["visit_mid"] - fastest["visit_mid"]
+            answer = (f'<div class="answer-k">Closest ER</div><div class="answer-v">{html.escape(str(closest["hospital"]))}</div>'
+                      f'<div class="answer-sub">~{fmt_minutes(closest["route_time_min"])} drive · typical visit {fmt_range(closest["visit_lo"], closest["visit_hi"])}</div>')
+            answer = (f'<div class="answer-grid"><div class="answer-card">{answer}</div>'
+                      f'<div class="answer-card answer-fast"><div class="answer-k">Likely fastest overall</div>'
+                      f'<div class="answer-v">{html.escape(str(fastest["hospital"]))}</div>'
+                      f'<div class="answer-sub">{"+" if extra >= 0 else "−"}{fmt_minutes(abs(extra))} drive vs closest, '
+                      f'typically ~{fmt_minutes(max(saved, 0))} shorter in the ED</div></div></div>')
+        st.markdown(answer, unsafe_allow_html=True)
+        st.caption("Emergency or getting worse? Go to the closest ER or call 911. "
+                   "For urgent, non-life-threatening visits, the fastest overall option can save real time.")
+
+    sort_by = st.radio("Sort ERs by", ["Fastest overall", "Closest"], horizontal=True, label_visibility="collapsed",
+                       key="er_sort")
+    if sort_by == "Closest":
+        ranked = ranked.sort_values(["route_ok", "route_time_min"], ascending=[False, True]).reset_index(drop=True)
+        st.caption("Sorted by drive time from your location. Each range is a hospital's typical performance for the next CMS period, not today's live queue.")
+    else:
+        st.caption("Sorted by drive time plus expected ED visit. Each range is a hospital's typical performance for the next CMS period, not today's live queue.")
+    closest_name = None if closest is None else closest["hospital"]
 
     cards = []
-    for _, row in ranked.iterrows():
-        best = " er-best" if int(row["rank"]) == 1 else ""
-        best_label = '<span class="best-label">Best overall estimate</span>' if int(row["rank"]) == 1 else ""
+    for pos, (_, row) in enumerate(ranked.iterrows(), start=1):
+        row = row.copy()
+        row["rank"] = pos
+        best = " er-best" if row["hospital"] == fastest["hospital"] else ""
+        best_label = '<span class="best-label">Likely fastest overall</span>' if row["hospital"] == fastest["hospital"] else ""
+        if row["hospital"] == closest_name:
+            best_label += '<span class="closest-label">Closest</span>'
         has_fc = pd.notna(row.get("visit_mid"))
         visit_range = (fmt_range(row["visit_lo"], row["visit_hi"]) if has_fc
                        else fmt_range(row["modeled_wait_low"], row["modeled_wait_high"]))
@@ -1103,6 +1154,16 @@ def render_methodology():
             f'<div class="evidence-card"><div class="evidence-value">{html.escape(v)}</div>'
             f'<div class="evidence-copy">{html.escape(c)}</div><div class="evidence-source">{html.escape(src)}</div></div>'
             for v, c, src in cards) + '</div>', unsafe_allow_html=True)
+
+    choice_path = Path(__file__).resolve().parent / "data" / "boston_choice.json"
+    if choice_path.exists():
+        ch = json.loads(choice_path.read_text())
+        st.markdown(
+            f'<div class="choice-callout"><div class="v">The closest ER is usually not the fastest: {ch["closest_not_fastest_share"]:.0%} of Boston locations</div>'
+            f'<div class="c">Across {ch["locations"]:,} points in Boston, for urgent but non-life-threatening visits, a different ER than the closest had the shortest '
+            f'drive plus typical ED visit {ch["closest_not_fastest_share"]:.0%} of the time, typically about {fmt_minutes(ch["median_minutes_saved_when_different"])} shorter '
+            f'for about {fmt_minutes(ch["median_extra_drive_min_when_different"])} more driving. Drive times in this analysis are estimated from distance; '
+            'the app uses real road routing. In an emergency, always go to the closest ER.</div></div>', unsafe_allow_html=True)
 
     if national:
         sp, iv, rk = national["split"], national["intervals"], national["ranking"]["selected"]

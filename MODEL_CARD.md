@@ -20,7 +20,7 @@ Chronological: train on releases 1–3 → next, select on release 4 → 5, test
 
 ## Results (test release)
 - Persistence: MAE 9.4 min, R² 0.931 (selected). Best challenger (partial pooling): 1.6% better on validation, below the bar.
-- 80% ranges (regime-adaptive conformalized quantile regression): 83% coverage on an earlier held-out year and 84% on the final test year (static conformal: 88%), median width 34 min (old fixed band: 134 min).
+- 80% ranges (regime-adaptive conformalized quantile regression): 83% coverage on an earlier held-out year and 85% on the final test year (static conformal: 88%), median width 34 min (old fixed band: 134 min).
 - Ranking: rank correlation 0.97 nationally, 0.86 within counties; fastest ER picked correctly 83% of the time vs 24% by chance.
 
 ## Intended use and limits
