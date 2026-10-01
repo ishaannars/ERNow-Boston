@@ -1,12 +1,18 @@
 # ERNow Boston
 
-**Compare Boston ERs in seconds, when you don't have minutes to search.**
+**For urgent, non-life-threatening visits: find the ER that gets you seen and home fastest, not just the closest, in about 15 seconds.**
 
-Boston has no single place to compare emergency departments, and hospitals don't publish live wait times. The useful data already exists, but it is scattered across CMS, the state's Center for Health Information and Analysis (CHIA), the CDC, the National Weather Service, event calendars, and maps. ERNow shows what ER transparency looks like **now**, with public data alone: one screen, a forecast trained on every U.S. hospital, and every number labeled with its source and period.
+Boston's ERs differ by hours in a way that persists year to year. ERNow uses that to point you to the ER most likely to get you seen fastest, not just the closest, in seconds, using public data alone.
+
+Today people search "ER near me" and go to the closest one, with no information about the ED itself. From 90% of Boston locations, that isn't the ER that would get them seen and home fastest. Hospitals don't publish live waits, but ERNow doesn't need them to help: a hospital's ED time predicts next year's with R² 0.93 across 4,000+ U.S. hospitals. ERNow assembles CMS, CHIA, the CDC, the Weather Service, and road routing into one screen, labels every number by source and period, and is built so live hospital data can plug in the day it exists.
 
 [Try ERNow Boston](https://ernowboston.streamlit.app/)
 
 > ERNow is not a live hospital queue and not medical advice. In an emergency, call 911 or go to the nearest emergency department. Never pass a closer ER because of an ERNow estimate.
+
+## Why it works without live data
+
+Boston's EDs differ by hours, and those differences are structural: size, staffing, how many admitted patients board in the ED, and case mix change slowly. Across 4,246 U.S. hospitals, a hospital's ED time predicts next year's with **R² 0.93**, and annual public data alone picked the **actual fastest local ER 83% of the time** the following year (versus 24% by chance). Like knowing which restaurant on your block is usually packed, you don't need a live feed to make a much better choice than "closest." What ERNow can't see is a usually fast ED having a bad night; that's why it shows tested ranges, labels everything "typical, not live," and is built to plug in live data the day hospitals publish it.
 
 ## The thesis: accelerate ER transparency the way Tesla accelerated EVs
 
@@ -21,6 +27,8 @@ Tesla's real achievement wasn't a faster car. It pulled a needed but slow-arrivi
 **3. Show it scales.** The model already covers 4,658 U.S. hospitals. Boston is the first city deployed; the same pipeline works anywhere.
 
 **What success looks like:** decision time in seconds (measured below), non-emergency patients choosing a faster ER instead of defaulting to the closest, ranges that keep their tested coverage as each new CMS release arrives, and more cities.
+
+**The Tesla move:** ship something useful before the infrastructure exists. Tesla sold cars before charging networks were everywhere, which created the demand for them. ERNow gives a better ER choice today from public data, which makes the case for hospitals to publish live data.
 
 **Guardrail:** ERNow is never a reason to delay care or pass a closer ER in an emergency. That rule is on every page.
 
@@ -38,8 +46,8 @@ Tesla's real achievement wasn't a faster car. It pulled a needed but slow-arrivi
 ## Decision time (measured)
 
 <!-- DECISION_TIME:START -->
-- **Full comparison** (the same information ERNow shows: 6 ED times + 6 drive times): **6 min 21 s manually vs 15 s in ERNow**, 25× faster (1 participant).
-- **The usual quick search** ("ER near me", pick the closest): 45 s (1 participant). It only finds the closest ER, and the closest isn't the fastest overall from 90% of Boston locations.
+- **ERNow vs the usual search** ("ER near me", pick the closest): **15 s in ERNow vs 45 s**, and ERNow also shows the likely fastest ER (1 participant). The quick search only finds the closest ER, which isn't the fastest overall from 90% of Boston locations (typically ~1h 16m longer in the ED for a non-emergency).
+- **Information ERNow assembles:** gathering the same facts by hand (6 ED times + 6 drive times) took 6 min 21 s (1 participant).
 
 Timed with `python timing_test.py` (protocol in `TIMING_TEST.md`).
 <!-- DECISION_TIME:END -->

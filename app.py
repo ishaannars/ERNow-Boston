@@ -960,29 +960,37 @@ hr, [data-testid="stDivider"] {margin:.55rem 0 .35rem !important}
 [data-testid="stHeaderActionElements"],.stApp h1 a,.stApp h2 a,.stApp h3 a{display:none !important}
 @media(max-width:900px){.live-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .live-measured{font-size:.68rem;font-weight:650;color:var(--moss);border:1px solid var(--moss);border-radius:999px;padding:.08rem .45rem}
+.brand-pitch{font-size:.82rem;line-height:1.45;color:var(--soft-ink);margin:-.45rem 0 .75rem;max-width:760px;opacity:.9}
 </style>
 """, unsafe_allow_html=True)
 
 
 def render_home():
     st.title("ERNow Boston")
-    st.markdown('<div class="brand-sub">Compare Boston ERs in seconds, when you don’t have minutes to search. Six public data sources, one screen.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="brand-sub">For urgent, non-life-threatening visits: find the ER that gets you seen and home fastest, '
+                'not just the closest, in about 15 seconds.</div>'
+                '<div class="brand-pitch">Boston’s ERs differ by hours in a way that persists year to year. ERNow uses that to point you to the ER '
+                'most likely to get you seen fastest, not just the closest, in seconds, using public data alone.</div>', unsafe_allow_html=True)
 
     national, _fc = load_national()
     if national:
         sp, iv, rk = national["split"], national["intervals"], national["ranking"]["selected"]
         live = [
             ("Forecast", national["selected_model"].replace(" baseline", ""),
-             f"Won a 4-model contest on {sp['test_rows']:,} held-out U.S. hospitals"),
+             f"ED performance persists year to year; won a 4-model contest on {sp['test_rows']:,} held-out hospitals"),
             ("Tested ranges", "Adaptive conformal", f"{iv['test_coverage']:.0%} coverage on a held-out year"),
             ("Vs similar hospitals", "Nearest neighbors", "25 U.S. peers, matched on case complexity"),
             ("Chance fastest", "Monte Carlo", "4,000 scenarios with your real route"),
         ]
         ds = decision_summary()
         measured = ""
-        if "full" in ds and "ernow" in ds:
-            measured = (f'<span class="live-measured">Measured: {fmt_seconds(ds["full"]["median_seconds"])} to compare manually → '
-                        f'{fmt_seconds(ds["ernow"]["median_seconds"])} in ERNow</span>')
+        choice_file = Path(__file__).resolve().parent / "data" / "boston_choice.json"
+        if choice_file.exists():
+            chb = json.loads(choice_file.read_text())
+            lead = f'In {fmt_seconds(ds["ernow"]["median_seconds"])}: ' if "ernow" in ds else ""
+            measured = (f'<span class="live-measured" title="Decision time measured with timing_test.py; savings from boston_choice_analysis.py">'
+                        f'{lead}the closest ER and the likely fastest · ~{fmt_minutes(chb["median_minutes_saved_when_different"])} saved '
+                        f'from {chb["closest_not_fastest_share"]:.0%} of Boston</span>')
         tiles = "".join(f'<div class="live-tile"><div class="live-k">{html.escape(k)}</div><div class="live-v">{html.escape(v)}</div>'
                         f'<div class="live-c">{html.escape(c)}</div></div>' for k, v, c in live)
         st.markdown(
@@ -1073,7 +1081,9 @@ def render_home():
                       f'<div class="answer-card answer-fast"><div class="answer-k">Likely fastest overall</div>'
                       f'<div class="answer-v">{html.escape(str(fastest["hospital"]))}</div>'
                       f'<div class="answer-sub">{"+" if extra >= 0 else "−"}{fmt_minutes(abs(extra))} drive vs closest, '
-                      f'typically ~{fmt_minutes(max(saved, 0))} shorter in the ED</div></div></div>')
+                      f'typically ~{fmt_minutes(max(saved, 0))} shorter in the ED'
+                      + (f' · <b>about {fmt_minutes(saved - extra)} sooner home</b>' if saved - extra > 0 else '')
+                      + '</div></div></div>')
         st.markdown(answer, unsafe_allow_html=True)
         st.caption("Emergency or getting worse? Go to the closest ER or call 911. "
                    "For urgent, non-life-threatening visits, the fastest overall option can save real time.")
@@ -1164,8 +1174,8 @@ def render_methodology():
 
     st.markdown("""
     <div class="ds-card">
-      <div class="ds-title">The mission: ER transparency now, not years from now</div>
-      <div class="ds-sub">Boston has no single place to compare emergency departments, and hospitals do not publish live wait times. The useful data already exists, scattered across CMS, CHIA, the CDC, the Weather Service, event calendars, and maps. ERNow shows what is possible today with public data alone: one screen, seconds instead of minutes, with every number labeled by source and period.</div>
+      <div class="ds-title">The mission: the ER that gets you seen fastest, not just the closest</div>
+      <div class="ds-sub"><strong>Boston's ERs differ by hours in a way that persists year to year. ERNow uses that to point you to the ER most likely to get you seen fastest, not just the closest, in seconds, using public data alone.</strong> Today people search "ER near me" and go to the closest one, with no information about the ED itself. Hospitals don't publish live waits, and ERNow doesn't need them: the differences come from staffing, size, boarding, and case mix, which change slowly. ERNow assembles the data from CMS, CHIA, the CDC, the Weather Service, and road routing into one screen, labels every number by source and period, and is built so live hospital data can plug in the day it exists.</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -1201,18 +1211,39 @@ def render_methodology():
             + (f'(the finding holds at {ch["sensitivity"]["share_min"]:.0%}–{ch["sensitivity"]["share_max"]:.0%} from gridlock to free-flowing traffic); ' if ch.get("sensitivity") else '; ')
             + 'the app uses real road routing. In an emergency, always go to the closest ER.</div></div>', unsafe_allow_html=True)
 
+    if national and ev:
+        sel_m = {m["model"]: m for m in national["models"]}[national["selected_model"]]
+        rk_m = national["ranking"]["selected"]
+        st.subheader("Why it works without live data")
+        why = [
+            ("Differences persist", f"R² {sel_m['R2']:.2f}",
+             f"A hospital's ED time predicts its next year's across {national['split']['hospitals']:,} U.S. hospitals. "
+             "Size, staffing, boarding, and case mix change slowly."),
+            ("Boston's order holds", f"Rank correlation {national['boston_backtest']['spearman_selected']:.2f}",
+             "Last year's public data put Boston's six EDs in the same order as the following year"
+             + (", including the fastest one." if national["boston_backtest"].get("fastest_pick_correct") else ".")),
+            ("The gaps are big", fmt_minutes(ev["boston_spread_min"]),
+             "Between Boston's fastest and slowest EDs. Gaps this large are built into how EDs run, not tonight's luck."),
+        ]
+        st.markdown('<div class="model-grid">' + "".join(
+            f'<div class="model-card"><div class="model-k">{html.escape(k)}</div><div class="model-value">{html.escape(v)}</div>'
+            f'<div class="model-copy">{html.escape(c)}</div></div>' for k, v, c in why) + '</div>', unsafe_allow_html=True)
+        st.markdown('<div class="note"><strong>Like restaurants:</strong> you don\'t need a live feed to know which place on your block is usually packed. '
+                    '<strong>What ERNow can\'t see:</strong> a usually fast ED having a bad night. No public data shows how often that happens, '
+                    'which is why ERNow shows tested ranges, labels everything "typical, not live," and is built to plug in live hospital data the day it exists.</div>',
+                    unsafe_allow_html=True)
+
     ds = decision_summary()
     if "ernow" in ds and ({"full", "quick"} & set(ds)):
         e = fmt_seconds(ds["ernow"]["median_seconds"])
         cards = []
-        if "full" in ds:
-            cards.append(("Decision time · full comparison", f'{fmt_seconds(ds["full"]["median_seconds"])} → {e}',
-                          f'Gathering what ERNow shows (6 ED times + 6 drive times) by hand vs in ERNow. '
-                          f'{ds["full"]["participants"]} participant{"s" if ds["full"]["participants"] != 1 else ""}.'))
         if "quick" in ds:
-            share = f" From {ch['closest_not_fastest_share']:.0%} of Boston locations, that's not the fastest ER." if choice_path.exists() else ""
-            cards.append(("Decision time · the usual quick search", fmt_seconds(ds["quick"]["median_seconds"]),
-                          f'"ER near me" and pick the closest: fast, but it only answers which ER is closest.{share}'))
+            share = (f" From {ch['closest_not_fastest_share']:.0%} of Boston locations, the closest isn't the fastest overall." if choice_path.exists() else "")
+            cards.append(("ERNow vs the usual search", f'{e} vs {fmt_seconds(ds["quick"]["median_seconds"])}',
+                          f'"ER near me" finds only the closest ER. ERNow is faster and also shows the likely fastest one.{share}'))
+        if "full" in ds:
+            cards.append(("Information ERNow assembles", f'{fmt_seconds(ds["full"]["median_seconds"])} by hand',
+                          "Gathering the same facts manually (6 ED times + 6 drive times) takes minutes; ERNow shows them on one screen."))
         st.markdown('<div class="answer-grid">' + "".join(
             f'<div class="answer-card"><div class="answer-k">{html.escape(k)}</div><div class="answer-v">{html.escape(v)}</div>'
             f'<div class="answer-sub">{html.escape(c)}</div></div>' for k, v, c in cards) + '</div>', unsafe_allow_html=True)
@@ -1334,7 +1365,7 @@ def render_forecast_model():
         else:
             summary = (f"Even with {sp['total_rows']:,} rows, Persistence was hard to beat. The best challenger, {national['best_learned_model']}, "
                        f"improved validation error by {gain:.1%}, short of the {national['promotion_margin']:.0%} bar, so ERNow keeps Persistence. "
-                       "The finding itself is useful: a hospital's ED performance is highly persistent from one year to the next, which is why last year's public number is already informative.")
+                       "The finding itself is the reason ERNow works: a hospital's ED performance is highly persistent from one year to the next, so last year's public number already points to the likely fastest ER, before any live data exists.")
         st.markdown(f'<div class="callout">{summary}</div>', unsafe_allow_html=True)
         st.caption(f"Train: {sp['train_rows']:,} rows ({sp['train_transitions']}). Validation: {sp['validation_rows']:,} rows ({sp['validation_transition']}). Test: {sp['test_rows']:,} rows ({sp['test_transition']}).")
 

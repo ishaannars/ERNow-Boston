@@ -2,7 +2,7 @@
 
 **Easiest way:** run `python timing_test.py`. It walks you through both runs with a built-in stopwatch, saves the times, and writes the result into the README. The steps below are the same protocol, if you'd rather time it by hand.
 
-Measures the headline claim: how long it takes to decide which Boston ER to go to, **manually vs in ERNow**.
+Measures the headline claim: ERNow gives a better ER choice (closest **and** likely fastest) faster than the usual "ER near me" search.
 
 ## Setup (once)
 - Pick one starting address and use it for every run (for example, your apartment).
@@ -11,8 +11,8 @@ Measures the headline claim: how long it takes to decide which Boston ER to go t
 
 ## Two kinds of manual run
 
-- **Full comparison (the headline):** gather the same information ERNow shows, described below.
-- **Quick search:** search "ER near me" and pick, the way most people do. It's fast but only finds the closest ER, so it's reported as a separate line.
+- **Quick search (the headline):** search "ER near me" and pick, the way most people do. ERNow is compared against this, because it's what people actually do.
+- **Full comparison (supporting):** gather the same information ERNow shows, described below, to show what ERNow assembles.
 
 The script asks which one you're timing. If you already saved a quick search as a manual run, `python timing_test.py --mark-quick` relabels it.
 
