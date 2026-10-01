@@ -1,7 +1,8 @@
 """Guided decision-time test.
 
     python timing_test.py          run a test (stopwatch or type in your own times)
-    python timing_test.py --reset  delete all saved results and restore the README placeholder
+    python timing_test.py --reset       delete all saved results and restore the README placeholder
+    python timing_test.py --mark-quick  relabel earlier manual runs as quick searches (closest ER only)
 
 Times one manual comparison and one ERNow comparison, saves them to
 data/decision_time_results.csv, and writes the median result into README.md.
@@ -20,7 +21,7 @@ HEADER = ["participant", "method", "seconds", "picked_hospital"]
 PLACEHOLDER = "_Not yet measured. Run `python timing_test.py` (guided stopwatch, about 10 minutes)._"
 HOSPITALS = ["Massachusetts General Hospital", "Brigham and Women's Hospital", "Brigham and Women's Faulkner Hospital",
              "Beth Israel Deaconess Medical Center", "Boston Medical Center", "Tufts Medical Center"]
-MIN_SECONDS = {"manual": 60, "ernow": 3}
+MIN_SECONDS = {"full": 120, "quick": 10, "ernow": 3}
 
 
 def reset():
@@ -58,7 +59,9 @@ def fmt(sec):
 def confirm_plausible(method, sec):
     if sec >= MIN_SECONDS[method]:
         return True
-    kind = "manual comparison usually takes several minutes" if method == "manual" else "ERNow run should include loading the page"
+    kind = {"full": "full comparison (12 lookups) usually takes several minutes",
+            "quick": "quick search still includes opening the search",
+            "ernow": "ERNow run should include loading the page"}[method]
     a = input(f"That was only {fmt(sec)}, but a {kind}. Keep it anyway? (y = keep, n = redo): ").strip().lower()
     return a == "y"
 
@@ -95,7 +98,9 @@ def typed(method, label):
             return sec, pick()
 
 
-MANUAL_STEPS = ["Use the same starting address for both runs.",
+QUICK_STEPS = ["Search 'ER near me' (Google or Maps) the way you normally would.",
+               "Skim the results and decide where you'd go."]
+FULL_STEPS = ["Use the same starting address for both runs.",
                 "medicare.gov/care-compare: find each of the 6 hospitals' ED 'time spent in the ED' (6 lookups).",
                 "Google Maps: drive time from your address to each hospital (6 lookups).",
                 "Decide where you'd go."]
@@ -103,25 +108,46 @@ ERNOW_STEPS = ["Open https://ernowboston.streamlit.app/ in a fresh tab.",
                "Allow location (or pick your area) and decide where you'd go."]
 
 
+def mark_quick():
+    """Relabel earlier `manual` rows as quick searches (for runs that only looked up the closest ER)."""
+    rows = list(csv.reader(CSV.open()))
+    n = 0
+    for r in rows[1:]:
+        if len(r) > 1 and r[1].strip().lower() == "manual":
+            r[1] = "quick"
+            n += 1
+    with CSV.open("w", newline="") as f:
+        csv.writer(f).writerows(rows)
+    print(f"Relabeled {n} run(s) as quick search.")
+    record_decision_time.main()
+
+
 def main():
     if "--reset" in sys.argv:
         reset()
         return
+    if "--mark-quick" in sys.argv:
+        mark_quick()
+        return
     who = input("Participant name (or initials): ").strip() or "participant"
+    print("Which manual run? 1 = full comparison (12 lookups, the headline)   2 = quick search (closest ER only)   3 = both")
+    which = input("Enter 1, 2, or 3: ").strip()
+    runs = {"1": ["full"], "2": ["quick"], "3": ["quick", "full"]}.get(which, ["full"])
+    do_ernow = input("Also time an ERNow run? (y/n; say n if you already recorded one): ").strip().lower() != "n"
     mode = input("Time with this script's stopwatch (1) or type in times you measured yourself (2)? Enter 1 or 2: ").strip()
-    if mode == "2":
-        manual = typed("manual", "MANUAL RUN")
-        ernow = typed("ernow", "ERNOW RUN")
-    else:
-        manual = stopwatch("manual", "MANUAL RUN (do this first)", MANUAL_STEPS)
-        ernow = stopwatch("ernow", "ERNOW RUN", ERNOW_STEPS)
+    labels = {"full": ("FULL COMPARISON", FULL_STEPS), "quick": ("QUICK SEARCH", QUICK_STEPS), "ernow": ("ERNOW RUN", ERNOW_STEPS)}
+    results = []
+    for m in runs + (["ernow"] if do_ernow else []):
+        label, steps = labels[m]
+        res = typed(m, label) if mode == "2" else stopwatch(m, label, steps)
+        results.append((m, res))
     new = not CSV.exists() or CSV.stat().st_size == 0
     with CSV.open("a", newline="") as f:
         w = csv.writer(f)
         if new:
             w.writerow(HEADER)
-        w.writerow([who, "manual", manual[0], manual[1]])
-        w.writerow([who, "ernow", ernow[0], ernow[1]])
+        for m, (sec, hosp) in results:
+            w.writerow([who, m, sec, hosp])
     print("\nSaved. README result:")
     record_decision_time.main()
     print("\nAdd more people by running this again. Then: git add -A && git commit -m 'Decision time' && git push")

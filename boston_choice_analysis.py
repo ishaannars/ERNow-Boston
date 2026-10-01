@@ -20,6 +20,21 @@ ROOT = Path(__file__).resolve().parent
 OUT = ROOT / "data" / "boston_choice.json"
 
 
+def share_closest_not_fastest(h, circuity, mph, park):
+    R = 3958.8
+    rows = []
+    for a in np.linspace(42.28, 42.39, 45):
+        for b in np.linspace(-71.16, -71.02, 45):
+            d = 2 * R * np.arcsin(np.sqrt(np.sin(np.radians(h.latitude - a) / 2) ** 2 + np.cos(np.radians(a))
+                                          * np.cos(np.radians(h.latitude)) * np.sin(np.radians(h.longitude - b) / 2) ** 2))
+            if d.min() > 4:
+                continue
+            drive = d * circuity / mph * 60 + park
+            total = drive + h.forecast_op18b
+            rows.append(int(np.argmin(drive)) != int(np.argmin(total)))
+    return float(np.mean(rows))
+
+
 def main():
     h = pd.read_csv(ROOT / "data" / "boston_er_data.csv", dtype={"cms_provider_id": str})
     f = pd.read_csv(ROOT / "data" / "boston_forecast.csv", dtype={"cms_provider_id": str})
@@ -43,6 +58,11 @@ def main():
            "median_minutes_saved_when_different": float(np.median(diff[:, 1])) if len(diff) else 0.0,
            "median_extra_drive_min_when_different": float(np.median(diff[:, 2])) if len(diff) else 0.0,
            "method": "Straight-line distance x1.35 at 18 mph +3 min; typical ED visit = national-model forecast (OP-18b)."}
+    # Sensitivity: does the finding survive very different drive-time assumptions?
+    grid = [(c, m) for c in (1.2, 1.35, 1.5) for m in (5, 10, 18, 30)]
+    shares = [share_closest_not_fastest(h, c, m, 3) for c, m in grid]
+    out["sensitivity"] = {"assumptions": "road circuity 1.2-1.5x, average speed 5-30 mph (5 mph = gridlock)",
+                          "share_min": float(min(shares)), "share_max": float(max(shares))}
     OUT.write_text(json.dumps(out, indent=2))
     print(out)
 

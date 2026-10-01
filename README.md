@@ -8,6 +8,22 @@ Boston has no single place to compare emergency departments, and hospitals don't
 
 > ERNow is not a live hospital queue and not medical advice. In an emergency, call 911 or go to the nearest emergency department. Never pass a closer ER because of an ERNow estimate.
 
+## The thesis: accelerate ER transparency the way Tesla accelerated EVs
+
+Tesla's real achievement wasn't a faster car. It pulled a needed but slow-arriving category forward by years, in three moves: prove it works, set the standard, then scale. ER transparency is a category like that.
+
+**Why it's slow to arrive on its own.** Hospitals have no mandate or incentive to publish live ED waits. The only public time-to-provider measure (CMS OP-20) was retired after 2019. What remains is published 9–12 months after the period it describes, and it's split across six sources nobody combines.
+
+**1. Prove it works now.** ERNow combines CMS, CHIA, CDC, the Weather Service, event calendars, and road routing into one screen, with a forecast trained and tested on every U.S. hospital. No hospital partnership needed.
+
+**2. Set the standard.** Every number is labeled with its source and period, no hand-set adjustment changes any displayed number, and uncertainty is shown as a tested range. The Methodology view lists exactly what hospitals would need to publish (current arrival-to-provider time, patients waiting by triage level, boarding counts, diversion status) for ERNow to go live.
+
+**3. Show it scales.** The model already covers 4,658 U.S. hospitals. Boston is the first city deployed; the same pipeline works anywhere.
+
+**What success looks like:** decision time in seconds (measured below), non-emergency patients choosing a faster ER instead of defaulting to the closest, ranges that keep their tested coverage as each new CMS release arrives, and more cities.
+
+**Guardrail:** ERNow is never a reason to delay care or pass a closer ER in an emergency. That rule is on every page.
+
 ## Why it matters
 
 | Finding | Evidence | Source |
@@ -15,14 +31,17 @@ Boston has no single place to compare emergency departments, and hospitals don't
 | Choosing an ER matters | Median ED visit time in Boston ranges from **3h 28m (Tufts) to 5h 36m (BIDMC): a 2h 8m gap** | CMS OP-18b, period ending Sep 2025 |
 | Official data arrives late | CMS ED data is published **9–12 months** after the period it describes ends | Computed across 6 CMS releases |
 | Long ED stays are growing | Massachusetts ED visits lasting over 4 hours rose from **~33% to ~44%** (Jul–Sep 2019 vs 2025) | CHIA, reported by the Boston Globe, May 2026 |
-| The closest ER is usually not the fastest | For urgent, non-life-threatening visits, a different ER had the shortest drive + typical visit from **90%** of 1,977 Boston locations, typically **~1h 16m** shorter for ~5 min more driving (drive estimated from distance) | `boston_choice_analysis.py` |
+| The closest ER is usually not the fastest | For urgent, non-life-threatening visits, a different ER had the shortest drive + typical visit from **90%** of 1,977 Boston locations, typically **~1h 16m** shorter for ~5 min more driving. Holds at **73–90%** from gridlock to free-flowing traffic | `boston_choice_analysis.py` |
 | It takes many lookups to compare | Gathering ED times and drive times for 6 hospitals manually takes **12 separate lookups across 2 websites**; ERNow takes one screen | See `TIMING_TEST.md` |
 | The method scales | The same pipeline covers **4,658 U.S. hospitals**; Boston is the first city deployed | CMS Hospital Compare archives |
 
 ## Decision time (measured)
 
 <!-- DECISION_TIME:START -->
-_Not yet measured. Run `python timing_test.py` (guided stopwatch, about 10 minutes)._
+- **Full comparison** (the same information ERNow shows: 6 ED times + 6 drive times): **6 min 21 s manually vs 15 s in ERNow**, 25× faster (1 participant).
+- **The usual quick search** ("ER near me", pick the closest): 45 s (1 participant). It only finds the closest ER, and the closest isn't the fastest overall from 90% of Boston locations.
+
+Timed with `python timing_test.py` (protocol in `TIMING_TEST.md`).
 <!-- DECISION_TIME:END -->
 
 ## The model
@@ -43,6 +62,8 @@ ERNow forecasts each hospital's next-period **CMS OP-18b**: the median time disc
 **Result:** even with 19,884 rows, Persistence was hard to beat. The best challenger improved validation error by 1.6%, short of the 2% bar, so ERNow keeps Persistence. The finding is useful in itself: a hospital's ED performance is highly persistent year to year, which is why last year's public number is already informative.
 
 **Tested 80% ranges.** Regime-adaptive conformalized quantile regression: gradient-boosted 10th/90th percentiles, calibrated on the prior release, then scaled by how much hospitals changed in the latest release (known at prediction time). Static conformal ranges over-covered (88%) because volatility differs year to year; the adaptive version, chosen on an earlier held-out year (**83%**), covered **85%** on the final test year (target 80%) with a median width of **34 minutes**. The old fixed band (0.65×–1.55×) was **4× wider** (134 minutes).
+
+**How sure are these numbers?** Bootstrap with 2,000 resamples on the final test year: fastest-pick accuracy **83% (95% CI 78–87%)**, range coverage **85% (83–86%)**. The best challenger's edge over Persistence is statistically real but about **8 seconds** per hospital on a 3–5 hour visit, and it missed the 2% bar on validation, so Persistence stays.
 
 **Does the ranking hold?** On the test release, the forecast ranked hospitals with a rank correlation of **0.97** nationally and **0.86** within local areas (293 counties with 3+ hospitals). It picked the actual fastest ER in the area **83%** of the time, versus **24%** by chance. Boston backtest: rank correlation 1.00 and the fastest hospital predicted correctly.
 

@@ -373,6 +373,8 @@ def run():
     y = test["target"].to_numpy()
     coverage = float(np.mean((y >= lo) & (y <= hi)))
     width = float(np.median(hi - lo))
+    hit = ((y >= lo) & (y <= hi)).astype(float)
+    cov_ci = [float(np.percentile(np.random.default_rng(SEED).choice(hit, (2000, len(hit))).mean(1), q)) for q in (2.5, 97.5)]
     slo, shi = cqr.predict(test, adaptive=False)
     static_cov, static_width = float(np.mean((y >= slo) & (y <= shi))), float(np.median(shi - slo))
     # earlier held-out year (the method was chosen on this fold, before looking at the final test)
@@ -389,6 +391,26 @@ def run():
     # --- ranking accuracy
     ranking = {"selected": ranking_eval(test, "pred_selected"),
                "persistence": ranking_eval(test, "pred_persistence")}
+
+    # --- statistical confidence: bootstrap the test release (2,000 resamples, by hospital / by county)
+    rng = np.random.default_rng(SEED)
+    B = 2000
+    y_t = test["target"].to_numpy()
+    err_p = np.abs(y_t - test["lag1"].to_numpy())
+    err_c = np.abs(y_t - fitted[best_learned].predict(test))
+    n_t = len(test)
+    idx = rng.integers(0, n_t, (B, n_t))
+    diff = err_p[idx].mean(1) - err_c[idx].mean(1)            # >0 means the challenger is better
+    groups = [g for _, g in test.groupby(["state", "county"]) if len(g) >= 3]
+    hits = np.array([float(g["pred_selected"].idxmin() == g["target"].idxmin()) for g in groups])
+    gidx = rng.integers(0, len(hits), (B, len(hits)))
+    pick = hits[gidx].mean(1)
+    confidence = {
+        "resamples": B,
+        "mae_gain_vs_best_challenger_min": float(diff.mean()),
+        "mae_gain_ci95": [float(np.percentile(diff, 2.5)), float(np.percentile(diff, 97.5))],
+        "fastest_pick_ci95": [float(np.percentile(pick, 2.5)), float(np.percentile(pick, 97.5))],
+    }
 
     # --- ablation: gradient boosting with growing feature groups
     ablation = []
@@ -505,11 +527,11 @@ def run():
         "intervals": {"method": "Regime-adaptive conformalized quantile regression (gradient boosting, q=0.10/0.90)",
                       "target_coverage": COVERAGE_TARGET, "test_coverage": coverage,
                       "median_width_min": width,
-                      "backtest_coverage": backtest_cov, "backtest_width_min": backtest_width,
+                      "test_coverage_ci95": cov_ci, "backtest_coverage": backtest_cov, "backtest_width_min": backtest_width,
                       "static_test_coverage": static_cov, "static_width_min": static_width, "old_fixed_band_coverage": old_band,
                       "old_fixed_band_median_width_min": old_width,
                       "coverage_by_volume": {k: float(v) for k, v in cov_by_volume.items()}},
-        "ranking": ranking, "boston_backtest": boston_bt, "ablation": ablation, "drivers": drivers[:10],
+        "ranking": ranking, "confidence": confidence, "boston_backtest": boston_bt, "ablation": ablation, "drivers": drivers[:10],
         "structure": {"by_volume": vol.reset_index().rename(columns={"edv": "ed_volume"}).to_dict("records"),
                       "by_ownership": own.reset_index().to_dict("records"),
                       "spearman_op18b_vs_left_without_being_seen": corr_op22},

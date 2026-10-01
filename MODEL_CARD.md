@@ -23,6 +23,8 @@ Chronological: train on releases 1–3 → next, select on release 4 → 5, test
 - 80% ranges (regime-adaptive conformalized quantile regression): 83% coverage on an earlier held-out year and 85% on the final test year (static conformal: 88%), median width 34 min (old fixed band: 134 min).
 - Ranking: rank correlation 0.97 nationally, 0.86 within counties; fastest ER picked correctly 83% of the time vs 24% by chance.
 
+- Confidence (bootstrap, 2,000 resamples): fastest-pick 95% CI 78–87%; coverage 95% CI 83–86%; best challenger's edge ~8 seconds per hospital (statistically real, practically negligible).
+
 ## Intended use and limits
 - Describes typical ED performance for a period, published 9–12 months after it ends; it cannot see today's queue, triage, staffing, or boarding.
 - OP-18b covers discharged patients only; academic and trauma centers treat sicker patients and run longer for reasons that do not mean worse care.
