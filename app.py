@@ -961,6 +961,18 @@ hr, [data-testid="stDivider"] {margin:.55rem 0 .35rem !important}
 @media(max-width:900px){.live-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .live-measured{font-size:.68rem;font-weight:650;color:var(--moss);border:1px solid var(--moss);border-radius:999px;padding:.08rem .45rem}
 .brand-pitch{font-size:.82rem;line-height:1.45;color:var(--soft-ink);margin:-.45rem 0 .75rem;max-width:760px;opacity:.9}
+
+/* model bar v2: tidy spacing, technique footnote, even tiles */
+.model-bar{padding:.75rem .9rem .8rem !important}
+.live-head{gap:.35rem .6rem !important;margin-bottom:.15rem}
+.live-meta{display:block;font-size:.76rem;line-height:1.45;color:var(--soft-ink);margin:.25rem 0 .1rem}
+.live-grid{gap:.5rem !important;margin-top:.55rem !important;align-items:stretch}
+.live-tile{display:flex;flex-direction:column;padding:.55rem .65rem .5rem !important}
+.live-c{flex:1}
+.live-t{font-size:.6rem;letter-spacing:.04em;text-transform:uppercase;font-weight:600;color:var(--moss);margin-top:.35rem;opacity:.85}
+.live-measured{white-space:normal}
+.brand-pitch{margin:-.35rem 0 .7rem !important}
+.answer-sub b{color:var(--ink);font-weight:650}
 </style>
 """, unsafe_allow_html=True)
 
@@ -975,29 +987,34 @@ def render_home():
     national, _fc = load_national()
     if national:
         sp, iv, rk = national["split"], national["intervals"], national["ranking"]["selected"]
+        vals_lm = {m["model"]: m["validation_MAE"] for m in national["models"]}
+        best_gain = (vals_lm["Persistence baseline"] - vals_lm[national["best_learned_model"]]) / vals_lm["Persistence baseline"]
         live = [
-            ("Forecast", national["selected_model"].replace(" baseline", ""),
-             f"ED performance persists year to year; won a 4-model contest on {sp['test_rows']:,} held-out hospitals"),
-            ("Tested ranges", "Adaptive conformal", f"{iv['test_coverage']:.0%} coverage on a held-out year"),
-            ("Vs similar hospitals", "Nearest neighbors", "25 U.S. peers, matched on case complexity"),
-            ("Chance fastest", "Monte Carlo", "4,000 scenarios with your real route"),
+            ("Expected ED visit", "Latest CMS figure",
+             f"ED times barely change year to year, so each hospital's latest CMS figure is the forecast. "
+             f"No learned model beat it by the required 2% (best: {best_gain:.1%})."),
+            ("The range on each card", "Checked against reality",
+             f"In a year the model never saw, the range held the actual ED time {iv['test_coverage']:.0%} of the time (target 80%)."),
+            ("Vs similar U.S. hospitals", "25 look-alikes",
+             "Hospitals with similar ED volume, type, ownership, rating, and case complexity."),
+            ("Chance fastest", "4,000 what-if trips",
+             "Replays your drive with each hospital's range to see how often each ER comes out quickest."),
         ]
+        techniques = ["Persistence forecast", "Adaptive conformal prediction", "Nearest-neighbor matching", "Monte Carlo simulation"]
         ds = decision_summary()
         measured = ""
-        choice_file = Path(__file__).resolve().parent / "data" / "boston_choice.json"
-        if choice_file.exists():
-            chb = json.loads(choice_file.read_text())
-            lead = f'In {fmt_seconds(ds["ernow"]["median_seconds"])}: ' if "ernow" in ds else ""
-            measured = (f'<span class="live-measured" title="Decision time measured with timing_test.py; savings from boston_choice_analysis.py">'
-                        f'{lead}the closest ER and the likely fastest · ~{fmt_minutes(chb["median_minutes_saved_when_different"])} saved '
-                        f'from {chb["closest_not_fastest_share"]:.0%} of Boston</span>')
+        if "ernow" in ds and "quick" in ds:
+            measured = (f'<span class="live-measured" title="Median decision times, measured with timing_test.py">'
+                        f'Measured: {fmt_seconds(ds["ernow"]["median_seconds"])} with ERNow vs '
+                        f'{fmt_seconds(ds["quick"]["median_seconds"])} for an “ER near me” search</span>')
         tiles = "".join(f'<div class="live-tile"><div class="live-k">{html.escape(k)}</div><div class="live-v">{html.escape(v)}</div>'
-                        f'<div class="live-c">{html.escape(c)}</div></div>' for k, v, c in live)
+                        f'<div class="live-c">{html.escape(c)}</div><div class="live-t">{html.escape(t)}</div></div>'
+                        for (k, v, c), t in zip(live, techniques))
         st.markdown(
             f"""<div class="model-bar">
-      <div class="live-head"><span class="model-dot"></span><span class="live-title">4 models running live</span>{measured}
-      <span class="live-meta">Trained on {sp['hospitals']:,} U.S. hospitals · {sp['total_rows']:,} hospital-periods · CMS {html.escape(national['releases'][0][:4])}–{html.escape(national['releases'][-1][:4])} ·
-      picked the fastest local ER {rk['fastest_pick_accuracy']:.0%} of the time vs {rk['fastest_pick_random_baseline']:.0%} by chance</span></div>
+      <div class="live-head"><span class="model-dot"></span><span class="live-title">4 models running live</span>{measured}</div>
+      <div class="live-meta">Built on {sp['hospitals']:,} U.S. hospitals ({sp['total_rows']:,} hospital-periods, CMS releases {html.escape(national['releases'][0][:4])}–{html.escape(national['releases'][-1][:4])}).
+      In a held-out year it picked the fastest ER in an area {rk['fastest_pick_accuracy']:.0%} of the time, versus {rk['fastest_pick_random_baseline']:.0%} by chance.</div>
       <div class="live-grid">{tiles}</div>
     </div>""",
             unsafe_allow_html=True,
@@ -1082,7 +1099,8 @@ def render_home():
                       f'<div class="answer-v">{html.escape(str(fastest["hospital"]))}</div>'
                       f'<div class="answer-sub">{"+" if extra >= 0 else "−"}{fmt_minutes(abs(extra))} drive vs closest, '
                       f'typically ~{fmt_minutes(max(saved, 0))} shorter in the ED'
-                      + (f' · <b>about {fmt_minutes(saved - extra)} sooner home</b>' if saved - extra > 0 else '')
+                      + (f' · <b>about {fmt_minutes(saved - 2 * max(extra, 0))} less overall</b>, counting the extra drive both ways'
+                         if saved - 2 * max(extra, 0) > 0 else '')
                       + '</div></div></div>')
         st.markdown(answer, unsafe_allow_html=True)
         st.caption("Emergency or getting worse? Go to the closest ER or call 911. "
@@ -1133,7 +1151,7 @@ def render_home():
         <div class="er-stat"><div class="er-stat-k">Drive</div><div class="er-stat-v">{drive} <span>{drive_sub}</span></div></div>
         <div class="er-stat"><div class="er-stat-k">Chance fastest</div><div class="er-stat-v">{chance}</div></div>
         <div class="er-stat"><div class="er-stat-k">Vs similar U.S. hospitals</div><div class="er-stat-v">{vs_txt}</div></div>
-        <div class="er-stat"><div class="er-stat-k">Provider wait, 2019 data</div><div class="er-stat-v">{wait_range}</div></div>
+        <div class="er-stat"><div class="er-stat-k">Provider wait (pre-2020 data)</div><div class="er-stat-v">{wait_range}</div></div>
       </div>
       <div class="er-actions"><a class="er-directions" href="{directions_url}" target="_blank" rel="noopener noreferrer">Open Directions</a></div>
     </div>""")
@@ -1191,8 +1209,8 @@ def render_methodology():
             ("~33% → ~44%",
              "Share of Massachusetts ED visits lasting over 4 hours, Jul–Sep 2019 vs Jul–Sep 2025.",
              "CHIA, reported by the Boston Globe (May 2026)"),
-            (f"{ev['hospitals_latest_release']:,}",
-             "U.S. hospitals the same pipeline already covers. Boston is the first city deployed.",
+            (f"{ev['hospitals_with_op18b_latest']:,}",
+             "U.S. hospitals with public ED-time data the same pipeline already covers. Boston is the first city deployed.",
              "CMS Hospital Compare archives"),
         ]
         st.markdown('<div class="evidence-grid">' + "".join(
@@ -1257,7 +1275,7 @@ def render_methodology():
         tiles = [
             ("National forecaster", f"{sel['MAE']:.1f} min avg. error",
              f"Four models compared on {sp['hospitals']:,} U.S. hospitals ({sp['total_rows']:,} hospital-periods): Persistence, Ridge, partial pooling, gradient boosting. "
-             f"{national['selected_model']} won on chronological validation (R² {sel['R2']:.2f})."),
+             f"The best challenger was only {(vals[national['selected_model']]['validation_MAE'] - vals[national['best_learned_model']]['validation_MAE']) / vals[national['selected_model']]['validation_MAE']:.1%} better on validation, under the 2% bar, so ERNow keeps {national['selected_model']} (R² {sel['R2']:.2f})."),
             ("Tested ranges", f"{iv['backtest_coverage']:.0%} & {iv['test_coverage']:.0%} coverage",
              f"Regime-adaptive conformal prediction builds each 80% range from real errors and recent volatility; tested on two held-out years. "
              f"Median width {fmt_minutes(iv['median_width_min'])}, {iv['old_fixed_band_median_width_min'] / max(iv['median_width_min'], 1):.1f}× narrower than the old fixed band."),
@@ -1281,7 +1299,7 @@ def render_methodology():
     - **Drive:** road route from where you are, without live traffic.
     - **Chance fastest:** how often this ER comes out quickest across 4,000 what-if scenarios.
     - **Vs similar U.S. hospitals:** faster or slower than comparable hospitals nationwide.
-    - **Provider wait, 2019 data:** the last public CMS measure of time to see a provider (retired after 2019), shown as-is for context.
+    - **Provider wait (pre-2020 data):** the last public CMS measure of time to see a provider, which CMS no longer publishes. Shown as-is for context.
     """)
     st.caption("Cards are sorted by drive time by default. Switch to Fastest overall to sort by drive time plus expected ED visit. ERs without a route are listed last.")
 
@@ -1300,7 +1318,7 @@ def render_methodology():
         ["National model + ED visit time", "CMS Hospital Compare (OP-18b, OP-18c, OP-22, ED volume)", f"{len((national or {}).get('releases', []))} releases", "Annual-period medians; published 9–12 months later"],
         ["Case complexity (peers)", "CMS Complications & Deaths (patient volumes)", "Latest release", "Heart-attack/stroke volume, cardiac surgery, inpatient volume"],
         ["Hospital utilization", "CHIA Hospital Profiles", "HFY 2024", "Annual ED visits and inpatient occupancy (context)"],
-        ["Provider wait", "CMS Hospital Compare OP-20 (retired)", "2019 or earlier", "Shown as-is for context"],
+        ["Provider wait", "CMS Hospital Compare OP-20 (no longer published)", "2019 or earlier", "Shown as-is for context"],
         ["Weather", "National Weather Service", "Current observation + alerts", "Boston-wide context"],
         ["Respiratory illness", "CDC Massachusetts ARI", "Latest reporting week", "Statewide context"],
         ["Major events", "Boston-area public sources", "Checked today", "Boston-wide context"],
@@ -1449,8 +1467,8 @@ def render_forecast_model():
             ctx = pd.DataFrame({"Hospital": base["hospital"],
                                 "ED visits, HFY 2024": base["recent_ed_visits"].map(lambda v: f"{int(v):,}"),
                                 "Inpatient occupancy, HFY 2024": base["recent_occupancy_pct"].map(lambda v: f"{v:.1f}%"),
-                                "Provider wait, 2019 data": base["legacy_wait_to_provider_min"].map(fmt_minutes)})
-            st.caption("Hospital context (CHIA annual profiles and the retired CMS OP-20 measure)")
+                                "Provider wait (pre-2020 data)": base["legacy_wait_to_provider_min"].map(fmt_minutes)})
+            st.caption("Hospital context (CHIA annual profiles and the discontinued CMS OP-20 measure)")
             _table(ctx)
 
         st.subheader("Who waits longest")
