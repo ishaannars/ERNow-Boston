@@ -3,6 +3,7 @@ from datetime import datetime, date, timedelta
 from zoneinfo import ZoneInfo
 from email.utils import parsedate_to_datetime
 from html import unescape
+import html
 import os
 import re
 import xml.etree.ElementTree as ET
@@ -11,11 +12,46 @@ import pandas as pd
 import requests
 import streamlit as st
 from streamlit_geolocation import streamlit_geolocation
-from historical_modeling import current_throughput_forecast, history_status, train_historical_models
+import json
+import numpy as np
 
 st.set_page_config(page_title="ERNow Boston", page_icon="✚", layout="wide")
 DATA_PATH = Path(__file__).parent / "data" / "boston_er_data.csv"
 HOSPITAL_DATA = DATA_PATH
+NATIONAL_RESULTS = Path(__file__).resolve().parent / "data" / "national_results.json"
+BOSTON_FORECAST = Path(__file__).resolve().parent / "data" / "boston_forecast.csv"
+URGENT_GUARDRAIL = ("For urgent but not life-threatening needs. In an emergency, call 911 or go to "
+                    "the nearest emergency department. Never pass a closer ER because of an ERNow estimate.")
+
+
+@st.cache_data(show_spinner=False)
+def load_national():
+    """Small outputs of national_model.py: trained on every U.S. hospital in the CMS archives."""
+    if not NATIONAL_RESULTS.exists() or not BOSTON_FORECAST.exists():
+        return None, None
+    res = json.loads(NATIONAL_RESULTS.read_text())
+    fc = pd.read_csv(BOSTON_FORECAST, dtype={"cms_provider_id": str})
+    fc["cms_provider_id"] = fc["cms_provider_id"].str.zfill(6)
+    return res, fc
+
+
+def chance_fastest(drive, mid, lo, hi, n=4000, seed=11):
+    """Probability each hospital has the shortest drive + ED visit, by simulation.
+
+    Each visit time is drawn from a lognormal matched to that hospital's tested 80% range;
+    hospitals without a route are excluded (shown as unavailable)."""
+    drive_a, mid_a = np.asarray(drive, dtype=float), np.asarray(mid, dtype=float)
+    ok = ~(np.isnan(drive_a) | np.isnan(mid_a))
+    probs = np.full(len(mid), np.nan)
+    if ok.sum() < 2:
+        return probs
+    rng = np.random.default_rng(seed)
+    m, l, h, d = (np.asarray(x, dtype=float)[ok] for x in (mid, lo, hi, drive))
+    sigma = np.maximum(np.log(np.maximum(h, m + 1) / np.maximum(l, 1)) / (2 * 1.2816), 0.01)
+    draws = d + np.exp(np.log(np.maximum(m, 1)) + sigma * rng.standard_normal((n, len(m))))
+    wins = np.bincount(draws.argmin(axis=1), minlength=len(m)) / n
+    probs[np.where(ok)[0]] = wins
+    return probs
 EASTERN = ZoneInfo("America/New_York")
 
 FALLBACK_ORIGINS = {
@@ -63,7 +99,7 @@ MAJOR_TICKETMASTER_VENUES = {
 st.markdown(
     """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap');
 :root{--ivory:#F8F4E6;--shell:#FFFDF5;--ink:#1C1B19;--soft-ink:#403A32;--tea:#B9AD91;--moss:#48513C;--beni:#8C2F2F;--kakishibu:#A85B45;--kakishibu-wash:rgba(168,91,69,.10)}
 html,body,[class*="css"],.stApp{font-family:'Instrument Sans','Helvetica Neue',Arial,sans-serif}
 .stApp{background:var(--ivory);color:var(--ink)}
@@ -102,6 +138,19 @@ button[kind="header"] {
 .er-metric{font-size:.93rem;color:var(--soft-ink)}
 .er-metric b{color:var(--ink);font-weight:600}
 .er-reason{font-size:.82rem;color:var(--moss);font-weight:600;margin-top:.5rem}
+.er-flag{display:inline-block;margin-left:.55rem;vertical-align:middle;font-size:.68rem;font-weight:650;color:var(--kakishibu);border:1px solid var(--kakishibu);border-radius:999px;padding:.08rem .45rem}
+.evidence-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem;margin:.45rem 0 1rem}
+.evidence-card{background:var(--shell);border:1px solid var(--tea);border-radius:12px;padding:.8rem .9rem}
+.evidence-value{font-size:1.25rem;font-weight:700;letter-spacing:-.01em;color:var(--ink);line-height:1.2}
+.evidence-copy{font-size:.84rem;color:var(--soft-ink);line-height:1.45;margin-top:.25rem}
+.evidence-source{font-size:.7rem;color:var(--soft-ink);opacity:.8;margin-top:.4rem;text-transform:uppercase;letter-spacing:.04em;font-weight:600}
+.stMarkdown table{width:100%;border-collapse:collapse;font-size:.86rem;margin:.35rem 0 .9rem}
+.stMarkdown th{text-align:left;font-weight:650;color:var(--ink);border-bottom:1px solid var(--tea);padding:.42rem .6rem}
+.stMarkdown td{color:var(--soft-ink);border-bottom:1px solid rgba(185,173,145,.45);padding:.4rem .6rem;vertical-align:top}
+[data-testid="stTable"]{margin:.45rem 0 .9rem !important}
+[data-testid="stTable"] table{font-size:.86rem}
+[data-testid="stTable"] th,[data-testid="stTable"] td{padding:.42rem .6rem !important;vertical-align:top}
+@media(max-width:720px){.evidence-grid{grid-template-columns:1fr}}
 @media(max-width:650px){.block-container{padding-top:4.8rem!important}.er-grid{grid-template-columns:1fr}.er-wait{font-size:1.5rem}.model-line-2{font-size:.8rem}.model-chip{font-size:.69rem}}
 
 [data-testid="stAppViewContainer"], [data-testid="stAppViewBlockContainer"], section.main, .stApp, html, body {background:var(--ivory) !important;}
@@ -344,7 +393,10 @@ def holiday_name(d):
         nth_weekday(y, 11, 3, 4): "Thanksgiving",
         observed_fixed(date(y, 12, 25)): "Christmas Day",
     }
-    return holidays.get(d)
+    # Match the actual date as well as the observed weekday (July 4 on a Saturday is still July 4).
+    actual = {date(y, 1, 1): "New Year's Day", date(y, 6, 19): "Juneteenth", date(y, 7, 4): "Independence Day",
+              date(y, 11, 11): "Veterans Day", date(y, 12, 25): "Christmas Day"}
+    return holidays.get(d) or actual.get(d)
 
 
 def temporal_factor(now_dt):
@@ -557,6 +609,15 @@ def fmt_minutes(v):
     return f"{m} min" if m < 60 else f"{m // 60}h {m % 60}m"
 
 
+def fmt_range(lo, hi):
+    """'17–40 min' when both ends are under an hour, otherwise '3h 17m–3h 55m'."""
+    if pd.isna(lo) or pd.isna(hi):
+        return "—"
+    if round(hi) < 60:
+        return f"{int(round(lo))}–{int(round(hi))} min"
+    return f"{fmt_minutes(lo)}–{fmt_minutes(hi)}"
+
+
 def current_condition_label(dynamic_factor):
     if dynamic_factor >= 1.08:
         return "Elevated"
@@ -574,9 +635,11 @@ def build_model(df, origin_lat, origin_lon, now_dt, weather_obs, alerts, ari, ma
     med_occupancy = df["recent_occupancy_pct"].median()
     med_lwbs = df["left_before_seen_pct"].median() if "left_before_seen_pct" in df and df["left_before_seen_pct"].notna().any() else None
 
-    hist_predictions = (historical_layer or {}).get("predictions", {})
-    selected_predictor = (historical_layer or {}).get("selected_model")
-    learned_promoted = bool((historical_layer or {}).get("learned_model_promoted", False))
+    national, forecast = load_national()
+    selected_predictor = (national or {}).get("selected_model")
+    learned_promoted = bool((national or {}).get("learned_model_promoted", False))
+    fc_by_id = {} if forecast is None else forecast.set_index("cms_provider_id").to_dict("index")
+    fc_med = float(forecast["forecast_op18b"].median()) if forecast is not None and len(forecast) else None
 
     rows = []
     for _, row in df.iterrows():
@@ -586,10 +649,14 @@ def build_model(df, origin_lat, origin_lon, now_dt, weather_obs, alerts, ari, ma
         historical_wait = float(row["legacy_wait_to_provider_min"])
         current_relative = float(row["typical_ed_minutes"]) / med_ed if med_ed else 1.0
 
-        predicted = hist_predictions.get(row["hospital"], {})
-        predicted_relative = float(predicted.get("relative_throughput_pressure", 1.0))
+        fc = fc_by_id.get(str(row["cms_provider_id"]).zfill(6), {})
+        predicted_relative = float(fc["forecast_op18b"]) / fc_med if fc and fc_med else 1.0
 
-        blended_throughput_relative = 0.60 * current_relative + 0.40 * predicted_relative
+        # Only blend in the historical prediction when a learned model was promoted. With the
+        # Persistence baseline, the "prediction" is the latest archived value, which is nearly the
+        # same number as the current CMS value, so blending would count one signal twice.
+        hist_weight = 0.40 if learned_promoted else 0.0
+        blended_throughput_relative = (1 - hist_weight) * current_relative + hist_weight * predicted_relative
         throughput_factor = max(0.90, min(1.12, blended_throughput_relative ** 0.30))
 
         hospital_demand = recent_demand_factor(row, med_volume, med_occupancy, med_lwbs)
@@ -603,13 +670,26 @@ def build_model(df, origin_lat, origin_lon, now_dt, weather_obs, alerts, ari, ma
             "modeled_wait_mid": wait_mid,
             "modeled_wait_low": wait_low,
             "modeled_wait_high": max(wait_low + 10, wait_mid * 1.55),
-            "access_mid": (drive_min if pd.notna(drive_min) else 999) + wait_mid,
+            "visit_mid": fc.get("forecast_op18b", float("nan")),
+            "visit_lo": fc.get("lo80", float("nan")),
+            "visit_hi": fc.get("hi80", float("nan")),
+            "vs_peers_min": fc.get("vs_peers_min", float("nan")),
+            "change_flag": bool(fc.get("change_flag", False)),
+            "route_ok": bool(pd.notna(drive_min)),
+            # Rank by the tested quantity when available: drive + forecast ED visit.
+            "access_mid": (drive_min if pd.notna(drive_min) else 0)
+                          + (fc["forecast_op18b"] if fc else wait_mid),
             "dynamic_factor": dynamic_factor,
             "hospital_demand_factor": hospital_demand,
             "predicted_throughput_pressure": predicted_relative,
         })
 
-    out = pd.DataFrame(rows).sort_values(["access_mid", "modeled_wait_mid"]).reset_index(drop=True)
+    out = pd.DataFrame(rows)
+    out["chance_fastest"] = chance_fastest(out["route_time_min"].where(out["route_ok"]), out["visit_mid"],
+                                           out["visit_lo"], out["visit_hi"])
+    # Hospitals without a route are ranked after routed ones, by ED time only.
+    out = out.sort_values(["route_ok", "access_mid", "modeled_wait_mid"],
+                          ascending=[False, True, True]).reset_index(drop=True)
     out["rank"] = range(1, len(out) + 1)
     return out, {
         "dynamic_factor": dynamic_factor,
@@ -759,29 +839,113 @@ h3 {margin-top:1.15rem !important;margin-bottom:.35rem !important}
 @media(max-width:720px) {
   .mini-grid,.feature-grid {grid-template-columns:1fr}
 }
+
+/* ===== V3.1 typography + compact layout ===== */
+/* Body stays Instrument Sans; headings and key numbers use Instrument Serif. */
+.stApp h1, .stApp h2, .stApp h3,
+.stApp [data-testid="stHeading"] h1, .stApp [data-testid="stHeading"] h2, .stApp [data-testid="stHeading"] h3 {
+  font-family:'Instrument Serif',Georgia,'Times New Roman',serif !important;
+  font-weight:400 !important; letter-spacing:-.01em !important; color:var(--ink) !important;
+}
+.stApp h1 {font-size:2.55rem !important; line-height:1.05 !important; margin:.2rem 0 .25rem !important; padding:0 !important}
+.stApp h2 {font-size:1.75rem !important; margin:1.2rem 0 .3rem !important; padding:0 !important}
+.stApp h3 {font-size:1.45rem !important; line-height:1.15 !important; margin:1.05rem 0 .3rem !important; padding:0 !important}
+.er-wait, .evidence-value, .mini-value, .model-value {
+  font-family:'Instrument Serif',Georgia,serif !important; font-weight:400 !important;
+  font-variant-numeric:tabular-nums; letter-spacing:0 !important;
+}
+.block-container {padding-top:3rem !important; padding-bottom:1.5rem !important; max-width:980px !important}
+.safety-banner {font-size:.86rem !important; padding:.62rem .9rem !important; border-radius:12px !important; margin:0 0 .6rem !important; font-weight:600 !important}
+.ernow-nav-rule {margin:.05rem 0 .45rem !important}
+[data-testid="stButton"] > button {min-height:1.95rem !important; padding:.2rem .7rem !important; font-size:.84rem !important}
+.brand-sub {font-size:.9rem !important; line-height:1.45 !important; margin:0 0 .75rem !important; max-width:760px}
+.model-bar {padding:.62rem .85rem !important; margin:.2rem 0 .6rem !important; border-radius:12px !important}
+.model-line-1 {font-size:.88rem !important}
+.model-line-2 {font-size:.79rem !important; margin-top:.18rem !important; font-weight:500 !important}
+.model-meta {margin-top:.4rem !important}
+.model-chip {font-size:.68rem !important; padding:.16rem .44rem !important}
+.location-confirm {padding:.5rem .75rem !important; margin:.2rem 0 .45rem !important; font-size:.88rem !important}
+[data-testid="stCaptionContainer"] {font-size:.78rem !important; line-height:1.45 !important}
+hr, [data-testid="stDivider"] {margin:.55rem 0 .35rem !important}
+.stMarkdown p {margin:.1rem 0 .55rem !important}
+/* ER cards: two per row on desktop, one on phones */
+.er-list {display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.65rem; margin:.35rem 0 .7rem}
+.er-card {margin:0 !important; padding:.8rem .9rem .75rem !important; border-radius:14px !important; display:flex; flex-direction:column}
+.er-best {border-width:2px !important}
+.er-head {display:flex; align-items:baseline; flex-wrap:wrap; gap:.15rem .45rem}
+.er-rank {font-family:'Instrument Serif',Georgia,serif !important; font-size:1.25rem !important; font-weight:400 !important; margin:0 !important; color:var(--moss)}
+.er-title {font-size:.98rem !important; font-weight:650 !important; line-height:1.25 !important}
+.best-label {font-size:.62rem !important; margin:0 !important; padding:.08rem .42rem; border-radius:999px; background:var(--moss); color:#fff !important; letter-spacing:.05em}
+.er-flag {margin-left:0 !important; font-size:.62rem !important}
+.er-wait-label {font-size:.72rem !important; margin-top:.45rem !important; letter-spacing:.01em}
+.er-wait {font-size:1.7rem !important; line-height:1.1 !important; margin:.05rem 0 .5rem !important}
+.er-stats {display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.45rem .8rem; padding-top:.5rem; border-top:1px solid rgba(185,173,145,.45)}
+.er-stat-k {font-size:.64rem; text-transform:uppercase; letter-spacing:.05em; font-weight:600; color:var(--soft-ink); opacity:.85}
+.er-stat-v {font-size:.88rem; font-weight:600; color:var(--ink); font-variant-numeric:tabular-nums}
+.er-stat-v span {font-weight:500; color:var(--soft-ink); font-size:.78rem}
+.er-actions {margin-top:.6rem !important}
+.er-directions {font-size:.7rem !important; padding:.28rem .55rem !important}
+/* Methodology + Forecast Model */
+.ds-card {padding:.75rem .9rem !important; margin:.35rem 0 .8rem !important}
+.ds-title {font-family:'Instrument Serif',Georgia,serif; font-weight:400 !important; font-size:1.25rem; margin-bottom:.2rem !important}
+.ds-sub {font-size:.86rem !important}
+.evidence-grid {grid-template-columns:repeat(4,minmax(0,1fr)) !important; gap:.5rem !important; margin:.35rem 0 .7rem !important}
+.evidence-card {padding:.65rem .75rem !important}
+.evidence-value {font-size:1.55rem !important; line-height:1.1 !important}
+.evidence-copy {font-size:.76rem !important; line-height:1.4 !important}
+.evidence-source {font-size:.6rem !important}
+.model-grid {display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.5rem; margin:.35rem 0 .6rem}
+.model-card {background:var(--shell); border:1px solid var(--tea); border-radius:12px; padding:.65rem .75rem}
+.model-k {font-size:.64rem; text-transform:uppercase; letter-spacing:.05em; font-weight:600; color:var(--soft-ink)}
+.model-value {font-size:1.45rem; line-height:1.15; color:var(--ink); margin:.1rem 0 .15rem}
+.model-copy {font-size:.76rem; color:var(--soft-ink); line-height:1.4}
+.status-card {padding:.65rem .85rem !important; margin:.3rem 0 .6rem !important}
+.mini-grid {grid-template-columns:repeat(6,minmax(0,1fr)) !important; gap:.4rem !important; margin:.3rem 0 .7rem !important}
+.mini-card {padding:.5rem .6rem !important}
+.mini-label {font-size:.58rem !important}
+.mini-value {font-size:1.35rem !important; margin-top:.05rem !important}
+.callout, .note {font-size:.8rem !important; padding:.6rem .75rem !important; margin:.35rem 0 .6rem !important}
+.stMarkdown table {font-size:.8rem !important; margin:.25rem 0 .6rem !important}
+.stMarkdown th, .stMarkdown td {padding:.3rem .5rem !important}
+.stMarkdown ul, .stMarkdown ol {margin:.1rem 0 .6rem !important}
+.stMarkdown li {margin-bottom:.12rem !important; font-size:.9rem}
+[data-testid="stTabs"] button p {font-size:.86rem !important; font-weight:600 !important}
+[data-testid="stTabs"] [data-baseweb="tab-list"] {gap:.9rem}
+@media(max-width:900px){.evidence-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important}.mini-grid{grid-template-columns:repeat(3,minmax(0,1fr)) !important}.model-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){
+  .block-container{padding-top:3.2rem !important}
+  .stApp h1{font-size:2.1rem !important}
+  .er-list,.evidence-grid,.model-grid{grid-template-columns:1fr !important}
+  .mini-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important}
+}
 </style>
 """, unsafe_allow_html=True)
 
 
 def render_home():
     st.title("ERNow Boston")
-    st.markdown('<div class="brand-sub">Compare Boston ER access in seconds — ERNow turns fragmented hospital, public-health, and routing data into one location-aware forecast.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="brand-sub">Compare Boston ERs in seconds, when you don’t have minutes to search. Six public data sources, one screen.</div>', unsafe_allow_html=True)
 
-    st.markdown(
-        """
+    national, _fc = load_national()
+    if national:
+        sp, iv, rk = national["split"], national["intervals"], national["ranking"]["selected"]
+        st.markdown(
+            f"""
     <div class="model-bar">
-      <div class="model-line-1"><span class="model-dot"></span>Learning model active</div>
-      <div class="model-line-2">ERNow uses a validated historical model to estimate expected ER flow, then combines that signal with current hospital conditions, weather, respiratory illness, major events, and route access.</div>
+      <div class="model-line-1"><span class="model-dot"></span>National model: {html.escape(national['selected_model'])}</div>
+      <div class="model-line-2">Trained on {sp['hospitals']:,} U.S. hospitals and tested on {sp['test_rows']:,} it had never seen: it picked the fastest ER in a local area {rk['fastest_pick_accuracy']:.0%} of the time, versus {rk['fastest_pick_random_baseline']:.0%} by chance.</div>
       <div class="model-meta">
-        <span class="model-chip">6 Boston ERs</span>
-        <span class="model-chip">36 historical observations</span>
-        <span class="model-chip">2020–2025 reporting periods</span>
-        <span class="model-chip">Aug 2026 CMS archive snapshot</span>
+        <span class="model-chip">{sp['hospitals']:,} U.S. hospitals</span>
+        <span class="model-chip">{sp['total_rows']:,} hospital-periods</span>
+        <span class="model-chip">Tested 80% ranges ({iv['test_coverage']:.0%} coverage)</span>
+        <span class="model-chip">CMS releases {html.escape(national['releases'][0][:4])}–{html.escape(national['releases'][-1][:4])}</span>
       </div>
     </div>
     """,
-        unsafe_allow_html=True,
-    )
+            unsafe_allow_html=True,
+        )
+    else:
+        st.markdown('<div class="model-bar"><div class="model-line-1"><span class="model-dot"></span>National model results not found</div><div class="model-line-2">Run <code>python national_model.py</code> to build them.</div></div>', unsafe_allow_html=True)
 
     st.subheader("Your location")
     location_slot = st.empty()
@@ -815,6 +979,7 @@ def render_home():
     now_dt = datetime.now(EASTERN)
     df = load_fallback_data()
     cms = fetch_cms_metrics(tuple(df["cms_provider_id"].tolist()))
+    cms_live = (not cms.empty) and ("cms_current_baseline" in cms) and cms["cms_current_baseline"].notna().any()
     if not cms.empty:
         df = df.merge(cms, on="cms_provider_id", how="left")
         if "cms_current_baseline" in df:
@@ -825,303 +990,347 @@ def render_home():
     alerts = fetch_nws_alerts(origin_lat, origin_lon)
     ari = fetch_cdc_ari()
     major_events = major_event_titles(now_dt)
-    historical_layer = current_throughput_forecast()
-    ranked, context = build_model(
-        df, origin_lat, origin_lon, now_dt, weather_obs, alerts, ari, major_events,
-        historical_layer=historical_layer,
-    )
+    ranked, context = build_model(df, origin_lat, origin_lon, now_dt, weather_obs, alerts, ari, major_events)
     loading_slot.empty()
 
     weather_status = weather_obs.get("description", "Unavailable") if weather_obs else "Unavailable"
     event_status = "; ".join(major_events[:2]) if major_events else "None detected"
     st.caption(
         f"Updated **{now_dt.strftime('%-I:%M %p')}** · {location_label} · "
-        f"Weather: **{weather_status}** · Seasonal respiratory illness: **{context['illness_label']}** · Major events nearby: **{event_status}**"
+        f"CMS data: **{'live' if cms_live else 'saved copy (live request failed)'}** · "
+        f"Weather: **{weather_status}** · Respiratory illness: **{context['illness_label']}** · Major events: **{event_status}**"
     )
 
     st.divider()
     st.subheader("Nearby ERs")
-    st.caption("Ranked using forecasted ER wait and travel access from your location. The wait forecast combines hospital history, the validated predictive layer, reported utilization, time, weather, respiratory illness, and major events. Travel time is personalized for each hospital and does not include live traffic.")
+    st.caption("Sorted by drive time plus expected ED visit. Each range is a hospital's typical performance for the next CMS period, not today's live queue.")
 
+    cards = []
     for _, row in ranked.iterrows():
         best = " er-best" if int(row["rank"]) == 1 else ""
-        best_label = '<div class="best-label">Best overall estimate</div>' if int(row["rank"]) == 1 else ""
-        wait_range = f"{fmt_minutes(row['modeled_wait_low'])}–{fmt_minutes(row['modeled_wait_high'])}"
-        route_time = f"~{fmt_minutes(row['route_time_min'])}" if pd.notna(row["route_time_min"]) else "Unavailable"
-        route_dist = f"{row['route_distance_miles']:.1f} mi" if pd.notna(row["route_distance_miles"]) else "—"
-        current_demand = current_condition_label(row["dynamic_factor"])
+        best_label = '<span class="best-label">Best overall estimate</span>' if int(row["rank"]) == 1 else ""
+        has_fc = pd.notna(row.get("visit_mid"))
+        visit_range = (fmt_range(row["visit_lo"], row["visit_hi"]) if has_fc
+                       else fmt_range(row["modeled_wait_low"], row["modeled_wait_high"]))
+        headline_label = "Expected ED visit · tested 80% range" if has_fc else "Estimated ER wait"
+        wait_range = fmt_minutes(row["legacy_wait_to_provider_min"])
+        if pd.notna(row["route_time_min"]):
+            drive = f"~{fmt_minutes(row['route_time_min'])}"
+            drive_sub = f"{row['route_distance_miles']:.1f} mi" if pd.notna(row["route_distance_miles"]) else ""
+        else:
+            drive, drive_sub = "Unavailable", "ranked by ED time"
+        cf = row.get("chance_fastest")
+        chance = "—" if pd.isna(cf) else ("<1%" if cf < 0.005 else f"{cf:.0%}")
+        vs = row.get("vs_peers_min")
+        vs_txt = "—" if pd.isna(vs) else f"{'+' if vs >= 0 else '−'}{fmt_minutes(abs(vs))}"
+        flag = ('<span class="er-flag">Unusual change since last release</span>' if row.get("change_flag") else "")
         directions_url = (
             "https://www.google.com/maps/dir/?api=1"
             f"&origin={origin_lat},{origin_lon}"
             f"&destination={row['latitude']},{row['longitude']}"
             "&travelmode=driving"
         )
-        reason = "Uses hospital history, validated prediction, current conditions, and route access. Not a live queue reading."
-        card = f"""
-    <div class="er-card{best}">
-      {best_label}
-      <div><span class="er-rank">#{int(row['rank'])}</span><span class="er-title">{row['hospital']}</span></div>
-      <div class="er-wait-label">Estimated ER wait</div><div class="er-wait">{wait_range}</div>
-      <div class="er-grid">
-        <div class="er-metric"><b>From your location:</b> {route_time} · {route_dist}</div>
-        <div class="er-metric"><b>Current demand conditions:</b> {current_demand}</div>
-        <div class="er-metric"><b>Historical wait:</b> {fmt_minutes(row['legacy_wait_to_provider_min'])}</div>
-        <div class="er-metric"><b>Typical visit duration:</b> {fmt_minutes(row['typical_ed_minutes'])}</div>
+        cards.append(f"""<div class="er-card{best}">
+      <div class="er-head"><span class="er-rank">{int(row['rank'])}</span><span class="er-title">{html.escape(str(row['hospital']))}</span>{best_label}{flag}</div>
+      <div class="er-wait-label">{headline_label}</div><div class="er-wait">{visit_range}</div>
+      <div class="er-stats">
+        <div class="er-stat"><div class="er-stat-k">Drive</div><div class="er-stat-v">{drive} <span>{drive_sub}</span></div></div>
+        <div class="er-stat"><div class="er-stat-k">Chance fastest</div><div class="er-stat-v">{chance}</div></div>
+        <div class="er-stat"><div class="er-stat-k">Vs similar U.S. hospitals</div><div class="er-stat-v">{vs_txt}</div></div>
+        <div class="er-stat"><div class="er-stat-k">Provider wait, 2019 data</div><div class="er-stat-v">{wait_range}</div></div>
       </div>
-      <div class="er-reason">{reason}</div>
       <div class="er-actions"><a class="er-directions" href="{directions_url}" target="_blank" rel="noopener noreferrer">Open Directions</a></div>
-    </div>"""
-        st.markdown(card, unsafe_allow_html=True)
+    </div>""")
+    st.markdown('<div class="er-list">' + "".join(cards) + '</div>', unsafe_allow_html=True)
 
-    with st.expander("What changes the estimate right now?"):
-        st.write("ERNow automatically uses the current Boston time/day, holiday status, National Weather Service observations and alerts, seasonal respiratory surveillance from CDC, and major Boston events found across official schedules plus a recent local-news check.")
+    with st.expander("About today's Boston conditions"):
+        st.write("Weather, respiratory illness, and major events are shown for context only. They do not change any number on this page, "
+                 "because no public data exists to test such an adjustment. A learned respiratory-surge forecast is next on the roadmap.")
         if major_events:
             st.caption("Major event sources detected: " + "; ".join(major_events[:4]))
         else:
             st.caption("No qualifying major event was detected by the current source checks. This does not guarantee that no event is occurring.")
-        st.caption("Recent hospital demand and capacity data are used in the model but are not shown as if they were live conditions.")
+        st.caption("Every number on the ER cards is either public data or a model output tested on held-out hospitals.")
 
     st.subheader("Map")
     st.map(ranked[["hospital", "latitude", "longitude"]], latitude="latitude", longitude="longitude", size=95)
-    st.caption("ERNow Boston · Forecasting prototype · Not a clinical decision tool or confirmed live hospital wait-time service.")
+
+
+def _table(df):
+    """Static markdown table: text wraps (never truncated) and there is no index column."""
+    def cell(v):
+        return str(v).replace("|", "\\|").replace("\n", " ")
+    cols = list(df.columns)
+    lines = ["| " + " | ".join(cell(c) for c in cols) + " |", "|" + "|".join("---" for _ in cols) + "|"]
+    lines += ["| " + " | ".join(cell(v) for v in row) + " |" for row in df.itertuples(index=False)]
+    st.markdown("\n".join(lines))
+
+
+def _pct(v):
+    return "—" if v is None or pd.isna(v) else f"{v:.0%}"
 
 
 def render_methodology():
     st.title("Methodology")
-    st.caption("How ERNow combines hospital history, current conditions, and travel access to estimate ER wait ranges.")
+    st.caption("Why ERNow exists, what it estimates, and exactly where every number comes from.")
+    national, forecast = load_national()
+    ev = (national or {}).get("evidence", {})
 
     st.markdown("""
     <div class="ds-card">
-      <div class="ds-title">Machine-learning layer</div>
-      <div class="ds-sub">ERNow uses a validated historical model to estimate expected ER flow. That prediction becomes one input to the public wait forecast, alongside current hospital conditions, weather, respiratory illness, major events, and route access.</div>
-      <div class="ds-tags">
-        <span class="ds-tag">6 Boston ERs</span>
-        <span class="ds-tag">36 historical observations</span>
-        <span class="ds-tag">2020–2025 reporting periods</span>
-        <span class="ds-tag">Aug 2026 CMS archive snapshot</span>
-        <span class="ds-tag">Persistence · Ridge · Random Forest</span>
-      </div>
+      <div class="ds-title">The mission: ER transparency now, not years from now</div>
+      <div class="ds-sub">Boston has no single place to compare emergency departments, and hospitals do not publish live wait times. The useful data already exists, scattered across CMS, CHIA, the CDC, the Weather Service, event calendars, and maps. ERNow shows what is possible today with public data alone: one screen, seconds instead of minutes, with every number labeled by source and period.</div>
     </div>
     """, unsafe_allow_html=True)
 
-    st.subheader("What ERNow estimates")
-    st.write(
-        "ERNow estimates a likely ER wait range for each included Boston hospital and combines it with "
-        "travel access from the user's location. It does not claim to know a hospital's live waiting-room queue."
-    )
+    st.subheader("Why it matters: the evidence")
+    if ev:
+        cards = [
+            (fmt_minutes(ev["boston_spread_min"]),
+             f"Gap in median ED visit time between Boston's fastest ({ev['boston_fastest']}, {fmt_minutes(ev['boston_fastest_min'])}) and slowest ({ev['boston_slowest']}, {fmt_minutes(ev['boston_slowest_min'])}) ED.",
+             "CMS OP-18b, latest release"),
+            (f"{ev['data_lag_months_min']:.0f}–{ev['data_lag_months_max']:.0f} months",
+             "How long after a reporting period ends CMS publishes its ED data.",
+             f"Computed across {ev['releases']} CMS releases"),
+            ("~33% → ~44%",
+             "Share of Massachusetts ED visits lasting over 4 hours, Jul–Sep 2019 vs Jul–Sep 2025.",
+             "CHIA, reported by the Boston Globe (May 2026)"),
+            (f"{ev['hospitals_latest_release']:,}",
+             "U.S. hospitals the same pipeline already covers. Boston is the first city deployed.",
+             "CMS Hospital Compare archives"),
+        ]
+        st.markdown('<div class="evidence-grid">' + "".join(
+            f'<div class="evidence-card"><div class="evidence-value">{html.escape(v)}</div>'
+            f'<div class="evidence-copy">{html.escape(c)}</div><div class="evidence-source">{html.escape(src)}</div></div>'
+            for v, c, src in cards) + '</div>', unsafe_allow_html=True)
 
-    st.subheader("What shapes the forecast")
+    if national:
+        sp, iv, rk = national["split"], national["intervals"], national["ranking"]["selected"]
+        vals = {m["model"]: m for m in national["models"]}
+        sel = vals[national["selected_model"]]
+        st.subheader("The models behind it")
+        tiles = [
+            ("National forecaster", f"{sel['MAE']:.1f} min avg. error",
+             f"Four models compared on {sp['hospitals']:,} U.S. hospitals ({sp['total_rows']:,} hospital-periods): Persistence, Ridge, partial pooling, gradient boosting. "
+             f"{national['selected_model']} won on chronological validation (R² {sel['R2']:.2f})."),
+            ("Tested ranges", f"{iv['backtest_coverage']:.0%} & {iv['test_coverage']:.0%} coverage",
+             f"Regime-adaptive conformal prediction builds each 80% range from real errors and recent volatility; tested on two held-out years. "
+             f"Median width {fmt_minutes(iv['median_width_min'])}, {iv['old_fixed_band_median_width_min'] / max(iv['median_width_min'], 1):.1f}× narrower than the old fixed band."),
+            ("Ranking test", f"{rk['fastest_pick_accuracy']:.0%} vs {rk['fastest_pick_random_baseline']:.0%}",
+             f"Picked the actual fastest ER in {rk['local_groups']} local areas {rk['fastest_pick_accuracy']:.0%} of the time, versus {rk['fastest_pick_random_baseline']:.0%} by chance."),
+            ("Chance it's the fastest", "4,000 scenarios",
+             "Monte Carlo simulation over each hospital's tested range plus your drive time turns uncertainty into one decision-ready probability."),
+            ("Peer comparison", "25 nearest peers",
+             "Nearest-neighbor matching on ED volume, hospital type, ownership, star rating, and case complexity (heart-attack and stroke volume, cardiac surgery, inpatient volume)."),
+            ("Drivers & ablation", "Honest by design",
+             "Permutation importance shows what moves ED time; ablation shows extra features did not beat Persistence, so ERNow keeps the simpler model."),
+        ]
+        st.markdown('<div class="model-grid">' + "".join(
+            f'<div class="model-card"><div class="model-k">{html.escape(k)}</div><div class="model-value">{html.escape(v)}</div>'
+            f'<div class="model-copy">{html.escape(c)}</div></div>' for k, v, c in tiles) + '</div>', unsafe_allow_html=True)
+        st.caption("Full results, tables, and validation details are on the Forecast Model page.")
+
+    st.subheader("Reading an ER card")
     st.markdown("""
-    **Hospital history and utilization**
-    - Archived CMS wait-to-provider information.
-    - CMS OP-18b hospital-throughput history.
-    - Recent reported ED volume, occupancy, and related utilization signals.
-    - CMS Left Before Being Seen (OP-22) when available.
-
-    **Current conditions**
-    - Boston time, day of week, holidays, and season.
-    - National Weather Service observations and severe-weather alerts.
-    - CDC Massachusetts respiratory-illness surveillance.
-    - Major Boston events that may affect demand or access.
-
-    **Travel access**
-    - Road-route distance and estimated travel time from the user's location to each hospital.
-    - Travel time is personalized by hospital but does not include live traffic.
+    - **Expected ED visit:** typical time from arrival to leaving for patients sent home, with a range checked against real outcomes.
+    - **Drive:** road route from where you are, without live traffic.
+    - **Chance fastest:** how often this ER comes out quickest across 4,000 what-if scenarios.
+    - **Vs similar U.S. hospitals:** faster or slower than comparable hospitals nationwide.
+    - **Provider wait, 2019 data:** the last public CMS measure of time to see a provider (retired after 2019), shown as-is for context.
     """)
+    st.caption("Cards are sorted by drive time plus expected ED visit. ERs without a route are listed last.")
 
-    st.subheader("Where machine learning fits")
-    st.write(
-        "The historical model learns from longitudinal CMS OP-18b data, which measures the median time discharged patients spend in the ED from arrival to departure. "
-        "It uses prior reporting periods to estimate expected ER flow for each hospital."
-    )
-    st.write(
-        "ERNow then uses that prediction as one bounded signal inside the wait forecast. The app also accounts for reported utilization, time, weather, respiratory illness, major events, and route access."
-    )
-
-    st.subheader("How the displayed wait range is built")
+    st.subheader("What would make this live")
+    st.write("ERNow is built so that live hospital data could plug in directly. If Boston hospitals published these fields, ERNow could switch from typical performance to current conditions:")
     st.markdown("""
-    1. Start with each hospital's archived wait-to-provider baseline.
-    2. Add a bounded adjustment from the validated historical model and recent hospital-throughput data.
-    3. Adjust for reported utilization and current local conditions.
-    4. Return a wait range rather than an exact minute.
-    5. Combine the wait forecast with travel access from the user's location to rank nearby ERs.
+    - Current median time from arrival to first provider, updated hourly.
+    - Number of patients waiting to be seen, by triage level.
+    - Number of admitted patients boarding in the ED.
+    - Ambulance diversion status.
     """)
+    st.caption("Until then, every ERNow number is labeled with its source and period, so nothing is presented as live.")
 
-    st.subheader("Why the estimate stays cautious")
-    st.write(
-        "CMS OP-18b measures total ED arrival-to-departure time for discharged patients; it is not a direct live wait-to-provider target. "
-        "The model therefore improves the forecast without being presented as a live queue measurement."
-    )
+    st.subheader("Data sources and freshness")
+    fresh = pd.DataFrame([
+        ["National model + ED visit time", "CMS Hospital Compare (OP-18b, OP-18c, OP-22, ED volume)", f"{len((national or {}).get('releases', []))} releases", "Annual-period medians; published 9–12 months later"],
+        ["Case complexity (peers)", "CMS Complications & Deaths (patient volumes)", "Latest release", "Heart-attack/stroke volume, cardiac surgery, inpatient volume"],
+        ["Hospital utilization", "CHIA Hospital Profiles", "HFY 2024", "Annual ED visits and inpatient occupancy (context)"],
+        ["Provider wait", "CMS Hospital Compare OP-20 (retired)", "2019 or earlier", "Shown as-is for context"],
+        ["Weather", "National Weather Service", "Current observation + alerts", "Boston-wide context"],
+        ["Respiratory illness", "CDC Massachusetts ARI", "Latest reporting week", "Statewide context"],
+        ["Major events", "Boston-area public sources", "Checked today", "Boston-wide context"],
+        ["Route", "OpenStreetMap / OSRM (public demo server)", "At search", "No live traffic"],
+    ], columns=["Factor", "Source", "Freshness", "Meaning"])
+    _table(fresh)
 
-    st.subheader("Accuracy and freshness")
+    st.subheader("Limitations")
     st.markdown("""
-    Weather — current National Weather Service observations and alerts.  
-    Respiratory illness — latest published CDC Massachusetts ARI reporting period.  
-    Major events — current-date checks from Boston-area public sources.  
-    Route — OpenStreetMap / OSRM road routing at search time, without live traffic.  
-    Hospital utilization — latest available public Massachusetts reporting.  
-    Historical model — longitudinal CMS OP-18b reporting periods used for chronological validation.
+    - ERNow cannot see live triage, staffing, open rooms, boarding, or how many people are waiting right now.
+    - The forecast describes typical ED performance for a CMS period. No public source reports live waits, which is the gap ERNow is built to expose.
+    - OP-18b covers discharged patients. Peer matching adjusts for case complexity with public proxies, not for each patient's severity.
+    - Travel time excludes live traffic, parking, and ambulance transport.
     """)
-
-    st.subheader("Important limitations")
-    st.markdown("""
-    - ERNow cannot see current triage severity, staffing, open treatment rooms, boarding load, ambulance arrivals, or the exact number of people waiting right now.
-    - Public hospital data can lag behind conditions inside the ER.
-    - Current-demand labels are contextual estimates, not direct live queue measurements.
-    - Travel time excludes live traffic, parking, road incidents, and ambulance transport conditions.
-    - Predictive relationships can improve forecasting, but they do not establish causation.
-
-    For a serious or time-sensitive emergency, call 911 or use the nearest appropriate emergency department rather than choosing a farther hospital because of an ERNow estimate.
-    """)
-
-    with st.expander("Source and freshness detail"):
-        fresh = pd.DataFrame([
-            ["Weather", "National Weather Service", "Current observation + alerts", "Current contextual signal"],
-            ["Respiratory illness", "CDC Massachusetts ARI", "Latest reporting period", "Statewide illness signal"],
-            ["Major events", "Boston-area public sources", "Current-date checks", "Contextual demand signal"],
-            ["Route", "OpenStreetMap / OSRM", "At search", "Personalized by hospital; no live traffic"],
-            ["Hospital utilization", "Massachusetts public reporting", "Latest reported period", "Recent, not live"],
-            ["ER throughput", "CMS OP-18b", "Longitudinal reporting periods", "Historical model target"],
-            ["Historical wait", "Archived CMS Hospital Compare OP-20", "Archived", "Historical baseline"],
-        ], columns=["Factor", "Source", "Freshness", "Meaning"])
-        st.dataframe(fresh, use_container_width=True, hide_index=True)
-
-    st.caption("ERNow is a forecasting prototype built on public or zero-cost data sources. It is not a clinical decision tool or a confirmed live wait-time service.")
 
 
 def render_forecast_model():
     st.title("Forecast Model")
-    st.caption("How ERNow tests its historical model and uses the selected prediction inside the wait forecast.")
+    st.caption("A national ED performance model, trained and tested on every U.S. hospital in the CMS archives, then applied to Boston.")
+    national, forecast = load_national()
+    if not national:
+        st.info("Run `python national_model.py` to build the national model results.")
+        return
+    sp, iv = national["split"], national["intervals"]
+    rk, rp = national["ranking"]["selected"], national["ranking"]["persistence"]
 
-    hist = history_status()
-    result = train_historical_models() if hist["ready"] else None
-
-    st.subheader("1. Model status")
-    if hist["ready"]:
-        hospitals = hist["data"]["hospital"].nunique()
-        start = hist["data"]["timestamp"].min().year
-        end = hist["data"]["timestamp"].max().year
-        predictor = result["selected_model"]
-        st.markdown(
-            '<div class="status-card"><div class="status-title">Learning model active</div>'
-            '<div class="status-copy">Real CMS history is loaded, later reporting periods are reserved for validation, and the best-performing historical predictor is available to help shape ERNow\'s wait forecast.</div></div>',
-            unsafe_allow_html=True,
-        )
-        st.markdown(
-            f"""<div class="mini-grid">
-            <div class="mini-card"><div class="mini-label">Historical observations</div><div class="mini-value">{hist['rows']}</div></div>
-            <div class="mini-card"><div class="mini-label">Boston ERs</div><div class="mini-value">{hospitals}</div></div>
-            <div class="mini-card"><div class="mini-label">Reporting coverage</div><div class="mini-value">{start}–{end}</div></div>
-            <div class="mini-card"><div class="mini-label">Holdout observations</div><div class="mini-value">{result['test_rows']}</div></div>
-            <div class="mini-card"><div class="mini-label">Selected predictor</div><div class="mini-value">{predictor}</div></div>
-            <div class="mini-card"><div class="mini-label">Validation</div><div class="mini-value">Earlier → later</div></div>
-            </div>""",
-            unsafe_allow_html=True,
-        )
-    else:
-        st.markdown(f'<div class="status-card"><div class="status-title">Historical model not ready</div><div class="status-copy">{hist["reason"]}</div></div>', unsafe_allow_html=True)
-
-    st.subheader("2. What the model predicts")
-    st.write(
-        "The model learns from CMS OP-18b, which measures the median time discharged patients spend in the ED from arrival to departure. "
-        "Using prior reporting periods, it estimates expected ER flow for each hospital."
-    )
-    st.write(
-        "This is not the same as predicting a live waiting-room queue. ERNow uses the historical prediction as one input inside the broader wait forecast."
-    )
-
-    st.subheader("3. Model comparison")
-    if hist["ready"]:
-        metrics = result["metrics"].copy().rename(columns={"MAE":"MAE (min)","RMSE":"RMSE (min)","R2":"R²"})
-        metrics["MAE (min)"] = metrics["MAE (min)"].round(1)
-        metrics["RMSE (min)"] = metrics["RMSE (min)"].round(1)
-        metrics["R²"] = metrics["R²"].round(3)
-        st.dataframe(metrics, use_container_width=True, hide_index=True)
-
-        if result["learned_model_promoted"]:
-            summary = f"{result['best_ml_model']} performed best on later held-out periods and cleared the promotion threshold, so ERNow uses it as the historical predictor."
-        else:
-            summary = f"{result['selected_model']} performed best on the holdout period. The strongest learned challenger was {result['best_ml_model']}, but it did not improve enough to replace the simpler predictor."
-        st.markdown(f'<div class="callout">{summary}</div>', unsafe_allow_html=True)
-        st.caption("MAE is the average error in minutes. RMSE gives more weight to larger misses. R² shows how much variation the model explains; a negative value means it performed worse than predicting the holdout average.")
-    else:
-        st.info("Generate `data/cms_op18b_history.csv` with `python cms_history_pipeline.py`.")
-
-    st.subheader("4. What the model uses")
-    st.markdown("""<div class="feature-grid">
-    <div class="feature-card"><div class="feature-title">Hospital identity</div><div class="feature-copy">Captures persistent differences across the six included Boston hospitals.</div></div>
-    <div class="feature-card"><div class="feature-title">Reporting period</div><div class="feature-copy">Year, month, and quarter help the model learn how outcomes change over time.</div></div>
-    <div class="feature-card"><div class="feature-title">Recent history</div><div class="feature-copy">Prior reporting periods and a rolling historical average give the model recent context without looking ahead.</div></div>
-    </div>""", unsafe_allow_html=True)
-    st.caption("All lagged features use only information that would have been available before the period being predicted, which prevents look-ahead leakage.")
-
-    st.subheader("5. Current hospital context")
-    base = pd.read_csv(HOSPITAL_DATA)
-    display = base[["hospital","legacy_wait_to_provider_min","typical_ed_minutes","recent_ed_visits","recent_occupancy_pct"]].rename(columns={
-        "hospital":"Hospital",
-        "legacy_wait_to_provider_min":"Historical wait (min)",
-        "typical_ed_minutes":"Typical ED stay (min)",
-        "recent_ed_visits":"Recent ED visits",
-        "recent_occupancy_pct":"Occupancy (%)",
-    })
-    st.dataframe(display, use_container_width=True, hide_index=True)
-    left,right = st.columns(2)
-    with left:
-        st.caption("Recent reported ED visits")
-        st.bar_chart(base.set_index("hospital")["recent_ed_visits"])
-    with right:
-        st.caption("Reported occupancy")
-        st.bar_chart(base.set_index("hospital")["recent_occupancy_pct"])
-
-    st.subheader("6. Validation")
-    if hist["ready"]:
-        st.write(
-            f"Training period: {result['train_start'].date()} → {result['train_end'].date()}  \n"
-            f"Holdout period: {result['test_start'].date()} → {result['test_end'].date()}"
-        )
-        st.caption("Earlier periods train the model; later periods test it. This better reflects how the model would face future data than a random split.")
-        err = result["hospital_error"].copy().rename(columns={"hospital":"Hospital","MAE":"MAE (min)","Observations":"Holdout observations"})
-        err["MAE (min)"] = err["MAE (min)"].round(1)
-        st.dataframe(err, use_container_width=True, hide_index=True)
-        st.caption("Holdout MAE by hospital")
-        st.bar_chart(result["hospital_error"].set_index("hospital")["MAE"])
-    else:
-        st.write("Earlier reporting periods train the model; later periods test it.")
-
-    st.subheader("7. How it affects your estimate")
-    st.write(
-        "The selected historical model contributes one bounded hospital-level signal. ERNow then combines that signal with recent utilization and current conditions to estimate a wait range. "
-        "Travel time from your location is added afterward to compare overall access."
+    st.markdown(
+        '<div class="status-card"><div class="status-title">Selected model: ' + html.escape(national["selected_model"]) + '</div>'
+        '<div class="status-copy">Every model was trained on earlier CMS releases, selected on the next release, and scored once on the latest release it had never seen.</div></div>',
+        unsafe_allow_html=True,
     )
     st.markdown(
-        '<div class="note"><strong>Important boundary:</strong> the machine-learning layer improves the forecast, but it does not directly observe a hospital\'s live queue. ERNow therefore shows a wait range and route context instead of claiming an exact real-time queue minute.</div>',
+        f"""<div class="mini-grid">
+        <div class="mini-card"><div class="mini-label">U.S. hospitals</div><div class="mini-value">{sp['hospitals']:,}</div></div>
+        <div class="mini-card"><div class="mini-label">Hospital-periods</div><div class="mini-value">{sp['total_rows']:,}</div></div>
+        <div class="mini-card"><div class="mini-label">Held-out test rows</div><div class="mini-value">{sp['test_rows']:,}</div></div>
+        <div class="mini-card"><div class="mini-label">80% range coverage</div><div class="mini-value">{iv['test_coverage']:.0%}</div></div>
+        <div class="mini-card"><div class="mini-label">Fastest-pick accuracy</div><div class="mini-value">{rk['fastest_pick_accuracy']:.0%}</div></div>
+        <div class="mini-card"><div class="mini-label">CMS releases</div><div class="mini-value">{len(national['releases'])}</div></div>
+        </div>""",
         unsafe_allow_html=True,
     )
 
-    with st.expander("Technical details"):
-        st.markdown("""
-    **Historical target**
-    - CMS OP-18b median ED arrival-to-departure duration for discharged patients.
+    tabs = st.tabs(["Models", "Accuracy", "What drives it", "Boston & insights", "Freshness & details"])
+    with tabs[0]:
+        st.subheader("What the model predicts")
+        st.write("Each hospital's next-period CMS OP-18b: the median time discharged patients spend in the ED from arrival to departure. "
+                 "Features come only from releases available before the period being predicted, so there is no look-ahead leakage.")
 
-    **Models compared**
-    - Persistence baseline
-    - Ridge regression
-    - Random Forest
+        st.subheader("Model comparison")
+        mt = pd.DataFrame(national["models"]).rename(columns={"model": "Model", "validation_MAE": "Validation MAE (min)",
+                                                              "MAE": "Test MAE (min)", "RMSE": "Test RMSE (min)", "R2": "Test R²"})
+        for c in ["Validation MAE (min)", "Test MAE (min)", "Test RMSE (min)"]:
+            mt[c] = mt[c].map(lambda v: f"{v:.1f}")
+        mt["Test R²"] = mt["Test R²"].map(lambda v: f"{v:.3f}")
+        _table(mt)
+        vals = {m["model"]: m["validation_MAE"] for m in national["models"]}
+        base, best = vals["Persistence baseline"], vals[national["best_learned_model"]]
+        gain = (base - best) / base
+        if national["learned_model_promoted"]:
+            summary = f"{national['best_learned_model']} beat Persistence by {gain:.1%} on validation, clearing the {national['promotion_margin']:.0%} promotion bar, so ERNow uses it."
+        else:
+            summary = (f"Even with {sp['total_rows']:,} rows, Persistence was hard to beat. The best challenger, {national['best_learned_model']}, "
+                       f"improved validation error by {gain:.1%}, short of the {national['promotion_margin']:.0%} bar, so ERNow keeps Persistence. "
+                       "The finding itself is useful: a hospital's ED performance is highly persistent from one year to the next, which is why last year's public number is already informative.")
+        st.markdown(f'<div class="callout">{summary}</div>', unsafe_allow_html=True)
+        st.caption(f"Train: {sp['train_rows']:,} rows ({sp['train_transitions']}). Validation: {sp['validation_rows']:,} rows ({sp['validation_transition']}). Test: {sp['test_rows']:,} rows ({sp['test_transition']}).")
 
-    **Validation**
-    - Chronological train/holdout split
-    - MAE, RMSE, and R²
-    - Hospital-level MAE
+    with tabs[1]:
+        st.subheader("Tested 80% ranges")
+        st.write(f"{iv['method']}. Ranges are calibrated on one release, then scaled by how much hospitals changed in the latest release "
+                 "(known at prediction time), because a calm year and a volatile year need different widths.")
+        cov = pd.DataFrame([
+            ["Old fixed band (0.65×–1.55×)", _pct(iv["old_fixed_band_coverage"]), fmt_minutes(iv["old_fixed_band_median_width_min"])],
+            ["Conformal, static", _pct(iv["static_test_coverage"]), fmt_minutes(iv["static_width_min"])],
+            ["Conformal, regime-adaptive (current)", _pct(iv["test_coverage"]), fmt_minutes(iv["median_width_min"])],
+        ], columns=["Range on the final test year", "Contained the actual value", "Median width"])
+        _table(cov)
+        st.caption(f"Target {iv['target_coverage']:.0%}. The adaptive method was chosen on an earlier held-out year ({_pct(iv['backtest_coverage'])} coverage) "
+                   f"before the final test year ({_pct(iv['test_coverage'])}). It is {iv['old_fixed_band_median_width_min'] / max(iv['median_width_min'], 1):.1f}× narrower than the old band.")
+        st.caption("Coverage by ED volume: " + " · ".join(f"{k} {_pct(v)}" for k, v in iv["coverage_by_volume"].items()) + ".")
 
-    **Selection rule**
-    - A learned model replaces the baseline only when it improves holdout MAE by the configured promotion margin.
+        st.subheader("Does the ranking hold?")
+        rt = pd.DataFrame([
+            ["Rank correlation, all U.S. hospitals", f"{rk['national_spearman']:.2f}"],
+            [f"Rank correlation within local areas ({rk['local_groups']} counties with 3+ hospitals)", f"{rk['mean_local_spearman']:.2f}"],
+            ["Picked the actual fastest ER in the area", _pct(rk["fastest_pick_accuracy"])],
+            ["Random pick would be right", _pct(rk["fastest_pick_random_baseline"])],
+        ], columns=["Test", "Result"])
+        _table(rt)
+        bt = national.get("boston_backtest", {})
+        if bt.get("hospitals"):
+            st.caption(f"Boston backtest on the latest release: average error {bt['MAE_selected']:.1f} min across {bt['hospitals']} hospitals; "
+                       f"rank correlation {bt['spearman_selected']:.2f}; fastest hospital predicted correctly: {'yes' if bt['fastest_pick_correct'] else 'no'}.")
 
-    **Role in ERNow**
-    - The selected historical prediction becomes one bounded signal inside the consumer wait forecast.
-    """)
+    with tabs[2]:
+        st.subheader("Which inputs actually help (ablation)")
+        ab = pd.DataFrame(national["ablation"]).rename(columns={"features": "Gradient boosting features", "test_MAE": "Test MAE (min)"})
+        ab["Test MAE (min)"] = ab["Test MAE (min)"].map(lambda v: f"{v:.2f}")
+        _table(ab)
+        st.caption("Adding feature groups did not beat Persistence on the test release. ERNow reports this rather than shipping a more complex model that does not help.")
 
+        st.subheader("What drives changes in ED time")
+        dr = pd.DataFrame(national["drivers"]).rename(columns={"feature": "Input", "importance_min": "Error increase when shuffled (min)"})
+        names = {"state_mean_gap": "Gap to state average", "lag1": "Last reported ED time", "lag2": "ED time two releases ago",
+                 "delta": "Most recent change", "op22": "Left without being seen (%)", "op18c": "Psychiatric-patient ED time",
+                 "edv": "ED volume category", "rating": "CMS star rating", "hospital_type": "Hospital type",
+                 "ownership": "Ownership", "state": "State", "peer_mean_gap": "Gap to peer average"}
+        dr["Input"] = dr["Input"].map(names).fillna(dr["Input"])
+        dr = dr[dr["Error increase when shuffled (min)"] > 0.005].copy()
+        dr["Error increase when shuffled (min)"] = dr["Error increase when shuffled (min)"].map(lambda v: f"{v:.2f}")
+        _table(dr)
+        st.caption("Permutation importance on the test release for the gradient-boosting challenger: how much worse its predictions get when each input is scrambled.")
+
+    with tabs[3]:
+        st.subheader("Boston forecasts and peers")
+        if forecast is not None:
+            bf = pd.DataFrame({
+                "Hospital": forecast["hospital"],
+                "Latest ED visit": forecast["latest_op18b"].map(fmt_minutes),
+                "Forecast (80% range)": [f"{fmt_minutes(a)} ({fmt_minutes(l)}–{fmt_minutes(h)})" for a, l, h in
+                                         zip(forecast["forecast_op18b"], forecast["lo80"], forecast["hi80"])],
+                "Similar U.S. hospitals": forecast["peer_median_op18b"].map(fmt_minutes),
+                "Difference": [f"{'+' if v >= 0 else '−'}{fmt_minutes(abs(v))}" for v in forecast["vs_peers_min"]],
+                "Unusual change": forecast["change_flag"].map({True: "Yes", False: "No"}),
+            })
+            _table(bf)
+            st.caption(f"Latest period ends {forecast['period_end'].iloc[0]}. Peers are the 25 most similar U.S. hospitals by ED volume, type, ownership, star rating, and case complexity.")
+            base = pd.read_csv(HOSPITAL_DATA)
+            ctx = pd.DataFrame({"Hospital": base["hospital"],
+                                "ED visits, HFY 2024": base["recent_ed_visits"].map(lambda v: f"{int(v):,}"),
+                                "Inpatient occupancy, HFY 2024": base["recent_occupancy_pct"].map(lambda v: f"{v:.1f}%"),
+                                "Provider wait, 2019 data": base["legacy_wait_to_provider_min"].map(fmt_minutes)})
+            st.caption("Hospital context (CHIA annual profiles and the retired CMS OP-20 measure)")
+            _table(ctx)
+
+        st.subheader("Who waits longest")
+        stc = national["structure"]
+        if True:
+            st.caption("By ED volume (latest release)")
+            bv = pd.DataFrame(stc["by_volume"])
+            bv = pd.DataFrame({"ED volume": bv["ed_volume"].str.capitalize(), "Hospitals": bv["hospitals"].map("{:,}".format),
+                               "Median ED visit": bv["median_op18b"].map(fmt_minutes),
+                               "Median left without being seen": bv["median_op22"].map(lambda v: f"{v:.0f}%")})
+            _table(bv)
+            st.caption("By ownership (six largest groups)")
+            bo = pd.DataFrame(stc["by_ownership"]).sort_values("hospitals", ascending=False).head(6).sort_values("median_op18b", ascending=False)
+            bo = pd.DataFrame({"Ownership": bo["ownership"], "Hospitals": bo["hospitals"].map("{:,}".format),
+                               "Median ED visit": bo["median_op18b"].map(fmt_minutes),
+                               "Median left without being seen": bo["median_op22"].map(lambda v: f"{v:.0f}%")})
+            _table(bo)
+        st.caption(f"Across U.S. hospitals, longer ED visits go with more patients leaving before being seen (rank correlation {stc['spearman_op18b_vs_left_without_being_seen']:.2f}).")
+
+    with tabs[4]:
+        st.subheader("Freshness and retraining")
+        gen = pd.Timestamp(national["generated_at"]).strftime("%B %-d, %Y")
+        st.write(f"Results generated {gen} from CMS releases {pd.Timestamp(national['releases'][0]).strftime('%b %Y')} to {pd.Timestamp(national['releases'][-1]).strftime('%b %Y')}. "
+                 "When CMS publishes a new release, add its archive to `data/cms_archives/` and run `python national_model.py`; the app reads the new results automatically.")
+
+        with st.expander("Technical details"):
+            st.markdown(f"""
+        **Target:** {national['target']}.
+
+        **Models:** Persistence baseline; Ridge regression on the change; robust partial pooling (shrink toward state and peer averages, weights fit by least absolute error); gradient boosting on the change.
+
+        **Validation:** chronological. Train on earlier releases, select on the next, test once on the latest. A learned model must beat Persistence by {national['promotion_margin']:.0%} on validation to be promoted.
+
+        **Ranges:** regime-adaptive conformalized quantile regression: gradient-boosted 10th/90th percentiles, a calibration offset from the prior release, then scaled by the ratio of current to calibration-period national volatility (median absolute change).
+
+        **Ranking:** Spearman rank correlation and fastest-pick accuracy within counties that have 3 or more hospitals.
+
+        **Peers:** nearest neighbors on ED volume, CMS star rating, hospital type, ownership, and case complexity (heart-attack and stroke patient volume, cardiac-surgery capability, inpatient volume from CMS Complications & Deaths).
+        """)
     st.divider()
-    st.caption("ERNow Forecast Model · Historical CMS model validation · Not a live queue model.")
+    st.caption("ERNow Forecast Model · National CMS model · Not a live queue model.")
 
 
 def _set_ernow_view(view_name):
