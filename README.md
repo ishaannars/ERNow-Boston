@@ -12,7 +12,7 @@ Today people search "ER near me" and go to the closest one, with no information 
 
 ## Why it works without live data
 
-Boston's EDs differ by hours, and those differences are structural: size, staffing, how many admitted patients board in the ED, and case mix change slowly. Across 4,246 U.S. hospitals, a hospital's ED time predicts next year's with **R² 0.93**, and annual public data alone picked the **actual fastest local ER 83% of the time** the following year (versus 24% by chance). Like knowing which restaurant on your block is usually packed, you don't need a live feed to make a much better choice than "closest." What ERNow can't see is a usually fast ED having a bad night; that's why it shows tested ranges, labels everything "typical, not live," and is built to plug in live data the day hospitals publish it.
+Boston's EDs differ by hours, and those differences are structural: size, staffing, how many admitted patients board in the ED, and case mix change slowly. Across 4,438 U.S. hospitals, a hospital's ED time predicts next year's with **R² 0.93**, and annual public data alone picked the **actual fastest local ER 83% of the time** the following year (versus 24% by chance). Like knowing which restaurant on your block is usually packed, you don't need a live feed to make a much better choice than "closest." What ERNow can't see is a usually fast ED having a bad night; that's why it shows tested ranges, labels everything "typical, not live," and is built to plug in live data the day hospitals publish it.
 
 ## The thesis: accelerate ER transparency the way Tesla accelerated EVs
 
@@ -37,7 +37,7 @@ Tesla's real achievement wasn't a faster car. It pulled a needed but slow-arrivi
 | Finding | Evidence | Source |
 |---|---|---|
 | Choosing an ER matters | Median ED visit time in Boston ranges from **2h 26m (Boston Medical Center–Brighton) to 5h 36m (BIDMC): a 3h 10m gap** | CMS OP-18b, period ending Sep 2025 |
-| Official data arrives late | CMS ED data is published **9–12 months** after the period it describes ends | Computed across 6 CMS releases |
+| Official data arrives late | CMS ED data is published **9–12 months** after the period it describes ends | Computed across 10 CMS releases |
 | Long ED stays are growing | Massachusetts ED visits lasting over 4 hours rose from **~33% to ~44%** (Jul–Sep 2019 vs 2025) | CHIA, reported by the Boston Globe, May 2026 |
 | The closest ER is usually not the fastest | For urgent, non-life-threatening visits, a different ER had the shortest drive + typical visit from **83%** of 1,997 Boston locations, typically **~1h 38m** shorter for ~14 min more driving. Holds at **74–83%** from gridlock to free-flowing traffic | `boston_choice_analysis.py` |
 | It takes many lookups to compare | Gathering ED times and drive times for every Boston ER manually takes **two lookups per hospital across 2 websites**; ERNow takes one screen | See `TIMING_TEST.md` |
@@ -55,28 +55,40 @@ Timed with `python timing_test.py` (protocol in `TIMING_TEST.md`).
 
 ## The model
 
-ERNow forecasts each hospital's next-period **CMS OP-18b**: the median time discharged patients spend in the ED from arrival to departure. The model is trained and tested on **every U.S. hospital** in six CMS Hospital Compare releases (2021–2026), then applied to Boston's seven adult emergency departments.
+ERNow forecasts each hospital's next-period **CMS OP-18b**: the median time patients who are sent home spend in the ED, from arrival to leaving. Validation is chronological: models learn from earlier releases, are chosen on the next one, and are scored once on the newest one. A learned model must beat Persistence (last year's value) by 2% to be used. The numbers below are written automatically by `national_model.py`, so they always match the app.
 
-`6 CMS releases → national panel (4,246 hospitals, 19,884 hospital-periods) → model comparison → tested 80% ranges → ranking test → Boston forecasts + peers → ERNow`
+<!-- MODEL_RESULTS:START -->
+Trained and tested on **every U.S. hospital** in 10 CMS Hospital Compare releases (2017–2026): **4,438 hospitals, 35,164 hospital-periods**, then applied to Boston's general emergency departments.
 
-**Validation is chronological.** Models train on earlier releases, are selected on the next release, and are scored once on the latest release (4,017 held-out hospitals). A learned model must beat Persistence by 2% on validation to be promoted.
+**Final test year** (4,017 held-out hospitals; chosen on the year before, scored once):
 
-| Model | Validation MAE | Test MAE | Test R² |
+| Model | Selection-year MAE | Test-year MAE | Test R² |
 |---|---|---|---|
-| Persistence baseline (last reported value) | 11.8 min | 9.4 min | 0.931 |
-| Partial pooling (shrink toward state & peer averages) | 11.6 min | 9.3 min | 0.934 |
-| Gradient boosting | 12.6 min | 10.2 min | 0.924 |
-| Ridge regression | 12.7 min | 10.5 min | 0.922 |
+| Partial pooling (nudged toward similar hospitals) | 11.6 min | 9.4 min | 0.933 |
+| Persistence (last year's value) | 11.8 min | 9.4 min | 0.931 |
+| Gradient boosting | 12.6 min | 10.3 min | 0.924 |
+| Ridge regression | 13.0 min | 10.7 min | 0.918 |
 
-**Result:** even with 19,884 rows, Persistence was hard to beat. The best challenger improved validation error by 1.6%, short of the 2% bar, so ERNow keeps Persistence. The finding is useful in itself: a hospital's ED performance is highly persistent year to year, which is why last year's public number is already informative.
+The best challenger, Partial pooling (nudged toward similar hospitals), was 1.7% better in the selection year, short of the 2% bar, so ERNow uses **Persistence (last year's value)**. Ranges: **85%** of 80% ranges held the true value (95% CI 84%–86%), median width 34 min. Picked the actual fastest local ER **83%** of the time (95% CI 78%–87%) vs **24%** by chance across 293 local areas.
 
-**Tested 80% ranges.** Regime-adaptive conformalized quantile regression: gradient-boosted 10th/90th percentiles, calibrated on the prior release, then scaled by how much hospitals changed in the latest release (known at prediction time). Static conformal ranges over-covered (88%) because volatility differs year to year; the adaptive version, chosen on an earlier held-out year (**83%**), covered **85%** on the final test year (target 80%) with a median width of **34 minutes**. The old fixed band (0.65×–1.55×) was **4× wider** (134 minutes).
+**Year by year (rolling backtest: each year trained only on earlier years):**
 
-**How sure are these numbers?** Bootstrap with 2,000 resamples on the final test year: fastest-pick accuracy **83% (95% CI 78–87%)**, range coverage **85% (83–86%)**. The best challenger's edge over Persistence is statistically real but about **8 seconds** per hospital on a 3–5 hour visit, and it missed the 2% bar on validation, so Persistence stays.
+| Held-out release | Persistence MAE | Best challenger MAE | ERNow's rule used | 80% range coverage | Fastest-pick |
+|---|---|---|---|---|---|
+| 2020-10 | 11.1 min | 10.8 min | — | 81% | 75% |
+| 2021-10 | 15.9 min | 15.4 min | Ridge regression | 66% | 71% |
+| 2022-07 | 12.0 min | 11.7 min | Ridge regression | 97% | 75% |
+| 2023-10 | 14.5 min | 13.8 min | Gradient boosting | 55% | 74% |
+| 2024-10 | 13.6 min | 13.4 min | Gradient boosting | 88% | 71% |
+| 2025-11 | 11.8 min | 11.6 min | Persistence | 83% | 76% |
+| 2026-08 | 9.4 min | 9.4 min | Persistence | 85% | 83% |
 
-**Does the ranking hold?** On the test release, the forecast ranked hospitals with a rank correlation of **0.97** nationally and **0.86** within local areas (293 counties with 3+ hospitals). It picked the actual fastest ER in the area **83%** of the time, versus **24%** by chance. Boston backtest (7 hospitals): rank correlation 1.00 and the fastest hospital predicted correctly.
+Run year by year, ERNow's promotion rule averaged **12.8 min** error vs **12.9 min** for always using Persistence, switching to a learned model in 4 of 6 years and doing worse in 1.
+<!-- MODEL_RESULTS:END -->
 
-**Ablation.** Adding other ED measures, hospital characteristics, and geography to gradient boosting did not beat Persistence on the test release, and ERNow reports that instead of shipping a more complex model that does not help.
+**What the year-by-year test shows.** During the volatile 2020–2023 releases, when the pandemic scrambled ED operations, learned models beat Persistence by more than 2% and the ranges missed in both directions. In the three stable years since, Persistence wins and the ranges sit near their 80% target. Run year by year, ERNow's promotion rule switched to a learned model in 4 of 6 years and came out only slightly ahead of always using Persistence (12.8 vs 12.9 min). Even during upheaval, last year's public data stayed hard to beat.
+
+**Ablation.** Adding other ED measures, hospital characteristics, and geography to gradient boosting did not beat Persistence on the final test year; ERNow reports that instead of shipping a more complex model that doesn't help.
 
 **No hand-set adjustments.** Every number on an ER card is public data or a model output tested on held-out hospitals.
 

@@ -57,6 +57,35 @@ def _find(names, pattern):
     return hits[0] if hits else None
 
 
+TIMELY_RE = r"Timely[ _]and[ _]Effective[ _]Care[ _]*-[ _]*Hospital\.csv$"
+GENERAL_RE = r"Hospital[ _]General[ _]Information\.csv$"
+# Some releases (e.g. Oct 2020) name files only by their CMS dataset ID.
+TIMELY_ID, GENERAL_ID = "yv7e-xc69", "xubh-q36u"
+
+
+def _locate(z):
+    """Find the Timely & Effective Care and Hospital General Information CSVs in an archive:
+    by name, then by CMS dataset ID, then by reading each file's header row."""
+    names = [n for n in z.namelist() if n.lower().endswith(".csv") and "__MACOSX" not in n and "REH_" not in n]
+    tec = _find(names, TIMELY_RE) or _find(names, TIMELY_ID)
+    gen = _find(names, GENERAL_RE) or _find(names, GENERAL_ID)
+    if tec and gen:
+        return tec, gen
+    gens, tecs = [], []
+    for n in names:
+        with z.open(n) as f:
+            head = f.readline().decode("latin-1").lower()
+        if all(k in head for k in ("hospital type", "hospital ownership", "emergency services", "hospital overall rating")):
+            gens.append(n)
+        if all(k in head for k in ("measure id", "condition", "score", "sample")) and b"OP_18b" in z.read(n):
+            tecs.append(n)
+    size = lambda n: z.getinfo(n).file_size
+    # The national files are by far the largest (e.g. a small VA-only file shares the same columns).
+    gen = gen or (max(gens, key=size) if gens else None)
+    tec = tec or (max(tecs, key=size) if tecs else None)
+    return tec, gen
+
+
 def _snapshot_date(zip_name):
     m = re.search(r"(\d{4})(\d{2})", zip_name)
     return pd.Timestamp(int(m.group(1)), int(m.group(2)), 1)
@@ -66,10 +95,9 @@ def build_panel():
     frames = []
     for zpath in sorted(ARCHIVES.glob("hospitals_compare_*.zip")):
         with zipfile.ZipFile(zpath) as z:
-            names = z.namelist()
-            tec = _find(names, r"Timely[ _]and[ _]Effective[ _]Care[ _]*-[ _]*Hospital\.csv$")
-            gen = _find(names, r"Hospital[ _]General[ _]Information\.csv$")
+            tec, gen = _locate(z)
             if not tec or not gen:
+                print(f"Skipping {zpath.name}: missing {'Timely and Effective Care' if not tec else 'Hospital General Information'} file")
                 continue
             t = pd.read_csv(io.BytesIO(z.read(tec)), dtype=str, encoding="latin-1")
             g = pd.read_csv(io.BytesIO(z.read(gen)), dtype=str, encoding="latin-1")
@@ -389,7 +417,8 @@ def run():
             maes[name] = float(mean_absolute_error(te_k["target"], model.predict(te_k)))
         best_c = min((m for m in maes if m != "Persistence baseline"), key=maes.get)
         row = {"target_release": str(pd.Timestamp(snaps[k + 1]).date()), "hospitals": int(len(te_k)),
-               "persistence_MAE": maes["Persistence baseline"], "best_challenger": best_c, "best_challenger_MAE": maes[best_c]}
+               "persistence_MAE": maes["Persistence baseline"], "best_challenger": best_c, "best_challenger_MAE": maes[best_c],
+               "maes": maes}
         if k >= 2 and len(labeled[labeled["t"] <= k - 2]) >= 1000:
             c = CQR(full_cols).fit(labeled[labeled["t"] <= k - 2], labeled[labeled["t"] == k - 1])
             lo_k, hi_k = c.predict(te_k)
@@ -398,6 +427,20 @@ def run():
         sel_k = te_k.assign(pred_selected=te_k["lag1"])
         row["fastest_pick_accuracy"] = ranking_eval(sel_k, "pred_selected")["fastest_pick_accuracy"]
         rolling.append(row)
+
+    for prev, cur in zip(rolling, rolling[1:]):
+        pm = prev["maes"]
+        cand = min((m for m in pm if m != "Persistence baseline"), key=pm.get)
+        use = cand if pm[cand] <= pm["Persistence baseline"] * (1 - PROMOTION_MARGIN) else "Persistence baseline"
+        cur["rule_model"], cur["rule_MAE"] = use, cur["maes"][use]
+    ruled = [r for r in rolling if "rule_MAE" in r]
+    walk_forward = {
+        "years": len(ruled),
+        "always_persistence_MAE": float(np.mean([r["persistence_MAE"] for r in ruled])) if ruled else None,
+        "rule_MAE": float(np.mean([r["rule_MAE"] for r in ruled])) if ruled else None,
+        "years_rule_switched": int(sum(r["rule_model"] != "Persistence baseline" for r in ruled)),
+        "years_rule_worse": int(sum(r["rule_MAE"] > r["persistence_MAE"] + 1e-9 for r in ruled)),
+    }
 
     # --- tested 80% intervals: fit on train, calibrate on validation, measure on test
     cqr = CQR(full_cols).fit(train, valid)
@@ -571,7 +614,7 @@ def run():
                       "static_test_coverage": static_cov, "static_width_min": static_width, "old_fixed_band_coverage": old_band,
                       "old_fixed_band_median_width_min": old_width,
                       "coverage_by_volume": {k: float(v) for k, v in cov_by_volume.items()}},
-        "ranking": ranking, "rolling": rolling, "confidence": confidence, "boston_backtest": boston_bt, "ablation": ablation, "drivers": drivers[:10],
+        "ranking": ranking, "rolling": rolling, "walk_forward": walk_forward, "confidence": confidence, "boston_backtest": boston_bt, "ablation": ablation, "drivers": drivers[:10],
         "structure": {"by_volume": vol.reset_index().rename(columns={"edv": "ed_volume"}).to_dict("records"),
                       "by_ownership": own.reset_index().to_dict("records"),
                       "spearman_op18b_vs_left_without_being_seen": corr_op22},
@@ -581,9 +624,92 @@ def run():
     return out
 
 
+README = ROOT / "README.md"
+MODEL_CARD = ROOT / "MODEL_CARD.md"
+RS, RE = "<!-- MODEL_RESULTS:START -->", "<!-- MODEL_RESULTS:END -->"
+
+
+def _hm(m):
+    m = int(round(m))
+    return f"{m} min" if m < 60 else f"{m // 60}h {m % 60}m"
+
+
+def results_markdown(r):
+    sp, iv, rk, cf, wf = r["split"], r["intervals"], r["ranking"]["selected"], r["confidence"], r["walk_forward"]
+    m = {x["model"]: x for x in r["models"]}
+    plain = {"Persistence baseline": "Persistence (last year's value)", "Ridge regression": "Ridge regression",
+             "Partial pooling (shrink toward state & peer means)": "Partial pooling (nudged toward similar hospitals)",
+             "Gradient boosting": "Gradient boosting"}
+    base, best = m["Persistence baseline"], m[r["best_learned_model"]]
+    gain = (base["validation_MAE"] - best["validation_MAE"]) / base["validation_MAE"]
+    lines = [
+        f"Trained and tested on **every U.S. hospital** in {len(r['releases'])} CMS Hospital Compare releases "
+        f"({r['releases'][0][:4]}–{r['releases'][-1][:4]}): **{sp['hospitals']:,} hospitals, {sp['total_rows']:,} hospital-periods**, "
+        "then applied to Boston's general emergency departments.",
+        "",
+        f"**Final test year** ({sp['test_rows']:,} held-out hospitals; chosen on the year before, scored once):",
+        "",
+        "| Model | Selection-year MAE | Test-year MAE | Test R² |",
+        "|---|---|---|---|",
+    ]
+    for x in sorted(r["models"], key=lambda x: x["MAE"]):
+        lines.append(f"| {plain.get(x['model'], x['model'])} | {x['validation_MAE']:.1f} min | {x['MAE']:.1f} min | {x['R2']:.3f} |")
+    lines += ["",
+              f"The best challenger, {plain.get(r['best_learned_model'], r['best_learned_model'])}, was {gain:.1%} better in the selection year, "
+              f"{'clearing' if r['learned_model_promoted'] else 'short of'} the {r['promotion_margin']:.0%} bar, so ERNow uses "
+              f"**{plain.get(r['selected_model'], r['selected_model'])}**. Ranges: **{iv['test_coverage']:.0%}** of 80% ranges held the true value "
+              f"(95% CI {iv.get('test_coverage_ci95', [0, 0])[0]:.0%}–{iv.get('test_coverage_ci95', [0, 0])[1]:.0%}), "
+              f"median width {_hm(iv['median_width_min'])}. Picked the actual fastest local ER **{rk['fastest_pick_accuracy']:.0%}** of the time "
+              f"(95% CI {cf['fastest_pick_ci95'][0]:.0%}–{cf['fastest_pick_ci95'][1]:.0%}) vs **{rk['fastest_pick_random_baseline']:.0%}** by chance "
+              f"across {rk['local_groups']} local areas.",
+              "",
+              "**Year by year (rolling backtest: each year trained only on earlier years):**",
+              "",
+              "| Held-out release | Persistence MAE | Best challenger MAE | ERNow's rule used | 80% range coverage | Fastest-pick |",
+              "|---|---|---|---|---|---|"]
+    for y in r["rolling"]:
+        cov = f"{y['coverage']:.0%}" if y.get("coverage") is not None else "—"
+        rule = plain.get(y.get("rule_model"), "—").split(" (")[0]
+        lines.append(f"| {y['target_release'][:7]} | {y['persistence_MAE']:.1f} min | {y['best_challenger_MAE']:.1f} min | "
+                     f"{rule} | {cov} | {y['fastest_pick_accuracy']:.0%} |")
+    if wf.get("years"):
+        lines += ["",
+                  f"Run year by year, ERNow's promotion rule averaged **{wf['rule_MAE']:.1f} min** error vs "
+                  f"**{wf['always_persistence_MAE']:.1f} min** for always using Persistence, switching to a learned model in "
+                  f"{wf['years_rule_switched']} of {wf['years']} years and doing worse in {wf['years_rule_worse']}."]
+    return "\n".join(lines)
+
+
+def write_docs(r):
+    block = results_markdown(r)
+    for path in (README, MODEL_CARD):
+        if not path.exists():
+            continue
+        body = path.read_text()
+        if RS in body and RE in body:
+            i, j = body.index(RS) + len(RS), body.index(RE)
+            path.write_text(body[:i] + "\n" + block + "\n" + body[j:])
+
+
+def check_archives():
+    for zpath in sorted(ARCHIVES.glob("hospitals_compare_*.zip")):
+        with zipfile.ZipFile(zpath) as z:
+            names = [n for n in z.namelist() if n.lower().endswith(".csv") and "__MACOSX" not in n]
+            tec, gen = _locate(z)
+        print(f"{zpath.name}: timely={tec or 'MISSING'}  general={gen or 'MISSING'}")
+        if not tec or not gen:
+            for n in names[:40]:
+                print("     ", n)
+
+
 if __name__ == "__main__":
+    import sys
+    if "--check" in sys.argv:
+        check_archives()
+        raise SystemExit
     build_panel()
     r = run()
+    write_docs(r)
     s = r["split"]
     print(f"Panel: {s['total_rows']:,} labeled rows, {s['hospitals']:,} hospitals")
     for m in r["models"]:

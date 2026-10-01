@@ -1051,8 +1051,8 @@ def render_home():
         best_gain = (vals_lm["Persistence baseline"] - vals_lm[national["best_learned_model"]]) / vals_lm["Persistence baseline"]
         live = [
             ("Expected ED visit", "Latest CMS figure",
-             f"ED times barely change year to year, so each hospital's latest CMS figure is the forecast. "
-             f"No learned model beat it by the required 2% (best: {best_gain:.1%})."),
+             f"In stable years ED times barely change, so each hospital's latest CMS figure is the forecast. "
+             f"In the latest selection year no learned model beat it by the required 2% (best: {best_gain:.1%})."),
             ("The range on each card", "Checked against reality",
              f"In a year the model never saw, the range held the actual ED time {iv['test_coverage']:.0%} of the time (target 80%)."),
             ("Vs similar U.S. hospitals", "25 look-alikes",
@@ -1398,9 +1398,13 @@ def render_methodology():
             ("National forecaster", f"{sel['MAE']:.1f} min avg. error",
              f"Four models compared on {sp['hospitals']:,} U.S. hospitals ({sp['total_rows']:,} hospital-periods): Persistence, Ridge, partial pooling, gradient boosting. "
              f"The best challenger was only {(vals[national['selected_model']]['validation_MAE'] - vals[national['best_learned_model']]['validation_MAE']) / vals[national['selected_model']]['validation_MAE']:.1%} better on validation, under the 2% bar, so ERNow keeps {national['selected_model']} (R² {sel['R2']:.2f})."),
-            ("Tested ranges", f"{iv['backtest_coverage']:.0%} & {iv['test_coverage']:.0%} coverage",
-             f"Regime-adaptive conformal prediction builds each 80% range from real errors and recent volatility; tested on held-out years (see the year-by-year table on the Forecast Model page). "
-             f"Median width {fmt_minutes(iv['median_width_min'])}, {iv['old_fixed_band_median_width_min'] / max(iv['median_width_min'], 1):.1f}× narrower than ERNow's early fixed range."),
+            ("Tested ranges", f"{iv['test_coverage']:.0%} coverage, latest year",
+             f"Conformal prediction builds each 80% range from real errors and recent volatility. Median width {fmt_minutes(iv['median_width_min'])}, "
+             f"{iv['old_fixed_band_median_width_min'] / max(iv['median_width_min'], 1):.1f}× narrower than ERNow's early fixed range."
+             + (f" Across {len(national.get('rolling') or [])} held-out years coverage ran "
+                f"{min(r['coverage'] for r in national['rolling'] if r.get('coverage') is not None):.0%}–"
+                f"{max(r['coverage'] for r in national['rolling'] if r.get('coverage') is not None):.0%}, missing most in volatile years."
+                if any(r.get('coverage') is not None for r in (national.get('rolling') or [])) else "")),
             ("Ranking test", f"{rk['fastest_pick_accuracy']:.0%} vs {rk['fastest_pick_random_baseline']:.0%}",
              f"Picked the actual fastest ER in {rk['local_groups']} local areas {rk['fastest_pick_accuracy']:.0%} of the time, versus {rk['fastest_pick_random_baseline']:.0%} by chance."),
             ("Chance it's the fastest", "4,000 scenarios",
@@ -1517,7 +1521,7 @@ def render_forecast_model():
         else:
             summary = (f"Even with {sp['total_rows']:,} hospital-periods, Persistence was hard to beat. The best challenger, {best_plain}, "
                        f"was {gain:.1%} more accurate in the selection year, short of the {national['promotion_margin']:.0%} bar, so ERNow keeps Persistence. "
-                       "The finding itself is the reason ERNow works: a hospital's ED performance is highly persistent from one year to the next, so last year's public number already points to the likely fastest ER, before any live data exists.")
+                       "In stable years, this is the reason ERNow works: a hospital's ED performance is highly persistent from one year to the next, so last year's public number already points to the likely fastest ER, before any live data exists.")
         st.markdown(f'<div class="callout">{summary}</div>', unsafe_allow_html=True)
         st.caption(f"Learned from {sp['train_rows']:,} hospital-periods, chose a model on the next release ({sp['validation_rows']:,}), "
                    f"and scored it once on the newest release ({sp['test_rows']:,} hospitals).")
@@ -1547,6 +1551,7 @@ def render_forecast_model():
                 "Hospitals": f"{r['hospitals']:,}",
                 "Persistence avg. error (MAE)": f"{r['persistence_MAE']:.1f} min",
                 "Best challenger avg. error": f"{r['best_challenger_MAE']:.1f} min",
+                "ERNow's rule used": {"Persistence baseline": "Persistence"}.get(r.get("rule_model"), "Learned model" if r.get("rule_model") else "—"),
                 "80% range held the true value": _pct(r.get("coverage")),
                 "Picked the fastest local ER": _pct(r.get("fastest_pick_accuracy")),
             } for r in roll])
@@ -1554,8 +1559,13 @@ def render_forecast_model():
             wins = sum(1 for r in roll if r["best_challenger_MAE"] <= r["persistence_MAE"] * (1 - national["promotion_margin"]))
             covs = [r["coverage"] for r in roll if r.get("coverage") is not None]
             cov_txt = f" Range coverage ran {min(covs):.0%}–{max(covs):.0%} against the 80% target." if covs else ""
+            wf = national.get("walk_forward") or {}
+            wf_txt = (f" Run year by year (choosing with last year's results), ERNow's rule averaged {wf['rule_MAE']:.1f} min of error vs "
+                      f"{wf['always_persistence_MAE']:.1f} min for always using Persistence, switching to a learned model in "
+                      f"{wf['years_rule_switched']} of {wf['years']} years." if wf.get("years") else "")
             st.caption(f"Each row trains only on releases before that year, then scores it once. In {wins} of {len(roll)} held-out years, "
-                       f"a learned model beat Persistence by the {national['promotion_margin']:.0%} bar.{cov_txt}")
+                       f"a learned model beat Persistence by the {national['promotion_margin']:.0%} bar.{cov_txt}{wf_txt} "
+                       "Ranges miss most in the most volatile years, when last year's pattern breaks.")
 
         st.subheader("Does it pick the right ER?")
         rt = pd.DataFrame([
