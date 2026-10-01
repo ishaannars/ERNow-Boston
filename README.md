@@ -18,13 +18,13 @@ Boston's EDs differ by hours, and those differences are structural: size, staffi
 
 Tesla's real achievement wasn't a faster car. It pulled a needed but slow-arriving category forward by years, in three moves: prove it works, set the standard, then scale. ER transparency is a category like that.
 
-**Why it's slow to arrive on its own.** Hospitals have no mandate or incentive to publish live ED waits. The only public time-to-provider measure (CMS OP-20) was retired after 2019. What remains is published 9–12 months after the period it describes, and it's split across six sources nobody combines.
+**Why it's slow to arrive on its own.** Hospitals have no mandate or incentive to publish live ED waits. The only public time-to-provider measure (CMS OP-20) is no longer published (its last data is from 2019 or earlier). What remains is published 9–12 months after the period it describes, and it's split across six sources nobody combines.
 
 **1. Prove it works now.** ERNow combines CMS, CHIA, CDC, the Weather Service, event calendars, and road routing into one screen, with a forecast trained and tested on every U.S. hospital. No hospital partnership needed.
 
 **2. Set the standard.** Every number is labeled with its source and period, no hand-set adjustment changes any displayed number, and uncertainty is shown as a tested range. The Methodology view lists exactly what hospitals would need to publish (current arrival-to-provider time, patients waiting by triage level, boarding counts, diversion status) for ERNow to go live.
 
-**3. Show it scales.** The model already covers 4,658 U.S. hospitals. Boston is the first city deployed; the same pipeline works anywhere.
+**3. Show it scales.** The model already covers the 4,081 U.S. hospitals that report ED times. Boston is the first city deployed; the same pipeline works anywhere.
 
 **What success looks like:** decision time in seconds (measured below), non-emergency patients choosing a faster ER instead of defaulting to the closest, ranges that keep their tested coverage as each new CMS release arrives, and more cities.
 
@@ -41,7 +41,7 @@ Tesla's real achievement wasn't a faster car. It pulled a needed but slow-arrivi
 | Long ED stays are growing | Massachusetts ED visits lasting over 4 hours rose from **~33% to ~44%** (Jul–Sep 2019 vs 2025) | CHIA, reported by the Boston Globe, May 2026 |
 | The closest ER is usually not the fastest | For urgent, non-life-threatening visits, a different ER had the shortest drive + typical visit from **90%** of 1,977 Boston locations, typically **~1h 16m** shorter for ~5 min more driving. Holds at **73–90%** from gridlock to free-flowing traffic | `boston_choice_analysis.py` |
 | It takes many lookups to compare | Gathering ED times and drive times for 6 hospitals manually takes **12 separate lookups across 2 websites**; ERNow takes one screen | See `TIMING_TEST.md` |
-| The method scales | The same pipeline covers **4,658 U.S. hospitals**; Boston is the first city deployed | CMS Hospital Compare archives |
+| The method scales | The same pipeline covers the **4,081 U.S. hospitals** that report ED times; Boston is the first city deployed | CMS Hospital Compare archives |
 
 ## Decision time (measured)
 
@@ -86,7 +86,7 @@ ERNow forecasts each hospital's next-period **CMS OP-18b**: the median time disc
 - **Expected ED visit time** for each hospital, with its tested 80% range
 - **Chance it's the fastest** option from your location
 - **Comparison with similar U.S. hospitals**
-- **Provider wait, 2019 data:** the last public CMS time-to-provider measure, shown as-is
+- **Provider wait (pre-2020 data):** the last public CMS time-to-provider measure, which CMS no longer publishes, shown as-is
 - **Closest vs likely fastest overall** up front, with a one-tap switch to sort by closest
 - Personalized drive time and one-tap directions
 - Boston context (weather, respiratory illness, major events), shown but never used to adjust a number
