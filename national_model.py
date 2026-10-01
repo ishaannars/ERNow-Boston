@@ -67,12 +67,19 @@ def build_panel():
     for zpath in sorted(ARCHIVES.glob("hospitals_compare_*.zip")):
         with zipfile.ZipFile(zpath) as z:
             names = z.namelist()
-            tec = _find(names, r"Timely_and_Effective_Care-Hospital\.csv$")
-            gen = _find(names, r"Hospital_General_Information\.csv$")
+            tec = _find(names, r"Timely[ _]and[ _]Effective[ _]Care[ _]*-[ _]*Hospital\.csv$")
+            gen = _find(names, r"Hospital[ _]General[ _]Information\.csv$")
             if not tec or not gen:
                 continue
             t = pd.read_csv(io.BytesIO(z.read(tec)), dtype=str, encoding="latin-1")
             g = pd.read_csv(io.BytesIO(z.read(gen)), dtype=str, encoding="latin-1")
+        t = t.rename(columns={"Provider ID": "Facility ID", "Measure Start Date": "Start Date", "Measure End Date": "End Date"})
+        g = g.rename(columns={"Provider ID": "Facility ID", "Hospital Name": "Facility Name"})
+        if "Measure ID" not in t or "Facility ID" not in t:
+            print(f"Skipping {zpath.name}: unrecognized layout")
+            continue
+        t["Facility ID"] = t["Facility ID"].astype(str).str.strip().str.zfill(6)
+        g["Facility ID"] = g["Facility ID"].astype(str).str.strip().str.zfill(6)
         t = t[t["Measure ID"].isin(MEASURES)]
         wide = t.pivot_table(index="Facility ID", columns="Measure ID", values="Score", aggfunc="first")
         ends = t[t["Measure ID"] == "OP_18b"].groupby("Facility ID")["End Date"].first()
@@ -95,7 +102,10 @@ def build_panel():
     panel = pd.concat(frames, ignore_index=True)
     for m in ["OP_18a", "OP_18b", "OP_18c", "OP_18d", "OP_22"]:
         panel[m] = pd.to_numeric(panel.get(m), errors="coerce")
-    panel["edv"] = panel.get("EDV").astype(str).str.strip().str.lower().map(EDV_ORDER)
+    # Older archives write ED volume as e.g. "Very High (60,000+ patients annually)"
+    edv_txt = panel.get("EDV").astype(str).str.strip().str.lower()
+    panel["edv"] = np.select([edv_txt.str.startswith("very high"), edv_txt.str.startswith("high"),
+                              edv_txt.str.startswith("medium"), edv_txt.str.startswith("low")], [4, 3, 2, 1], default=np.nan)
     panel["rating"] = pd.to_numeric(panel["rating"], errors="coerce")
     panel["county"] = panel["county"].astype(str).str.upper().str.strip()
     panel["city"] = panel["city"].astype(str).str.upper().str.strip()
@@ -367,6 +377,28 @@ def run():
     test["pred_selected"] = fitted[selected].predict(test)
     test["pred_persistence"] = test["lag1"]
 
+    # --- rolling backtest: for every held-out year, train on all earlier years only
+    rolling = []
+    for k in range(2, T + 1):
+        tr_k, te_k = labeled[labeled["t"] < k], labeled[labeled["t"] == k]
+        if len(tr_k) < 1000 or len(te_k) < 500:
+            continue
+        maes = {}
+        for name, model in candidate_models().items():
+            model.fit(tr_k)
+            maes[name] = float(mean_absolute_error(te_k["target"], model.predict(te_k)))
+        best_c = min((m for m in maes if m != "Persistence baseline"), key=maes.get)
+        row = {"target_release": str(pd.Timestamp(snaps[k + 1]).date()), "hospitals": int(len(te_k)),
+               "persistence_MAE": maes["Persistence baseline"], "best_challenger": best_c, "best_challenger_MAE": maes[best_c]}
+        if k >= 2 and len(labeled[labeled["t"] <= k - 2]) >= 1000:
+            c = CQR(full_cols).fit(labeled[labeled["t"] <= k - 2], labeled[labeled["t"] == k - 1])
+            lo_k, hi_k = c.predict(te_k)
+            yk = te_k["target"].to_numpy()
+            row["coverage"] = float(np.mean((yk >= lo_k) & (yk <= hi_k)))
+        sel_k = te_k.assign(pred_selected=te_k["lag1"])
+        row["fastest_pick_accuracy"] = ranking_eval(sel_k, "pred_selected")["fastest_pick_accuracy"]
+        rolling.append(row)
+
     # --- tested 80% intervals: fit on train, calibrate on validation, measure on test
     cqr = CQR(full_cols).fit(train, valid)
     lo, hi = cqr.predict(test)
@@ -470,7 +502,10 @@ def run():
     mad = float(np.median(np.abs(changes - changes.median()))) * 1.4826 or 1.0
 
     boston = pd.read_csv(BOSTON_CSV, dtype={"cms_provider_id": str})
-    boston["cms_provider_id"] = boston["cms_provider_id"].str.zfill(6)
+    boston["cms_provider_id"] = boston["cms_provider_id"].fillna("").str.zfill(6)
+    if "ed_type" not in boston:
+        boston["ed_type"] = "general"
+    boston["ed_type"] = boston["ed_type"].fillna("general")
     rows = []
     for _, b in boston.iterrows():
         hit = now[now["facility_id"].str.zfill(6) == b["cms_provider_id"]]
@@ -482,7 +517,7 @@ def run():
         peers = now.iloc[[i for i in nbr[0] if i != idx][:25]]
         peer_med = float(peers["op18b"].median())
         rows.append({
-            "hospital": b["hospital"], "cms_provider_id": b["cms_provider_id"],
+            "hospital": b["hospital"], "cms_provider_id": b["cms_provider_id"], "ed_type": b["ed_type"],
             "latest_op18b": float(h["op18b"]), "period_end": str(h["op18b_period_end"].date()) if pd.notna(h["op18b_period_end"]) else "",
             "forecast_op18b": float(h["forecast"]), "lo80": float(h["lo80"]), "hi80": float(h["hi80"]),
             "peer_median_op18b": peer_med, "vs_peers_min": float(h["op18b"] - peer_med),
@@ -491,11 +526,14 @@ def run():
             "latest_change_min": float(h["delta"]) if pd.notna(h["delta"]) else None,
             "change_flag": bool(pd.notna(h["delta"]) and abs(h["delta"]) > 2.5 * mad),
         })
-    bos = pd.DataFrame(rows)
-    bos.to_csv(BOSTON_PATH, index=False)
+    bos_all = pd.DataFrame(rows)
+    bos_all.to_csv(BOSTON_PATH, index=False)
+    # Evidence and backtest compare general EDs only (specialty/pediatric/VA EDs serve different patients).
+    bos = bos_all[bos_all["ed_type"] == "general"].reset_index(drop=True)
+    general_ids = set(boston.loc[boston["ed_type"] == "general", "cms_provider_id"])
 
     # --- Boston backtest on the test transition
-    bt = test[test["facility_id"].str.zfill(6).isin(boston["cms_provider_id"])]
+    bt = test[test["facility_id"].str.zfill(6).isin(general_ids)]
     boston_bt = {"hospitals": int(len(bt)),
                  "MAE_selected": float(mean_absolute_error(bt["target"], bt["pred_selected"])) if len(bt) else None,
                  "spearman_selected": _spearman(bt["pred_selected"], bt["target"]) if len(bt) >= 3 else None,
@@ -533,7 +571,7 @@ def run():
                       "static_test_coverage": static_cov, "static_width_min": static_width, "old_fixed_band_coverage": old_band,
                       "old_fixed_band_median_width_min": old_width,
                       "coverage_by_volume": {k: float(v) for k, v in cov_by_volume.items()}},
-        "ranking": ranking, "confidence": confidence, "boston_backtest": boston_bt, "ablation": ablation, "drivers": drivers[:10],
+        "ranking": ranking, "rolling": rolling, "confidence": confidence, "boston_backtest": boston_bt, "ablation": ablation, "drivers": drivers[:10],
         "structure": {"by_volume": vol.reset_index().rename(columns={"edv": "ed_volume"}).to_dict("records"),
                       "by_ownership": own.reset_index().to_dict("records"),
                       "spearman_op18b_vs_left_without_being_seen": corr_op22},
@@ -557,6 +595,9 @@ if __name__ == "__main__":
     print("Ranking:", json.dumps(r["ranking"], indent=1))
     print("Boston backtest:", r["boston_backtest"])
     print("Ablation:", r["ablation"])
+    for y in r["rolling"]:
+        print(f"  Year {y['target_release']}: Persistence {y['persistence_MAE']:.1f} min vs best challenger "
+              f"{y['best_challenger_MAE']:.1f}; coverage {y.get('coverage', float('nan')):.0%}; fastest-pick {y['fastest_pick_accuracy']:.0%}")
     print("Top drivers:", r["drivers"][:5])
     print("Evidence:", r["evidence"])
     print(f"Wrote {RESULTS_PATH.name}, {BOSTON_PATH.name}, {PANEL_PATH.name}")

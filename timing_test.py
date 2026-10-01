@@ -20,7 +20,7 @@ README = ROOT / "README.md"
 HEADER = ["participant", "method", "seconds", "picked_hospital"]
 PLACEHOLDER = "_Not yet measured. Run `python timing_test.py` (guided stopwatch, about 10 minutes)._"
 HOSPITALS = ["Massachusetts General Hospital", "Brigham and Women's Hospital", "Brigham and Women's Faulkner Hospital",
-             "Beth Israel Deaconess Medical Center", "Boston Medical Center", "Tufts Medical Center"]
+             "Beth Israel Deaconess Medical Center", "Boston Medical Center", "Boston Medical Center–Brighton", "Tufts Medical Center"]
 MIN_SECONDS = {"full": 120, "quick": 10, "ernow": 3}
 
 
@@ -38,8 +38,8 @@ def pick():
     for i, h in enumerate(HOSPITALS, 1):
         print(f"  {i}. {h}")
     while True:
-        a = input("Which hospital did you pick? Enter 1-6: ").strip()
-        if a.isdigit() and 1 <= int(a) <= 6:
+        a = input("Which hospital did you pick? Enter 1-7: ").strip()
+        if a.isdigit() and 1 <= int(a) <= len(HOSPITALS):
             return HOSPITALS[int(a) - 1]
 
 
@@ -59,7 +59,7 @@ def fmt(sec):
 def confirm_plausible(method, sec):
     if sec >= MIN_SECONDS[method]:
         return True
-    kind = {"full": "full comparison (12 lookups) usually takes several minutes",
+    kind = {"full": "full comparison (two lookups per ER) usually takes several minutes",
             "quick": "quick search still includes opening the search",
             "ernow": "ERNow run should include loading the page"}[method]
     a = input(f"That was only {fmt(sec)}, but a {kind}. Keep it anyway? (y = keep, n = redo): ").strip().lower()
@@ -101,8 +101,8 @@ def typed(method, label):
 QUICK_STEPS = ["Search 'ER near me' (Google or Maps) the way you normally would.",
                "Skim the results and decide where you'd go."]
 FULL_STEPS = ["Use the same starting address for both runs.",
-                "medicare.gov/care-compare: find each of the 6 hospitals' ED 'time spent in the ED' (6 lookups).",
-                "Google Maps: drive time from your address to each hospital (6 lookups).",
+                "medicare.gov/care-compare: find each of Boston's 7 ERs' 'time spent in the ED' (7 lookups).",
+                "Google Maps: drive time from your address to each hospital (7 lookups).",
                 "Decide where you'd go."]
 ERNOW_STEPS = ["Open https://ernowboston.streamlit.app/ in a fresh tab.",
                "Allow location (or pick your area) and decide where you'd go."]
@@ -130,7 +130,7 @@ def main():
         mark_quick()
         return
     who = input("Participant name (or initials): ").strip() or "participant"
-    print("Which manual run? 1 = quick search ('ER near me', the headline)   2 = full comparison (12 lookups)   3 = both")
+    print("Which manual run? 1 = quick search ('ER near me', the headline)   2 = full comparison (two lookups per ER)   3 = both")
     which = input("Enter 1, 2, or 3: ").strip()
     runs = {"1": ["quick"], "2": ["full"], "3": ["quick", "full"]}.get(which, ["quick"])
     do_ernow = input("Also time an ERNow run? (y/n; say n if you already recorded one): ").strip().lower() != "n"

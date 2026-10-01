@@ -38,7 +38,9 @@ def share_closest_not_fastest(h, circuity, mph, park):
 def main():
     h = pd.read_csv(ROOT / "data" / "boston_er_data.csv", dtype={"cms_provider_id": str})
     f = pd.read_csv(ROOT / "data" / "boston_forecast.csv", dtype={"cms_provider_id": str})
-    h = h.merge(f[["cms_provider_id", "forecast_op18b"]], on="cms_provider_id")
+    if "ed_type" in h:
+        h = h[h["ed_type"].fillna("general") == "general"]   # compare general EDs only
+    h = h.merge(f[["cms_provider_id", "forecast_op18b"]], on="cms_provider_id").reset_index(drop=True)
     R = 3958.8
     rows = []
     for a in np.linspace(42.28, 42.39, 45):

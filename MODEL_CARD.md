@@ -29,7 +29,7 @@ Chronological: train on releases 1–3 → next, select on release 4 → 5, test
 - Describes typical ED performance for a period, published 9–12 months after it ends; it cannot see today's queue, triage, staffing, or boarding.
 - OP-18b covers discharged patients only; academic and trauma centers treat sicker patients and run longer for reasons that do not mean worse care.
 - Peer comparisons adjust for case complexity with public proxies (heart-attack and stroke patient volume, cardiac-surgery capability, inpatient volume), not each patient's severity.
-- The provider-wait figure is CMS OP-20 (2019 or earlier), shown as-is. No hand-set adjustment changes any displayed number.
+- The cards show CMS OP-22 (left before being seen, 2024) as a crowding signal. CMS OP-20 provider wait (2019 or earlier) appears only as context on the Forecast Model page. No hand-set adjustment changes any displayed number.
 
 ## Retraining
 Add a new CMS release archive to `data/cms_archives/` and run `python national_model.py`. The app reads the regenerated results.

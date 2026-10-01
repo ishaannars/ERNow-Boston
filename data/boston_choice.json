@@ -1,12 +1,12 @@
 {
-  "locations": 1977,
-  "closest_not_fastest_share": 0.9044006069802731,
-  "median_minutes_saved_when_different": 75.62149444394714,
-  "median_extra_drive_min_when_different": 4.650553288442186,
+  "locations": 1997,
+  "closest_not_fastest_share": 0.8307461191787682,
+  "median_minutes_saved_when_different": 97.5078572118828,
+  "median_extra_drive_min_when_different": 13.958529355104844,
   "method": "Straight-line distance x1.35 at 18 mph +3 min; typical ED visit = national-model forecast (OP-18b).",
   "sensitivity": {
     "assumptions": "road circuity 1.2-1.5x, average speed 5-30 mph (5 mph = gridlock)",
-    "share_min": 0.7334344967121902,
-    "share_max": 0.9044006069802731
+    "share_min": 0.7436154231347021,
+    "share_max": 0.8307461191787682
   }
 }
