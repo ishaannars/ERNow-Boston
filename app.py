@@ -999,8 +999,8 @@ hr, [data-testid="stDivider"] {margin:.55rem 0 .35rem !important}
 
 /* consistent fonts for Streamlit's own widgets */
 [data-testid="stAlert"]{background:var(--shell) !important;border:1px solid var(--tea) !important;border-radius:12px !important;color:var(--ink) !important}
-[data-testid="stAlert"] *{font-family:'Instrument Sans','Helvetica Neue',Arial,sans-serif !important;color:var(--ink) !important;font-size:.9rem !important}
-[data-testid="stExpander"] summary, [data-testid="stExpander"] summary *{font-family:'Instrument Sans','Helvetica Neue',Arial,sans-serif !important;font-size:.88rem !important;font-weight:600 !important;color:var(--ink) !important}
+[data-testid="stAlert"] p, [data-testid="stAlert"] [data-testid="stMarkdownContainer"] *{font-family:'Instrument Sans','Helvetica Neue',Arial,sans-serif !important;color:var(--ink) !important;font-size:.9rem !important}
+[data-testid="stExpander"] summary p, [data-testid="stExpander"] summary [data-testid="stMarkdownContainer"] *{font-family:'Instrument Sans','Helvetica Neue',Arial,sans-serif !important;font-size:.88rem !important;font-weight:600 !important;color:var(--ink) !important}
 [data-testid="stExpander"]{border-radius:12px !important}
 [data-testid="stRadio"] [role="radiogroup"] label p{font-size:.88rem !important;text-transform:none !important;letter-spacing:0 !important;color:var(--ink) !important;font-weight:600 !important}
 
@@ -1033,6 +1033,22 @@ hr, [data-testid="stDivider"] {margin:.55rem 0 .35rem !important}
 [data-testid="stRadio"]:has(input[name*="who"]) {margin-top:.15rem}
 [data-testid="stToggle"] label p{font-size:.84rem !important;font-weight:600 !important;color:var(--ink) !important;font-family:'Instrument Sans','Helvetica Neue',Arial,sans-serif !important}
 [data-testid="stToggle"]{margin:.15rem 0 .1rem}
+
+/* compact, readable live-model tiles; 3-column ER grid */
+.live-tile .live-v{font-size:1.25rem !important}
+.live-tile .live-c{font-size:.78rem !important;line-height:1.4 !important;color:var(--ink) !important;opacity:.82}
+.live-tile .live-t{margin-top:.3rem !important}
+.er-list{grid-template-columns:repeat(3,minmax(0,1fr)) !important;gap:.55rem !important}
+.er-card{padding:.7rem .8rem .65rem !important}
+.er-wait{font-size:1.45rem !important;margin-bottom:.35rem !important}
+.er-stats{gap:.35rem .6rem !important}
+.er-stat-v{font-size:.84rem !important}
+.answer-one{padding:.75rem .9rem !important}
+@media(max-width:1000px){.er-list{grid-template-columns:repeat(2,minmax(0,1fr)) !important}}
+@media(max-width:650px){.er-list{grid-template-columns:1fr !important}}
+.er-head{flex-wrap:nowrap !important;align-items:flex-start !important;min-height:2.6em}
+.er-head .er-rank{flex:0 0 auto}
+.er-head .er-title{flex:1 1 auto;min-width:0}
 </style>
 """, unsafe_allow_html=True)
 
@@ -1050,26 +1066,20 @@ def render_home():
         vals_lm = {m["model"]: m["validation_MAE"] for m in national["models"]}
         best_gain = (vals_lm["Persistence baseline"] - vals_lm[national["best_learned_model"]]) / vals_lm["Persistence baseline"]
         live = [
-            ("Expected ED visit", "Latest CMS figure",
-             f"In stable years ED times barely change, so each hospital's latest CMS figure is the forecast. "
-             f"In the latest selection year no learned model beat it by the required 2% (best: {best_gain:.1%})."),
-            ("The range on each card", "Checked against reality",
-             f"In a year the model never saw, the range held the actual ED time {iv['test_coverage']:.0%} of the time (target 80%)."),
-            ("Vs similar U.S. hospitals", "25 look-alikes",
-             "Hospitals with similar ED volume, type, ownership, rating, and case complexity."),
-            ("Chance fastest", "4,000 what-if trips",
-             "Replays your drive with each hospital's range to see how often each ER comes out quickest."),
+            ("Expected ED visit", "Last year's figure", "ED times persist; in the latest test no learned model beat it by 2%."),
+            ("The range on each card", f"{iv['test_coverage']:.0%} held true", "In a year the model never saw (target 80%)."),
+            ("Vs similar hospitals", "25 look-alikes", "Matched on size, type, and case mix."),
+            ("Chance fastest", "4,000 trips", "Your drive, replayed over each ER's range."),
         ]
-        techniques = ["Persistence forecast", "Adaptive conformal prediction", "Nearest-neighbor matching", "Monte Carlo simulation"]
+        techniques = ["Method: last year's value (persistence)", "Method: calibrated ranges (conformal)",
+                      "Method: look-alike matching (nearest neighbors)", "Method: trip simulation"]
         ds = decision_summary()
         measured = ""
         if "ernow" in ds and "quick" in ds:
             secs = lambda v: f"{int(round(v))} seconds" if v < 60 else fmt_seconds(v)
             measured = (f'<div class="live-proof" title="Median times, measured with timing_test.py">'
                         f'<b>In our timed test, choosing an ER took {secs(ds["ernow"]["median_seconds"])} with ERNow</b>, '
-                        f'versus {secs(ds["quick"]["median_seconds"])} with a Google “ER near me” search, '
-                        f'which only shows the closest ER. In those {secs(ds["ernow"]["median_seconds"])} ERNow also shows each ER\'s typical visit, '
-                        f'its chance of being fastest, how it compares with similar U.S. hospitals, and how often patients leave before being seen.</div>')
+                        f'vs {secs(ds["quick"]["median_seconds"])} with a Google “ER near me” search, which only finds the closest ER.</div>')
         tiles = "".join(f'<div class="live-tile"><div class="live-k">{html.escape(k)}</div><div class="live-v">{html.escape(v)}</div>'
                         f'<div class="live-c">{html.escape(c)}</div><div class="live-t">{html.escape(t)}</div></div>'
                         for (k, v, c), t in zip(live, techniques))
@@ -1077,8 +1087,8 @@ def render_home():
             f"""<div class="model-bar">
       <div class="live-head"><span class="model-dot"></span><span class="live-title">4 models running live</span></div>
       {measured}
-      <div class="live-meta">Built on {sp['hospitals']:,} U.S. hospitals ({sp['total_rows']:,} hospital-periods, CMS releases {html.escape(national['releases'][0][:4])}–{html.escape(national['releases'][-1][:4])}).
-      In a held-out year it picked the fastest ER in an area {rk['fastest_pick_accuracy']:.0%} of the time, versus {rk['fastest_pick_random_baseline']:.0%} by chance.</div>
+      <div class="live-meta">{sp['hospitals']:,} U.S. hospitals · {sp['total_rows']:,} hospital-periods · CMS {html.escape(national['releases'][0][:4])}–{html.escape(national['releases'][-1][:4])} ·
+      picked the fastest local ER {rk['fastest_pick_accuracy']:.0%} of the time vs {rk['fastest_pick_random_baseline']:.0%} by chance</div>
       <div class="live-grid">{tiles}</div>
     </div>""",
             unsafe_allow_html=True,
@@ -1169,32 +1179,43 @@ def render_home():
         st.caption("Mass Eye and Ear is included because this is an eye, ear, nose, or throat emergency. "
                    "For any other emergency, turn this off.")
 
-    st.subheader("Your two best options")
+    specialist = None
+    if focus == "specialty":
+        sp_rows = ranked[ranked["hospital"].isin(df_all.loc[df_all["ed_type"] == "specialty", "hospital"])]
+        specialist = sp_rows.iloc[0] if len(sp_rows) else None
+    best = specialist if specialist is not None else fastest
+    st.subheader("Your best option")
     if closest is not None:
-        if closest["hospital"] == fastest["hospital"]:
-            answer = (f'<div class="answer-one"><div class="answer-k">Closest and likely fastest</div>'
-                      f'<div class="answer-v">{html.escape(str(fastest["hospital"]))}</div>{opt_rows(fastest)}'
-                      f'<div class="answer-note">Good news: the closest ER is also the one likely to get you seen and home fastest.</div></div>')
+        same = closest["hospital"] == best["hospital"]
+        if specialist is not None:
+            label = "Eye & ENT specialist" + (" · closest" if same else "")
+            note = "Built for eye, ear, nose, and throat emergencies."
+            if fastest["hospital"] != best["hospital"]:
+                note += (f" {html.escape(str(fastest['hospital']))} is usually quicker overall "
+                         f"(~{fmt_minutes(fastest['route_time_min'] + fastest['visit_mid'])}), but it's a general ED.")
+        elif same:
+            label, note = "Closest and usually quickest", "The closest ER is also the one that usually gets you seen and home fastest."
         else:
-            extra = fastest["route_time_min"] - closest["route_time_min"]
-            # Same quantity the cards show ("Drive + typical visit"), so the numbers on screen add up.
-            net = (closest["route_time_min"] + closest["visit_mid"]) - (fastest["route_time_min"] + fastest["visit_mid"])
-            note = (f'Typically done about <b>{fmt_minutes(net)} sooner</b> than at the closest ER, even after the extra '
-                    f'{fmt_minutes(max(extra, 0))} of driving.' if net > 0 else "About the same total time as the closest ER.")
-            answer = (f'<div class="answer-grid">'
-                      f'<div class="answer-card"><div class="answer-k">Closest</div>'
-                      f'<div class="answer-v">{html.escape(str(closest["hospital"]))}</div>{opt_rows(closest)}'
-                      f'<div class="answer-note">Go here in an emergency.</div></div>'
-                      f'<div class="answer-card answer-fast"><div class="answer-k">Likely fastest overall</div>'
-                      f'<div class="answer-v">{html.escape(str(fastest["hospital"]))}</div>{opt_rows(fastest)}'
-                      f'<div class="answer-note">{note}</div></div></div>')
-        st.markdown(answer, unsafe_allow_html=True)
-        st.caption("Emergency or getting worse? Go to the closest ER or call 911. The fastest option is for urgent, non-life-threatening visits.")
+            extra = best["route_time_min"] - closest["route_time_min"]
+            net = (closest["route_time_min"] + closest["visit_mid"]) - (best["route_time_min"] + best["visit_mid"])
+            label = "Usually quickest overall"
+            note = (f"Usually done about <b>{fmt_minutes(net)} sooner</b> than at the closest ER, "
+                    f"{html.escape(str(closest['hospital']))} (~{fmt_minutes(closest['route_time_min'])} away), "
+                    f"even after {fmt_minutes(max(extra, 0))} more driving." if net > 0 else
+                    f"About the same total time as the closest ER, {html.escape(str(closest['hospital']))}.")
+        st.markdown(f'<div class="answer-one"><div class="answer-k">{label}</div>'
+                    f'<div class="answer-v">{html.escape(str(best["hospital"]))}</div>{opt_rows(best)}'
+                    f'<div class="answer-note">{note}</div></div>', unsafe_allow_html=True)
+        st.caption("“Usually” means typical public CMS times, not tonight's queue. Emergency or getting worse? "
+                   "Go to the closest ER or call 911.")
 
     st.subheader(f"All {len(ranked)} Boston ERs" + (" for this problem" if focus == "specialty" else ""))
     sort_by = st.radio("Sort by", ["Closest", "Fastest overall"], index=0, horizontal=True, key="er_sort")
     if sort_by == "Closest":
         ranked = ranked.sort_values(["route_ok", "route_time_min"], ascending=[False, True]).reset_index(drop=True)
+    if specialist is not None:   # the eye/ENT specialist leads when that's the emergency
+        ranked = pd.concat([ranked[ranked["hospital"] == specialist["hospital"]],
+                            ranked[ranked["hospital"] != specialist["hospital"]]]).reset_index(drop=True)
     st.caption("Times are each ER's typical performance from public CMS data, not tonight's live wait. Drive times use real roads without live traffic.")
     closest_name = None if closest is None else closest["hospital"]
 
@@ -1204,13 +1225,17 @@ def render_home():
         tags = ""
         if row["hospital"] == closest_name:
             tags += '<span class="closest-label">Closest</span>'
+        if specialist is not None and row["hospital"] == specialist["hospital"]:
+            tags += '<span class="best-label">Eye &amp; ENT specialist</span>'
         if row["hospital"] == fastest["hospital"]:
-            tags += '<span class="best-label">Likely fastest</span>'
+            tags += '<span class="best-label">Usually quickest</span>'
         has_fc = pd.notna(row.get("visit_mid"))
         visit_range = (fmt_range(row["visit_lo"], row["visit_hi"]) if has_fc
                        else fmt_range(row["modeled_wait_low"], row["modeled_wait_high"]))
         vs = row.get("vs_peers_min")
-        peer = ("" if pd.isna(vs) else
+        is_specialist = specialist is not None and row["hospital"] == specialist["hospital"]
+        # A specialty eye/ENT hospital has no true national peers in CMS data, so no peer comparison for it.
+        peer = ("" if pd.isna(vs) or is_specialist else
                 f'<div class="er-peer">{fmt_minutes(abs(vs))} {"longer" if vs >= 0 else "shorter"} than similar U.S. hospitals</div>')
         if pd.notna(row["route_time_min"]):
             drive = f"~{fmt_minutes(row['route_time_min'])}"
@@ -1222,7 +1247,7 @@ def render_home():
         chance = "—" if pd.isna(cf) else ("&lt;1%" if cf < 0.005 else (">99%" if cf > 0.995 else f"{cf:.0%}"))
         lw, lw_us = row.get("lwbs_pct"), row.get("lwbs_us_median")
         lwbs = "—" if pd.isna(lw) else f"{lw:.0f}%"
-        lwbs_sub = "" if pd.isna(lw_us) else f"U.S. typical {lw_us:.0f}%"
+        lwbs_sub = "2024" if pd.isna(lw_us) else f"U.S. {lw_us:.0f}% · 2024"
         flag = ('<span class="er-flag">Unusual change since last year</span>' if row.get("change_flag") else "")
         directions_url = (
             "https://www.google.com/maps/dir/?api=1"
@@ -1233,12 +1258,12 @@ def render_home():
         cards.append(f"""<div class="er-card{top}">
       <div class="er-tags">{tags}{flag}</div>
       <div class="er-head"><span class="er-rank">{pos}</span><span class="er-title">{html.escape(str(row['hospital']))}</span></div>
-      <div class="er-wait-label">Typical ED visit, arrival to leaving · tested range</div><div class="er-wait">{visit_range}</div>{peer}
+      <div class="er-wait-label">Typical ED visit · tested range</div><div class="er-wait">{visit_range}</div>{peer}
       <div class="er-stats">
         <div class="er-stat"><div class="er-stat-k">Drive</div><div class="er-stat-v">{drive} <span>{drive_sub}</span></div></div>
         <div class="er-stat"><div class="er-stat-k">Drive + typical visit</div><div class="er-stat-v">{total}</div></div>
         <div class="er-stat"><div class="er-stat-k">Chance fastest</div><div class="er-stat-v">{chance}</div></div>
-        <div class="er-stat"><div class="er-stat-k">Left before being seen (2024)</div><div class="er-stat-v">{lwbs} <span>{lwbs_sub}</span></div></div>
+        <div class="er-stat"><div class="er-stat-k">Left before seen</div><div class="er-stat-v">{lwbs} <span>{lwbs_sub}</span></div></div>
       </div>
       <div class="er-actions"><a class="er-directions" href="{directions_url}" target="_blank" rel="noopener noreferrer">Open Directions</a></div>
     </div>""")
@@ -1289,7 +1314,10 @@ def render_home():
 
     st.subheader("Map")
     map_df = pd.concat([ranked[["hospital", "latitude", "longitude"]], others[["hospital", "latitude", "longitude"]]], ignore_index=True)
-    st.map(map_df, latitude="latitude", longitude="longitude", size=95)
+    try:
+        st.map(map_df, latitude="latitude", longitude="longitude", size=95, height=320)
+    except TypeError:
+        st.map(map_df, latitude="latitude", longitude="longitude", size=95)
 
 
 def _table(df):
@@ -1408,7 +1436,7 @@ def render_methodology():
             ("Ranking test", f"{rk['fastest_pick_accuracy']:.0%} vs {rk['fastest_pick_random_baseline']:.0%}",
              f"Picked the actual fastest ER in {rk['local_groups']} local areas {rk['fastest_pick_accuracy']:.0%} of the time, versus {rk['fastest_pick_random_baseline']:.0%} by chance."),
             ("Chance it's the fastest", "4,000 scenarios",
-             "Monte Carlo simulation over each hospital's tested range plus your drive time turns uncertainty into one decision-ready probability."),
+             "A trip simulation (Monte Carlo) replays your drive with each hospital's tested range 4,000 times, turning uncertainty into one decision-ready probability."),
             ("Peer comparison", "25 nearest peers",
              "Nearest-neighbor matching on ED volume, hospital type, ownership, star rating, and case complexity (heart-attack and stroke volume, cardiac surgery, inpatient volume)."),
             ("Drivers & ablation", "Honest by design",
@@ -1421,12 +1449,12 @@ def render_methodology():
 
     st.subheader("Reading an ER card")
     st.markdown("""
-    - **Typical ED visit:** how long patients who are sent home usually spend in that ED, from arrival to leaving. The range was checked against real outcomes.
-    - **Similar U.S. hospitals:** how that time compares with 25 look-alike hospitals nationwide (similar size, type, and case complexity).
-    - **Drive:** real road route from where you are, without live traffic.
-    - **Drive + typical visit:** the two added together, which is how ERNow decides which ER is likely fastest.
-    - **Chance fastest:** how often this ER came out quickest across 4,000 what-if versions of your trip.
-    - **Left before being seen (2024):** the share of patients who gave up and left. A high number is a sign of long waits.
+    - **Typical ED visit:** how long patients who are sent home usually spend in that ED, from arrival to leaving (CMS OP-18b median, Persistence forecast). The range is an 80% conformal prediction interval, checked against real outcomes.
+    - **Similar U.S. hospitals:** that time vs 25 look-alike hospitals nationwide (k-nearest neighbors on ED volume, type, ownership, star rating, and case-complexity proxies).
+    - **Drive:** real road route from where you are (OpenStreetMap/OSRM), without live traffic.
+    - **Drive + typical visit:** the two added together, which is how ERNow ranks "usually quickest" (the expected total, not a guarantee).
+    - **Chance fastest:** how often this ER came out quickest across 4,000 simulated trips (a trip simulation, known in statistics as Monte Carlo, using each ER's range plus your drive).
+    - **Left before seen (2024):** the share of patients who left before being seen (CMS OP-22). A high number signals long waits.
     """)
     st.caption("Sort by Closest (the default) or by Fastest overall (drive + typical visit). ERs without a route are listed last. "
                "For an eye, ear, nose, or throat emergency, a switch adds Mass Eye and Ear to the comparison.")
@@ -1462,6 +1490,10 @@ def render_methodology():
     - OP-18b covers discharged patients. Peer matching adjusts for case complexity with public proxies, not for each patient's severity.
     - Travel time excludes live traffic, parking, and ambulance transport.
     """)
+    st.markdown('<div class="note"><strong>Left out on purpose:</strong> hour-by-hour or day-of-week patterns (no public hospital-level data), '
+                'traffic-aware drive times (paid APIs only), live waits (not published), Cambridge and other cities (next on the roadmap), '
+                'and a respiratory-surge forecast (planned). Each was skipped because it would need data ERNow can\'t get or test today.</div>',
+                unsafe_allow_html=True)
 
 
 def render_forecast_model():
@@ -1528,21 +1560,6 @@ def render_forecast_model():
 
     with tabs[1]:
         st.caption("In plain terms: we hid the most recent year from the models, then checked how often they got it right.")
-        st.subheader("Are the ranges honest?")
-        st.write("Each range is built from the model's real past errors (conformal prediction), then widened or narrowed by how much "
-                 "hospitals changed in the latest release, because a calm year and a volatile year need different widths "
-                 "(regime-adaptive). That change is known before the forecast, so nothing is borrowed from the future.")
-        cov = pd.DataFrame([
-            ["Early version: fixed ±band", _pct(iv["old_fixed_band_coverage"]), fmt_minutes(iv["old_fixed_band_median_width_min"])],
-            ["Conformal, fixed width", _pct(iv["static_test_coverage"]), fmt_minutes(iv["static_width_min"])],
-            ["Conformal, adapts to volatility (live)", _pct(iv["test_coverage"]), fmt_minutes(iv["median_width_min"])],
-        ], columns=["Method, on the held-out year", "Held the actual ED time", "Typical range width"])
-        _table(cov)
-        st.caption(f"Target {iv['target_coverage']:.0%}. The live method was chosen on an earlier held-out year ({_pct(iv['backtest_coverage'])}) before "
-                   f"checking the final one ({_pct(iv['test_coverage'])}), and is {iv['old_fixed_band_median_width_min'] / max(iv['median_width_min'], 1):.1f}× "
-                   "narrower than the early fixed band, which was wide enough to be nearly useless.")
-        st.caption("Coverage by ED volume: " + " · ".join(f"{k} {_pct(v)}" for k, v in iv["coverage_by_volume"].items()) + ".")
-
         roll = national.get("rolling") or []
         if roll:
             st.subheader("Year by year (rolling backtest)")
@@ -1566,6 +1583,21 @@ def render_forecast_model():
             st.caption(f"Each row trains only on releases before that year, then scores it once. In {wins} of {len(roll)} held-out years, "
                        f"a learned model beat Persistence by the {national['promotion_margin']:.0%} bar.{cov_txt}{wf_txt} "
                        "Ranges miss most in the most volatile years, when last year's pattern breaks.")
+
+        st.subheader("Are the ranges honest?")
+        st.write("Each range is built from the model's real past errors (conformal prediction), then widened or narrowed by how much "
+                 "hospitals changed in the latest release, because a calm year and a volatile year need different widths "
+                 "(regime-adaptive). That change is known before the forecast, so nothing is borrowed from the future.")
+        cov = pd.DataFrame([
+            ["Early version: fixed ±band", _pct(iv["old_fixed_band_coverage"]), fmt_minutes(iv["old_fixed_band_median_width_min"])],
+            ["Conformal, fixed width", _pct(iv["static_test_coverage"]), fmt_minutes(iv["static_width_min"])],
+            ["Conformal, adapts to volatility (live)", _pct(iv["test_coverage"]), fmt_minutes(iv["median_width_min"])],
+        ], columns=["Method, on the held-out year", "Held the actual ED time", "Typical range width"])
+        _table(cov)
+        st.caption(f"Target {iv['target_coverage']:.0%}. The live method was chosen on an earlier held-out year ({_pct(iv['backtest_coverage'])}) before "
+                   f"checking the final one ({_pct(iv['test_coverage'])}), and is {iv['old_fixed_band_median_width_min'] / max(iv['median_width_min'], 1):.1f}× "
+                   "narrower than the early fixed band, which was wide enough to be nearly useless.")
+        st.caption("Coverage by ED volume: " + " · ".join(f"{k} {_pct(v)}" for k, v in iv["coverage_by_volume"].items()) + ".")
 
         st.subheader("Does it pick the right ER?")
         rt = pd.DataFrame([
@@ -1621,10 +1653,26 @@ def render_forecast_model():
         dr["Error increase when shuffled (min)"] = dr["Error increase when shuffled (min)"].map(lambda v: f"{v:.2f}")
         _table(dr)
         st.caption("Permutation importance on the test release for the gradient-boosting challenger: how much worse its predictions get when each input is scrambled.")
+        st.subheader("Who waits longest nationally")
+        stc = national["structure"]
+        if True:
+            st.caption("By ED volume (latest release)")
+            bv = pd.DataFrame(stc["by_volume"])
+            bv = pd.DataFrame({"ED volume": bv["ed_volume"].str.capitalize(), "Hospitals": bv["hospitals"].map("{:,}".format),
+                               "Median ED visit": bv["median_op18b"].map(fmt_minutes),
+                               "Median left without being seen": bv["median_op22"].map(lambda v: f"{v:.0f}%")})
+            _table(bv)
+            st.caption("By ownership (six largest groups)")
+            bo = pd.DataFrame(stc["by_ownership"]).sort_values("hospitals", ascending=False).head(6).sort_values("median_op18b", ascending=False)
+            bo = pd.DataFrame({"Ownership": bo["ownership"], "Hospitals": bo["hospitals"].map("{:,}".format),
+                               "Median ED visit": bo["median_op18b"].map(fmt_minutes),
+                               "Median left without being seen": bo["median_op22"].map(lambda v: f"{v:.0f}%")})
+            _table(bo)
+        st.caption(f"Across U.S. hospitals, longer ED visits go with more patients leaving before being seen (rank correlation {stc['spearman_op18b_vs_left_without_being_seen']:.2f}).")
 
     with tabs[3]:
         st.caption("In plain terms: the numbers behind each Boston card, and how Boston compares nationally.")
-        st.subheader(f"Boston's {len(forecast) if forecast is not None else ''} ERs at a glance")
+        st.subheader("Boston's ERs at a glance")
         if forecast is not None:
             forecast = forecast.sort_values("forecast_op18b").reset_index(drop=True)
             bf = pd.DataFrame({
@@ -1647,22 +1695,6 @@ def render_forecast_model():
             st.caption("Hospital context (CHIA annual profiles and the discontinued CMS OP-20 measure)")
             _table(ctx)
 
-        st.subheader("Who waits longest nationally")
-        stc = national["structure"]
-        if True:
-            st.caption("By ED volume (latest release)")
-            bv = pd.DataFrame(stc["by_volume"])
-            bv = pd.DataFrame({"ED volume": bv["ed_volume"].str.capitalize(), "Hospitals": bv["hospitals"].map("{:,}".format),
-                               "Median ED visit": bv["median_op18b"].map(fmt_minutes),
-                               "Median left without being seen": bv["median_op22"].map(lambda v: f"{v:.0f}%")})
-            _table(bv)
-            st.caption("By ownership (six largest groups)")
-            bo = pd.DataFrame(stc["by_ownership"]).sort_values("hospitals", ascending=False).head(6).sort_values("median_op18b", ascending=False)
-            bo = pd.DataFrame({"Ownership": bo["ownership"], "Hospitals": bo["hospitals"].map("{:,}".format),
-                               "Median ED visit": bo["median_op18b"].map(fmt_minutes),
-                               "Median left without being seen": bo["median_op22"].map(lambda v: f"{v:.0f}%")})
-            _table(bo)
-        st.caption(f"Across U.S. hospitals, longer ED visits go with more patients leaving before being seen (rank correlation {stc['spearman_op18b_vs_left_without_being_seen']:.2f}).")
 
     with tabs[4]:
         st.subheader("How fresh is the data?")
@@ -1670,6 +1702,9 @@ def render_forecast_model():
         st.write(f"Results generated {gen} from CMS releases {pd.Timestamp(national['releases'][0]).strftime('%b %Y')} to {pd.Timestamp(national['releases'][-1]).strftime('%b %Y')}. "
                  "ERNow is retrained each time CMS publishes a new release, so every number on these pages moves forward with the public data.")
 
+        st.markdown('<div class="note"><strong>Tried or considered, and not shipped:</strong> a hierarchical mixed-effects model (partial pooling covers the same idea more simply), '
+                    'SHAP values (permutation importance answers the same question without extra dependencies), deep learning (10 yearly releases per hospital is too little history '
+                    'to train it reliably), and the 2016 CMS archive (its download link is offline).</div>', unsafe_allow_html=True)
         with st.expander("Technical details"):
             st.markdown(f"""
         **Target:** {national['target']}.
@@ -1681,6 +1716,10 @@ def render_forecast_model():
         **Ranges:** regime-adaptive conformalized quantile regression: gradient-boosted 10th/90th percentiles, a calibration offset from the prior release, then scaled by the ratio of current to calibration-period national volatility (median absolute change).
 
         **Ranking:** Spearman rank correlation and fastest-pick accuracy within counties that have 3 or more hospitals.
+
+        **Chance fastest:** 4,000 Monte Carlo draws per hospital from a lognormal matched to its 80% range, plus drive time; hospitals are treated as independent, which is an assumption.
+
+        **What the 83% measures:** ranking hospitals by ED time within a county. The app's "usually quickest" also adds your drive time, which public data can't backtest.
 
         **Peers:** nearest neighbors on ED volume, CMS star rating, hospital type, ownership, and case complexity (heart-attack and stroke patient volume, cardiac-surgery capability, inpatient volume from CMS Complications & Deaths).
         """)
