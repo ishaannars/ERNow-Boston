@@ -35,6 +35,20 @@ def load_national():
     return res, fc
 
 
+def decision_summary():
+    """Measured decision times (record_decision_time.py); {} until the test has been run."""
+    try:
+        import record_decision_time
+        return record_decision_time.summary()
+    except Exception:
+        return {}
+
+
+def fmt_seconds(sec):
+    sec = int(round(sec))
+    return f"{sec // 60}m {sec % 60:02d}s" if sec >= 60 else f"{sec}s"
+
+
 def chance_fastest(drive, mid, lo, hi, n=4000, seed=11):
     """Probability each hospital has the shortest drive + ED visit, by simulation.
 
@@ -933,6 +947,19 @@ hr, [data-testid="stDivider"] {margin:.55rem 0 .35rem !important}
 .choice-callout .v{font-family:'Instrument Serif',Georgia,serif;font-size:1.45rem;line-height:1.15;color:var(--ink)}
 .choice-callout .c{font-size:.8rem;color:var(--soft-ink);line-height:1.45;margin-top:.2rem}
 @media(max-width:650px){.answer-grid{grid-template-columns:1fr}}
+
+/* live model stack in the model bar; heading link icons hidden */
+.live-head{display:flex;align-items:center;flex-wrap:wrap;gap:.3rem .55rem}
+.live-title{font-size:.64rem;text-transform:uppercase;letter-spacing:.05em;font-weight:650;color:var(--soft-ink)}
+.live-meta{font-size:.74rem;color:var(--soft-ink)}
+.live-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.45rem;margin-top:.5rem}
+.live-tile{background:var(--ivory);border:1px solid rgba(185,173,145,.6);border-radius:10px;padding:.45rem .6rem}
+.live-k{font-size:.6rem;text-transform:uppercase;letter-spacing:.05em;font-weight:650;color:var(--soft-ink)}
+.live-v{font-family:'Instrument Serif',Georgia,serif;font-size:1.2rem;line-height:1.15;color:var(--ink);margin:.05rem 0 .1rem}
+.live-c{font-size:.7rem;line-height:1.35;color:var(--soft-ink)}
+[data-testid="stHeaderActionElements"],.stApp h1 a,.stApp h2 a,.stApp h3 a{display:none !important}
+@media(max-width:900px){.live-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.live-measured{font-size:.68rem;font-weight:650;color:var(--moss);border:1px solid var(--moss);border-radius:999px;padding:.08rem .45rem}
 </style>
 """, unsafe_allow_html=True)
 
@@ -944,19 +971,27 @@ def render_home():
     national, _fc = load_national()
     if national:
         sp, iv, rk = national["split"], national["intervals"], national["ranking"]["selected"]
+        live = [
+            ("Forecast", national["selected_model"].replace(" baseline", ""),
+             f"Won a 4-model contest on {sp['test_rows']:,} held-out U.S. hospitals"),
+            ("Tested ranges", "Adaptive conformal", f"{iv['test_coverage']:.0%} coverage on a held-out year"),
+            ("Vs similar hospitals", "Nearest neighbors", "25 U.S. peers, matched on case complexity"),
+            ("Chance fastest", "Monte Carlo", "4,000 scenarios with your real route"),
+        ]
+        ds = decision_summary()
+        measured = ""
+        if "full" in ds and "ernow" in ds:
+            measured = (f'<span class="live-measured">Measured: {fmt_seconds(ds["full"]["median_seconds"])} to compare manually → '
+                        f'{fmt_seconds(ds["ernow"]["median_seconds"])} in ERNow</span>')
+        tiles = "".join(f'<div class="live-tile"><div class="live-k">{html.escape(k)}</div><div class="live-v">{html.escape(v)}</div>'
+                        f'<div class="live-c">{html.escape(c)}</div></div>' for k, v, c in live)
         st.markdown(
-            f"""
-    <div class="model-bar">
-      <div class="model-line-1"><span class="model-dot"></span>National model: {html.escape(national['selected_model'])}</div>
-      <div class="model-line-2">Trained on {sp['hospitals']:,} U.S. hospitals and tested on {sp['test_rows']:,} it had never seen: it picked the fastest ER in a local area {rk['fastest_pick_accuracy']:.0%} of the time, versus {rk['fastest_pick_random_baseline']:.0%} by chance.</div>
-      <div class="model-meta">
-        <span class="model-chip">{sp['hospitals']:,} U.S. hospitals</span>
-        <span class="model-chip">{sp['total_rows']:,} hospital-periods</span>
-        <span class="model-chip">Tested 80% ranges ({iv['test_coverage']:.0%} coverage)</span>
-        <span class="model-chip">CMS releases {html.escape(national['releases'][0][:4])}–{html.escape(national['releases'][-1][:4])}</span>
-      </div>
-    </div>
-    """,
+            f"""<div class="model-bar">
+      <div class="live-head"><span class="model-dot"></span><span class="live-title">4 models running live</span>{measured}
+      <span class="live-meta">Trained on {sp['hospitals']:,} U.S. hospitals · {sp['total_rows']:,} hospital-periods · CMS {html.escape(national['releases'][0][:4])}–{html.escape(national['releases'][-1][:4])} ·
+      picked the fastest local ER {rk['fastest_pick_accuracy']:.0%} of the time vs {rk['fastest_pick_random_baseline']:.0%} by chance</span></div>
+      <div class="live-grid">{tiles}</div>
+    </div>""",
             unsafe_allow_html=True,
         )
     else:
@@ -1043,7 +1078,7 @@ def render_home():
         st.caption("Emergency or getting worse? Go to the closest ER or call 911. "
                    "For urgent, non-life-threatening visits, the fastest overall option can save real time.")
 
-    sort_by = st.radio("Sort ERs by", ["Fastest overall", "Closest"], horizontal=True, label_visibility="collapsed",
+    sort_by = st.radio("Sort ERs by", ["Closest", "Fastest overall"], index=0, horizontal=True, label_visibility="collapsed",
                        key="er_sort")
     if sort_by == "Closest":
         ranked = ranked.sort_values(["route_ok", "route_time_min"], ascending=[False, True]).reset_index(drop=True)
@@ -1162,8 +1197,26 @@ def render_methodology():
             f'<div class="choice-callout"><div class="v">The closest ER is usually not the fastest: {ch["closest_not_fastest_share"]:.0%} of Boston locations</div>'
             f'<div class="c">Across {ch["locations"]:,} points in Boston, for urgent but non-life-threatening visits, a different ER than the closest had the shortest '
             f'drive plus typical ED visit {ch["closest_not_fastest_share"]:.0%} of the time, typically about {fmt_minutes(ch["median_minutes_saved_when_different"])} shorter '
-            f'for about {fmt_minutes(ch["median_extra_drive_min_when_different"])} more driving. Drive times in this analysis are estimated from distance; '
-            'the app uses real road routing. In an emergency, always go to the closest ER.</div></div>', unsafe_allow_html=True)
+            f'for about {fmt_minutes(ch["median_extra_drive_min_when_different"])} more driving. Drive times in this analysis are estimated from distance '
+            + (f'(the finding holds at {ch["sensitivity"]["share_min"]:.0%}–{ch["sensitivity"]["share_max"]:.0%} from gridlock to free-flowing traffic); ' if ch.get("sensitivity") else '; ')
+            + 'the app uses real road routing. In an emergency, always go to the closest ER.</div></div>', unsafe_allow_html=True)
+
+    ds = decision_summary()
+    if "ernow" in ds and ({"full", "quick"} & set(ds)):
+        e = fmt_seconds(ds["ernow"]["median_seconds"])
+        cards = []
+        if "full" in ds:
+            cards.append(("Decision time · full comparison", f'{fmt_seconds(ds["full"]["median_seconds"])} → {e}',
+                          f'Gathering what ERNow shows (6 ED times + 6 drive times) by hand vs in ERNow. '
+                          f'{ds["full"]["participants"]} participant{"s" if ds["full"]["participants"] != 1 else ""}.'))
+        if "quick" in ds:
+            share = f" From {ch['closest_not_fastest_share']:.0%} of Boston locations, that's not the fastest ER." if choice_path.exists() else ""
+            cards.append(("Decision time · the usual quick search", fmt_seconds(ds["quick"]["median_seconds"]),
+                          f'"ER near me" and pick the closest: fast, but it only answers which ER is closest.{share}'))
+        st.markdown('<div class="answer-grid">' + "".join(
+            f'<div class="answer-card"><div class="answer-k">{html.escape(k)}</div><div class="answer-v">{html.escape(v)}</div>'
+            f'<div class="answer-sub">{html.escape(c)}</div></div>' for k, v, c in cards) + '</div>', unsafe_allow_html=True)
+        st.caption("Timed with the protocol in TIMING_TEST.md.")
 
     if national:
         sp, iv, rk = national["split"], national["intervals"], national["ranking"]["selected"]
@@ -1199,7 +1252,7 @@ def render_methodology():
     - **Vs similar U.S. hospitals:** faster or slower than comparable hospitals nationwide.
     - **Provider wait, 2019 data:** the last public CMS measure of time to see a provider (retired after 2019), shown as-is for context.
     """)
-    st.caption("Cards are sorted by drive time plus expected ED visit. ERs without a route are listed last.")
+    st.caption("Cards are sorted by drive time by default. Switch to Fastest overall to sort by drive time plus expected ED visit. ERs without a route are listed last.")
 
     st.subheader("What would make this live")
     st.write("ERNow is built so that live hospital data could plug in directly. If Boston hospitals published these fields, ERNow could switch from typical performance to current conditions:")
@@ -1307,6 +1360,22 @@ def render_forecast_model():
             ["Random pick would be right", _pct(rk["fastest_pick_random_baseline"])],
         ], columns=["Test", "Result"])
         _table(rt)
+        cf = national.get("confidence")
+        if cf:
+            st.subheader("How sure are these numbers?")
+            lo_p, hi_p = cf["fastest_pick_ci95"]
+            lo_c, hi_c = iv.get("test_coverage_ci95", [None, None])
+            lo_g, hi_g = cf["mae_gain_ci95"]
+            ct = pd.DataFrame([
+                ["Picked the fastest local ER", _pct(rk["fastest_pick_accuracy"]), f"{lo_p:.0%}–{hi_p:.0%}"],
+                ["80% range coverage", _pct(iv["test_coverage"]), f"{lo_c:.0%}–{hi_c:.0%}" if lo_c is not None else "—"],
+                [f"{national['best_learned_model']} vs Persistence (error saved per hospital)",
+                 f"{cf['mae_gain_vs_best_challenger_min'] * 60:.0f} seconds", f"{lo_g * 60:.0f}–{hi_g * 60:.0f} seconds"],
+            ], columns=["Result on the final test year", "Estimate", "95% confidence interval"])
+            _table(ct)
+            st.caption(f"Bootstrap with {cf['resamples']:,} resamples (hospitals for errors and coverage, counties for fastest-pick). "
+                       "The best challenger's edge is real but tiny, seconds on a 3–5 hour visit, and it missed the 2% bar on validation, so Persistence stays.")
+
         bt = national.get("boston_backtest", {})
         if bt.get("hospitals"):
             st.caption(f"Boston backtest on the latest release: average error {bt['MAE_selected']:.1f} min across {bt['hospitals']} hospitals; "

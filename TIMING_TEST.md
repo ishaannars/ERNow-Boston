@@ -9,7 +9,14 @@ Measures the headline claim: how long it takes to decide which Boston ER to go t
 - Use a phone stopwatch. Use a fresh browser tab for each run.
 - Do the manual run first, then ERNow, so ERNow's answer can't influence the manual search.
 
-## Manual run: 12 lookups across 2 websites
+## Two kinds of manual run
+
+- **Full comparison (the headline):** gather the same information ERNow shows, described below.
+- **Quick search:** search "ER near me" and pick, the way most people do. It's fast but only finds the closest ER, so it's reported as a separate line.
+
+The script asks which one you're timing. If you already saved a quick search as a manual run, `python timing_test.py --mark-quick` relabels it.
+
+## Full comparison: 12 lookups across 2 websites
 Start the timer, then gather, for each of the 6 hospitals (MGH, Brigham and Women's, BWH Faulkner, BIDMC, Boston Medical Center, Tufts Medical Center):
 
 1. **CMS Care Compare** (medicare.gov/care-compare): search the hospital, open its page, find the emergency department "median time patients spent in the ED before leaving" (6 lookups).
