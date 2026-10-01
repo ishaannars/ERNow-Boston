@@ -21,7 +21,7 @@ Boston has no single place to compare emergency departments, and hospitals don't
 ## Decision time (measured)
 
 <!-- DECISION_TIME:START -->
-Comparing Boston's 6 ERs took a median of **4 s manually vs 2 s in ERNow** (**2× faster**; 1 participant, timed with the protocol in `TIMING_TEST.md`). Participants picked the same hospital both ways in 1 of 1 cases.
+_Not yet measured. Run `python timing_test.py` (guided stopwatch, about 10 minutes)._
 <!-- DECISION_TIME:END -->
 
 ## The model
