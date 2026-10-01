@@ -52,3 +52,6 @@ Patient-volume denominators from the newest release: heart-attack and stroke vol
 
 ### Note on CHIA and weather/illness/events
 CHIA utilization and Boston context (weather, respiratory illness, events) are displayed for context and are not used to adjust any number.
+
+### CMS OP-22 (left before being seen)
+Share of ED patients who left before being seen, calendar year 2024 (latest release). Shown on each ER card next to the U.S. median.
