@@ -24,6 +24,11 @@ def fmt(sec):
     return f"{sec // 60} min {sec % 60:02d} s" if sec >= 60 else f"{sec} s"
 
 
+def hm(minutes):
+    m = int(round(minutes))
+    return f"{m // 60}h {m % 60}m" if m >= 60 else f"{m} min"
+
+
 def summary():
     """Medians per run type, or {} when nothing is recorded yet. Also used by the app."""
     if not CSV.exists():
@@ -45,20 +50,20 @@ def readme_text(s):
         return PLACEHOLDER
     e = s["ernow"]["median_seconds"]
     lines = []
-    if "full" in s:
-        f, n = s["full"]["median_seconds"], s["full"]["participants"]
-        lines.append(f"- **Full comparison** (the same information ERNow shows: 6 ED times + 6 drive times): "
-                     f"**{fmt(f)} manually vs {fmt(e)} in ERNow**, {f / max(e, 1):.0f}× faster "
-                     f"({n} participant{'s' if n != 1 else ''}).")
     if "quick" in s:
         q, n = s["quick"]["median_seconds"], s["quick"]["participants"]
         tail = ""
         if CHOICE.exists():
             ch = json.loads(CHOICE.read_text())
-            tail = (f" It only finds the closest ER, and the closest isn't the fastest overall from "
-                    f"{ch['closest_not_fastest_share']:.0%} of Boston locations.")
-        lines.append(f"- **The usual quick search** (\"ER near me\", pick the closest): {fmt(q)} "
-                     f"({n} participant{'s' if n != 1 else ''}).{tail}")
+            tail = (f" The quick search only finds the closest ER, which isn't the fastest overall from "
+                    f"{ch['closest_not_fastest_share']:.0%} of Boston locations (typically ~{hm(ch['median_minutes_saved_when_different'])} "
+                    f"longer in the ED for a non-emergency).")
+        lines.append(f"- **ERNow vs the usual search** (\"ER near me\", pick the closest): **{fmt(e)} in ERNow vs {fmt(q)}**, "
+                     f"and ERNow also shows the likely fastest ER ({n} participant{'s' if n != 1 else ''}).{tail}")
+    if "full" in s:
+        f, n = s["full"]["median_seconds"], s["full"]["participants"]
+        lines.append(f"- **Information ERNow assembles:** gathering the same facts by hand (6 ED times + 6 drive times) took "
+                     f"{fmt(f)} ({n} participant{'s' if n != 1 else ''}).")
     return "\n".join(lines) + "\n\nTimed with `python timing_test.py` (protocol in `TIMING_TEST.md`)."
 
 

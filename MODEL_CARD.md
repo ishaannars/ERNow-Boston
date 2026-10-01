@@ -1,7 +1,7 @@
 # ERNow Boston — Model Card
 
 ## Purpose
-Support the decision "which Boston ER should I consider?" for urgent, non-life-threatening needs by forecasting each hospital's typical ED visit time for the next CMS period, with a tested range. Not a live queue and not medical advice.
+For urgent, non-life-threatening visits, help people find the Boston ER likely to get them seen and home fastest, not just the closest, in about 15 seconds, by forecasting each hospital's typical ED visit time for the next CMS period with a tested range. This works without live data because ED performance is highly persistent year to year (R² 0.93). Not a live queue and not medical advice.
 
 ## Target
 Next-release CMS **OP-18b**: median minutes from ED arrival to departure for discharged patients, per hospital.
