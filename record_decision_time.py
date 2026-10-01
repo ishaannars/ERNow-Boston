@@ -1,7 +1,7 @@
 """Summarize the decision-time test and write it into README.md between the DECISION_TIME markers.
 
 Three kinds of runs (data/decision_time_results.csv, column `method`):
-  full    manual comparison with the same information ERNow shows (6 ED times + 6 drive times)
+  full    manual comparison with the same information ERNow shows (each ER's ED time and drive time)
   quick   the usual way: search "ER near me", skim, pick (closest ER only)
   ernow   the same decision in ERNow
 Older rows labeled `manual` count as `full`.
@@ -62,7 +62,7 @@ def readme_text(s):
                      f"and ERNow also shows the likely fastest ER ({n} participant{'s' if n != 1 else ''}).{tail}")
     if "full" in s:
         f, n = s["full"]["median_seconds"], s["full"]["participants"]
-        lines.append(f"- **Information ERNow assembles:** gathering the same facts by hand (6 ED times + 6 drive times) took "
+        lines.append(f"- **Information ERNow assembles:** gathering the same facts by hand (each ER's ED time and drive time) took "
                      f"{fmt(f)} ({n} participant{'s' if n != 1 else ''}).")
     return "\n".join(lines) + "\n\nTimed with `python timing_test.py` (protocol in `TIMING_TEST.md`)."
 

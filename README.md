@@ -4,7 +4,7 @@
 
 Boston's ERs differ by hours in a way that persists year to year. ERNow uses that to point you to the ER most likely to get you seen fastest, not just the closest, in seconds, using public data alone.
 
-Today people search "ER near me" and go to the closest one, with no information about the ED itself. From 90% of Boston locations, that isn't the ER that would get them seen and home fastest. Hospitals don't publish live waits, but ERNow doesn't need them to help: a hospital's ED time predicts next year's with R² 0.93 across 4,000+ U.S. hospitals. ERNow assembles CMS, CHIA, the CDC, the Weather Service, and road routing into one screen, labels every number by source and period, and is built so live hospital data can plug in the day it exists.
+Today people search "ER near me" and go to the closest one, with no information about the ED itself. From 83% of Boston locations, that isn't the ER that would get them seen and home fastest. Hospitals don't publish live waits, but ERNow doesn't need them to help: a hospital's ED time predicts next year's with R² 0.93 across 4,000+ U.S. hospitals. ERNow assembles CMS, CHIA, the CDC, the Weather Service, and road routing into one screen, labels every number by source and period, and is built so live hospital data can plug in the day it exists.
 
 [Try ERNow Boston](https://ernowboston.streamlit.app/)
 
@@ -36,25 +36,26 @@ Tesla's real achievement wasn't a faster car. It pulled a needed but slow-arrivi
 
 | Finding | Evidence | Source |
 |---|---|---|
-| Choosing an ER matters | Median ED visit time in Boston ranges from **3h 28m (Tufts) to 5h 36m (BIDMC): a 2h 8m gap** | CMS OP-18b, period ending Sep 2025 |
+| Choosing an ER matters | Median ED visit time in Boston ranges from **2h 26m (Boston Medical Center–Brighton) to 5h 36m (BIDMC): a 3h 10m gap** | CMS OP-18b, period ending Sep 2025 |
 | Official data arrives late | CMS ED data is published **9–12 months** after the period it describes ends | Computed across 6 CMS releases |
 | Long ED stays are growing | Massachusetts ED visits lasting over 4 hours rose from **~33% to ~44%** (Jul–Sep 2019 vs 2025) | CHIA, reported by the Boston Globe, May 2026 |
-| The closest ER is usually not the fastest | For urgent, non-life-threatening visits, a different ER had the shortest drive + typical visit from **90%** of 1,977 Boston locations, typically **~1h 16m** shorter for ~5 min more driving. Holds at **73–90%** from gridlock to free-flowing traffic | `boston_choice_analysis.py` |
-| It takes many lookups to compare | Gathering ED times and drive times for 6 hospitals manually takes **12 separate lookups across 2 websites**; ERNow takes one screen | See `TIMING_TEST.md` |
+| The closest ER is usually not the fastest | For urgent, non-life-threatening visits, a different ER had the shortest drive + typical visit from **83%** of 1,997 Boston locations, typically **~1h 38m** shorter for ~14 min more driving. Holds at **74–83%** from gridlock to free-flowing traffic | `boston_choice_analysis.py` |
+| It takes many lookups to compare | Gathering ED times and drive times for every Boston ER manually takes **two lookups per hospital across 2 websites**; ERNow takes one screen | See `TIMING_TEST.md` |
+| Which ERs are included | All 10 emergency departments in Boston. The 7 general EDs are compared and ranked; Mass Eye and Ear (eye and ENT only), Boston Children's (children only), and VA Boston West Roxbury (enrolled veterans only) are shown in their own section so no one is sent to an ED that can't treat them. Carney Hospital's ED closed in 2024 | CMS Hospital Compare, VA Boston |
 | The method scales | The same pipeline covers the **4,081 U.S. hospitals** that report ED times; Boston is the first city deployed | CMS Hospital Compare archives |
 
 ## Decision time (measured)
 
 <!-- DECISION_TIME:START -->
-- **ERNow vs the usual search** ("ER near me", pick the closest): **15 s in ERNow vs 45 s**, and ERNow also shows the likely fastest ER (1 participant). The quick search only finds the closest ER, which isn't the fastest overall from 90% of Boston locations (typically ~1h 16m longer in the ED for a non-emergency).
-- **Information ERNow assembles:** gathering the same facts by hand (6 ED times + 6 drive times) took 6 min 21 s (1 participant).
+- **ERNow vs the usual search** ("ER near me", pick the closest): **15 s in ERNow vs 45 s**, and ERNow also shows the likely fastest ER (1 participant). The quick search only finds the closest ER, which isn't the fastest overall from 83% of Boston locations (typically ~1h 38m longer in the ED for a non-emergency).
+- **Information ERNow assembles:** gathering the same facts by hand (each ER's ED time and drive time) took 6 min 21 s (1 participant).
 
 Timed with `python timing_test.py` (protocol in `TIMING_TEST.md`).
 <!-- DECISION_TIME:END -->
 
 ## The model
 
-ERNow forecasts each hospital's next-period **CMS OP-18b**: the median time discharged patients spend in the ED from arrival to departure. The model is trained and tested on **every U.S. hospital** in six CMS Hospital Compare releases (2021–2026), then applied to Boston's six.
+ERNow forecasts each hospital's next-period **CMS OP-18b**: the median time discharged patients spend in the ED from arrival to departure. The model is trained and tested on **every U.S. hospital** in six CMS Hospital Compare releases (2021–2026), then applied to Boston's seven adult emergency departments.
 
 `6 CMS releases → national panel (4,246 hospitals, 19,884 hospital-periods) → model comparison → tested 80% ranges → ranking test → Boston forecasts + peers → ERNow`
 
@@ -73,7 +74,7 @@ ERNow forecasts each hospital's next-period **CMS OP-18b**: the median time disc
 
 **How sure are these numbers?** Bootstrap with 2,000 resamples on the final test year: fastest-pick accuracy **83% (95% CI 78–87%)**, range coverage **85% (83–86%)**. The best challenger's edge over Persistence is statistically real but about **8 seconds** per hospital on a 3–5 hour visit, and it missed the 2% bar on validation, so Persistence stays.
 
-**Does the ranking hold?** On the test release, the forecast ranked hospitals with a rank correlation of **0.97** nationally and **0.86** within local areas (293 counties with 3+ hospitals). It picked the actual fastest ER in the area **83%** of the time, versus **24%** by chance. Boston backtest: rank correlation 1.00 and the fastest hospital predicted correctly.
+**Does the ranking hold?** On the test release, the forecast ranked hospitals with a rank correlation of **0.97** nationally and **0.86** within local areas (293 counties with 3+ hospitals). It picked the actual fastest ER in the area **83%** of the time, versus **24%** by chance. Boston backtest (7 hospitals): rank correlation 1.00 and the fastest hospital predicted correctly.
 
 **Ablation.** Adding other ED measures, hospital characteristics, and geography to gradient boosting did not beat Persistence on the test release, and ERNow reports that instead of shipping a more complex model that does not help.
 
@@ -83,8 +84,10 @@ ERNow forecasts each hospital's next-period **CMS OP-18b**: the median time disc
 
 ## What the app shows
 
-- **Your two best options:** the closest ER and the ER likely to be fastest overall, side by side with the same three facts (drive, typical ED visit, drive + visit), plus how much time the faster one saves counting the extra drive both ways
-- **All 6 Boston ERs**, sorted by closest (default) or fastest overall, each with:
+- **Your two best options:** the closest ER and the ER likely to be fastest overall, side by side with the same three facts (drive, typical ED visit, drive + visit), plus how much sooner you're typically done at the faster one, after its extra drive
+- **Eye, ear, nose, or throat emergency switch:** turning it on adds Mass Eye and Ear to the full comparison. Boston Children's and VA Boston West Roxbury are always shown in their own section, labeled with who they serve
+- **Other Boston emergency departments:** Mass Eye and Ear, Boston Children's, and VA Boston West Roxbury, each labeled with who it serves, with drive time (and a forecast range where CMS publishes ED times)
+- **All 7 Boston ERs**, sorted by closest (default) or fastest overall, each with:
   - typical ED visit (arrival to leaving) with a tested range, and how it compares with 25 similar U.S. hospitals
   - drive time, drive + typical visit, chance it's the fastest (4,000 simulated trips), and how often patients left before being seen (CMS OP-22, 2024)
 - One-tap directions; Boston context (weather, respiratory illness, events) shown but never used to adjust a number

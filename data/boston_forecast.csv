@@ -1,7 +1,9 @@
-hospital,cms_provider_id,latest_op18b,period_end,forecast_op18b,lo80,hi80,peer_median_op18b,vs_peers_min,left_without_seen_pct,national_median_left_without_seen_pct,latest_change_min,change_flag
-Tufts Medical Center,220116,208.0,2025-09-30,208.0,201.23741394019092,230.44209730414414,200.0,8.0,4.0,1.0,-32.0,False
-Boston Medical Center,220031,227.0,2025-09-30,227.0,213.89837760873314,247.23949328875347,187.0,40.0,7.0,1.0,-24.0,False
-Brigham and Women's Faulkner Hospital,220119,256.0,2025-09-30,256.0,230.59834636495623,270.37046880301705,164.0,92.0,3.0,1.0,-19.0,False
-Massachusetts General Hospital,220071,288.0,2025-09-30,288.0,266.33669636970205,313.0069107115088,230.0,58.0,4.0,1.0,5.0,False
-Brigham and Women's Hospital,220110,300.0,2025-09-30,300.0,280.32715810943245,319.7691013972288,230.0,70.0,5.0,1.0,-17.0,False
-Beth Israel Deaconess Medical Center,220086,336.0,2025-09-30,336.0,313.5293025849601,359.9497873701522,210.0,126.0,2.0,1.0,-26.0,False
+hospital,cms_provider_id,ed_type,latest_op18b,period_end,forecast_op18b,lo80,hi80,peer_median_op18b,vs_peers_min,left_without_seen_pct,national_median_left_without_seen_pct,latest_change_min,change_flag
+Tufts Medical Center,220116,general,208.0,2025-09-30,208.0,201.23741394019092,230.44209730414414,200.0,8.0,4.0,1.0,-32.0,False
+Boston Medical Center,220031,general,227.0,2025-09-30,227.0,213.89837760873314,247.23949328875347,187.0,40.0,7.0,1.0,-24.0,False
+Brigham and Women's Faulkner Hospital,220119,general,256.0,2025-09-30,256.0,230.59834636495623,270.37046880301705,164.0,92.0,3.0,1.0,-19.0,False
+Massachusetts General Hospital,220071,general,288.0,2025-09-30,288.0,266.33669636970205,313.0069107115088,230.0,58.0,4.0,1.0,5.0,False
+Brigham and Women's Hospital,220110,general,300.0,2025-09-30,300.0,280.32715810943245,319.7691013972288,230.0,70.0,5.0,1.0,-17.0,False
+Beth Israel Deaconess Medical Center,220086,general,336.0,2025-09-30,336.0,313.5293025849601,359.9497873701522,210.0,126.0,2.0,1.0,-26.0,False
+Boston Medical Center–Brighton,220036,general,146.0,2025-09-30,146.0,140.39479709769628,174.3761483222294,158.0,-12.0,1.0,1.0,-2.0,False
+Mass Eye and Ear,220075,specialty,174.0,2025-09-30,174.0,166.2566045107583,193.73931401330955,144.0,30.0,3.0,1.0,9.0,False

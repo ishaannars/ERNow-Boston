@@ -16,15 +16,15 @@ Measures the headline claim: ERNow gives a better ER choice (closest **and** lik
 
 The script asks which one you're timing. If you already saved a quick search as a manual run, `python timing_test.py --mark-quick` relabels it.
 
-## Full comparison: 12 lookups across 2 websites
-Start the timer, then gather, for each of the 6 hospitals (MGH, Brigham and Women's, BWH Faulkner, BIDMC, Boston Medical Center, Tufts Medical Center):
+## Full comparison: two lookups per ER across 2 websites
+Start the timer, then gather, for each of Boston's 7 ERs (MGH, Brigham and Women's, BWH Faulkner, BIDMC, Boston Medical Center, Boston Medical Center–Brighton, Tufts Medical Center):
 
-1. **CMS Care Compare** (medicare.gov/care-compare): search the hospital, open its page, find the emergency department "median time patients spent in the ED before leaving" (6 lookups).
-2. **Google Maps**: drive time from your starting address to the hospital (6 lookups).
+1. **CMS Care Compare** (medicare.gov/care-compare): search the hospital, open its page, find the emergency department "median time patients spent in the ED before leaving" (7 lookups).
+2. **Google Maps**: drive time from your starting address to the hospital (7 lookups).
 
 While you're on each hospital's own website, note whether it posts a live ED wait time (yes/no).
 
-Write the 6 ED times and 6 drive times down, decide where you'd go, then **stop the timer**.
+Write the 7 ED times and 7 drive times down, decide where you'd go, then **stop the timer**.
 
 ## ERNow run
 Open https://ernowboston.streamlit.app/, start the timer, enter the same starting address, decide where you'd go, **stop the timer**.

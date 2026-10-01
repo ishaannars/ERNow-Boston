@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-01T13:30:22+00:00",
+  "generated_at": "2026-10-01T14:41:14+00:00",
   "target": "Next-release CMS OP-18b (median ED visit duration, discharged patients, minutes)",
   "releases": [
     "2021-10-01",
@@ -91,6 +91,35 @@
       "fastest_pick_random_baseline": 0.24041179592012413
     }
   },
+  "rolling": [
+    {
+      "target_release": "2024-10-01",
+      "hospitals": 3964,
+      "persistence_MAE": 13.56710393541877,
+      "best_challenger": "Partial pooling (shrink toward state & peer means)",
+      "best_challenger_MAE": 14.439555140743408,
+      "coverage": 0.8355196770938446,
+      "fastest_pick_accuracy": 0.7054794520547946
+    },
+    {
+      "target_release": "2025-11-01",
+      "hospitals": 3967,
+      "persistence_MAE": 11.804638265691958,
+      "best_challenger": "Partial pooling (shrink toward state & peer means)",
+      "best_challenger_MAE": 11.619797067486187,
+      "coverage": 0.8290899924376103,
+      "fastest_pick_accuracy": 0.7567567567567568
+    },
+    {
+      "target_release": "2026-08-01",
+      "hospitals": 4017,
+      "persistence_MAE": 9.421458800099577,
+      "best_challenger": "Partial pooling (shrink toward state & peer means)",
+      "best_challenger_MAE": 9.260013835353998,
+      "coverage": 0.8454070201643017,
+      "fastest_pick_accuracy": 0.8293515358361775
+    }
+  ],
   "confidence": {
     "resamples": 2000,
     "mae_gain_vs_best_challenger_min": 0.13793731659056788,
@@ -104,8 +133,8 @@
     ]
   },
   "boston_backtest": {
-    "hospitals": 6,
-    "MAE_selected": 20.5,
+    "hospitals": 7,
+    "MAE_selected": 17.857142857142858,
     "spearman_selected": 1.0,
     "fastest_pick_correct": true
   },
@@ -261,10 +290,10 @@
   "evidence": {
     "hospitals_latest_release": 4658,
     "hospitals_with_op18b_latest": 4081,
-    "boston_spread_min": 128.0,
-    "boston_fastest": "Tufts Medical Center",
+    "boston_spread_min": 190.0,
+    "boston_fastest": "Boston Medical Center\u2013Brighton",
     "boston_slowest": "Beth Israel Deaconess Medical Center",
-    "boston_fastest_min": 208.0,
+    "boston_fastest_min": 146.0,
     "boston_slowest_min": 336.0,
     "data_lag_months_min": 9.00131406044678,
     "data_lag_months_max": 12.02365308804205,

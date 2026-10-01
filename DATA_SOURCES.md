@@ -37,7 +37,7 @@ Legacy median minutes from ED arrival until evaluation by a qualified healthcare
 
 ## Model limitation
 
-No public source reliably provides all six Boston ERs' live queue, triage mix, staffing, room availability, boarding load, or incoming ambulance volume. ERNow therefore produces a forecast range rather than a confirmed live wait time.
+No public source reliably provides all seven Boston ERs' live queue, triage mix, staffing, room availability, boarding load, or incoming ambulance volume. ERNow therefore produces a forecast range rather than a confirmed live wait time.
 
 ## Added sources
 
@@ -55,3 +55,6 @@ CHIA utilization and Boston context (weather, respiratory illness, events) are d
 
 ### CMS OP-22 (left before being seen)
 Share of ED patients who left before being seen, calendar year 2024 (latest release). Shown on each ER card next to the U.S. median.
+
+### Restricted emergency departments
+Mass Eye and Ear (eye and ENT emergencies; CMS OP-18b available, so it gets a forecast range), Boston Children's Hospital (pediatric; no CMS ED-time data), and VA Boston's West Roxbury ED (enrolled veterans; not in CMS Hospital Compare, location from VA Boston). Shown separately and never ranked against general EDs.
