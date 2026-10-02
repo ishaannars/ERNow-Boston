@@ -1049,16 +1049,29 @@ hr, [data-testid="stDivider"] {margin:.55rem 0 .35rem !important}
 .er-head{flex-wrap:nowrap !important;align-items:flex-start !important;min-height:2.6em}
 .er-head .er-rank{flex:0 0 auto}
 .er-head .er-title{flex:1 1 auto;min-width:0}
+
+/* even card headers: rank chip + tags on one row, name below, same on every card */
+.rank-chip{font-size:.62rem;font-weight:700;letter-spacing:.04em;padding:.08rem .42rem;border-radius:999px;background:var(--ink);color:var(--ivory)}
+.er-head{min-height:2.5em !important}
+.er-head .er-title{font-size:.98rem !important}
+/* one rhythm for section headings on the home page */
+.stApp h3{margin-top:.9rem !important}
+.location-confirm{margin:0 !important}
+.live-tile{display:flex !important;flex-direction:column !important}
+.live-tile .live-c{flex:1 1 auto}
+.live-tile .live-t{margin-top:auto !important;padding-top:.35rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 </style>
 """, unsafe_allow_html=True)
 
 
 def render_home():
     st.title("ERNow Boston")
+    _nat, _ = load_national()
+    n_hosp = f"{_nat['split']['hospitals']:,}" if _nat else "4,000+"
     st.markdown('<div class="brand-sub">For urgent, non-life-threatening visits: find the ER that gets you seen and home fastest, '
                 'not just the closest, in about 15 seconds.</div>'
-                '<div class="brand-pitch">Boston’s ERs differ by hours in a way that persists year to year. ERNow uses that to point you to the ER '
-                'most likely to get you seen fastest, not just the closest, in seconds, using public data alone.</div>', unsafe_allow_html=True)
+                '<div class="brand-pitch">Live ER wait times could be years away. ERNow brings ER transparency to Boston now: '
+                f'models tested on {n_hosp} U.S. hospitals predict which ER will likely get you seen fastest.</div>', unsafe_allow_html=True)
 
     national, _fc = load_national()
     if national:
@@ -1071,15 +1084,14 @@ def render_home():
             ("Vs similar hospitals", "25 look-alikes", "Matched on size, type, and case mix."),
             ("Chance fastest", "4,000 trips", "Your drive, replayed over each ER's range."),
         ]
-        techniques = ["Method: last year's value (persistence)", "Method: calibrated ranges (conformal)",
-                      "Method: look-alike matching (nearest neighbors)", "Method: trip simulation"]
+        techniques = ["Method: persistence", "Method: conformal ranges", "Method: nearest neighbors", "Method: trip simulation"]
         ds = decision_summary()
         measured = ""
         if "ernow" in ds and "quick" in ds:
             secs = lambda v: f"{int(round(v))} seconds" if v < 60 else fmt_seconds(v)
             measured = (f'<div class="live-proof" title="Median times, measured with timing_test.py">'
-                        f'<b>In our timed test, choosing an ER took {secs(ds["ernow"]["median_seconds"])} with ERNow</b>, '
-                        f'vs {secs(ds["quick"]["median_seconds"])} with a Google “ER near me” search, which only finds the closest ER.</div>')
+                        f'<b>Timed test: ERNow picked an ER in {secs(ds["ernow"]["median_seconds"])}.</b> '
+                        f'A Google “ER near me” search took {secs(ds["quick"]["median_seconds"])} and only found the closest one.</div>')
         tiles = "".join(f'<div class="live-tile"><div class="live-k">{html.escape(k)}</div><div class="live-v">{html.escape(v)}</div>'
                         f'<div class="live-c">{html.escape(c)}</div><div class="live-t">{html.escape(t)}</div></div>'
                         for (k, v, c), t in zip(live, techniques))
@@ -1096,30 +1108,42 @@ def render_home():
     else:
         st.markdown('<div class="model-bar"><div class="model-line-1"><span class="model-dot"></span>National model results not found</div><div class="model-line-2">Run <code>python national_model.py</code> to build them.</div></div>', unsafe_allow_html=True)
 
-    st.subheader("Your location")
-    location_slot = st.empty()
-    with location_slot.container():
-        location = streamlit_geolocation()
-
+    saved = st.session_state.get("origin")
     origin_lat = origin_lon = None
     location_label = None
-    if isinstance(location, dict) and location.get("latitude") is not None and location.get("longitude") is not None:
-        origin_lat, origin_lon = float(location["latitude"]), float(location["longitude"])
-        location_slot.empty()
-        location_label = fetch_location_name(origin_lat, origin_lon)
-        st.markdown(f'<div class="location-confirm">Location detected: {location_label}<span class="sub">Results updated from your current location.</span></div>', unsafe_allow_html=True)
+    if saved:
+        origin_lat, origin_lon, location_label = saved
+        st.subheader("Your location")
+        loc_l, loc_r = st.columns([5, 1.2], vertical_alignment="center")
+        with loc_l:
+            st.markdown(f'<div class="location-confirm">Location: {html.escape(str(location_label))}'
+                        f'<span class="sub">Results are for this spot.</span></div>', unsafe_allow_html=True)
+        with loc_r:
+            if st.button("Change location", key="change_location", use_container_width=True):
+                st.session_state.pop("origin", None)
+                st.session_state.pop("fallback_origin", None)
+                st.rerun()
     else:
-        with st.expander("Location blocked? Choose a Boston area"):
-            fallback = st.selectbox("Boston area", list(FALLBACK_ORIGINS.keys()))
-            if st.button("Use this area", use_container_width=True):
-                st.session_state["fallback_origin"] = fallback
-        if st.session_state.get("fallback_origin"):
-            fallback = st.session_state["fallback_origin"]
-            origin_lat, origin_lon = FALLBACK_ORIGINS[fallback]
-            location_label = fallback
+        st.subheader("Get your location")
+        location = streamlit_geolocation()
+        if isinstance(location, dict) and location.get("latitude") is not None and location.get("longitude") is not None:
+            origin_lat, origin_lon = float(location["latitude"]), float(location["longitude"])
+            location_label = fetch_location_name(origin_lat, origin_lon)
+        else:
+            with st.expander("Location blocked? Choose a Boston area"):
+                fallback = st.selectbox("Boston area", list(FALLBACK_ORIGINS.keys()))
+                if st.button("Use this area", use_container_width=True):
+                    st.session_state["fallback_origin"] = fallback
+            if st.session_state.get("fallback_origin"):
+                fallback = st.session_state["fallback_origin"]
+                origin_lat, origin_lon = FALLBACK_ORIGINS[fallback]
+                location_label = fallback
+        if origin_lat is not None:
+            # Remember it for this visit, so Methodology / Forecast Model and back don't ask again.
+            st.session_state["origin"] = (origin_lat, origin_lon, location_label)
+            st.rerun()
 
     if origin_lat is None:
-        st.info("Use **Get My Location**. That's the only input ERNow needs.")
         st.stop()
 
     loading_slot = st.empty()
@@ -1133,9 +1157,9 @@ def render_home():
     # General EDs are compared and ranked; specialty, pediatric, and VA EDs serve specific patients
     # and are shown separately so no one is sent to an ED that can't treat them.
     status_slot = st.empty()
-    ent = st.toggle("Eye, ear, nose, or throat emergency", key="ent_emergency",
-                    help="Adds Mass Eye and Ear to the comparison. Leave off for any other emergency.")
-    focus = "specialty" if ent else None
+    em_type = st.radio("Type of emergency", ["General", "Eye, ear, nose, or throat"], index=0, horizontal=True,
+                       key="emergency_type", help="Eye, ear, nose, or throat brings in Mass Eye and Ear, the specialist ED.")
+    focus = "specialty" if em_type != "General" else None
     general = df_all[df_all["ed_type"] == "general"]
     # Eye/ENT: Mass Eye and Ear has public ED-time data, so it joins the full comparison.
     df = (pd.concat([general, df_all[df_all["ed_type"] == "specialty"]]) if focus == "specialty" else general).reset_index(drop=True)
@@ -1177,7 +1201,7 @@ def render_home():
 
     if focus == "specialty":
         st.caption("Mass Eye and Ear is included because this is an eye, ear, nose, or throat emergency. "
-                   "For any other emergency, turn this off.")
+                   "For any other emergency, choose General.")
 
     specialist = None
     if focus == "specialty":
@@ -1256,8 +1280,8 @@ def render_home():
             "&travelmode=driving"
         )
         cards.append(f"""<div class="er-card{top}">
-      <div class="er-tags">{tags}{flag}</div>
-      <div class="er-head"><span class="er-rank">{pos}</span><span class="er-title">{html.escape(str(row['hospital']))}</span></div>
+      <div class="er-tags"><span class="rank-chip">#{pos}</span>{tags}{flag}</div>
+      <div class="er-head"><span class="er-title">{html.escape(str(row['hospital']))}</span></div>
       <div class="er-wait-label">Typical ED visit · tested range</div><div class="er-wait">{visit_range}</div>{peer}
       <div class="er-stats">
         <div class="er-stat"><div class="er-stat-k">Drive</div><div class="er-stat-v">{drive} <span>{drive_sub}</span></div></div>
@@ -1277,7 +1301,7 @@ def render_home():
         tag_names = {"specialty": "Eye & ENT only", "pediatric": "Children only", "veterans": "Veterans only"}
         st.subheader("Other Boston emergency departments")
         st.caption("Open to specific patients only, so they aren't ranked against the EDs above. If one fits you, "
-                   "it may be the right place to go." + ("" if focus else " For an eye, ear, nose, or throat emergency, use the switch at the top."))
+                   "it may be the right place to go." + ("" if focus else " For an eye, ear, nose, or throat emergency, change the type of emergency at the top."))
         ocards = []
         for _, o in others.iterrows():
             route = route_estimate(origin_lat, origin_lon, o["latitude"], o["longitude"])
@@ -1343,7 +1367,7 @@ def render_methodology():
     st.markdown("""
     <div class="ds-card">
       <div class="ds-title">The mission: the ER that gets you seen fastest, not just the closest</div>
-      <div class="ds-sub"><strong>Boston's ERs differ by hours in a way that persists year to year. ERNow uses that to point you to the ER most likely to get you seen fastest, not just the closest, in seconds, using public data alone.</strong> Today people search "ER near me" and go to the closest one, with no information about the ED itself. Hospitals don't publish live waits, and ERNow doesn't need them: the differences come from staffing, size, boarding, and case mix, which change slowly. ERNow assembles the data from CMS, CHIA, the CDC, the Weather Service, and road routing into one screen, labels every number by source and period, and is built so live hospital data can plug in the day it exists.</div>
+      <div class="ds-sub"><strong>Live ER wait times could be years away. ERNow brings ER transparency to Boston now: models tested on thousands of U.S. hospitals predict which ER will likely get you seen fastest.</strong> Today people search "ER near me" and go to the closest one, with no information about the ED itself. Hospitals don't publish live waits, and ERNow doesn't need them: the differences come from staffing, size, boarding, and case mix, which change slowly. ERNow assembles the data from CMS, CHIA, the CDC, the Weather Service, and road routing into one screen, labels every number by source and period, and is built so live hospital data can plug in the day it exists.</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -1457,7 +1481,7 @@ def render_methodology():
     - **Left before seen (2024):** the share of patients who left before being seen (CMS OP-22). A high number signals long waits.
     """)
     st.caption("Sort by Closest (the default) or by Fastest overall (drive + typical visit). ERs without a route are listed last. "
-               "For an eye, ear, nose, or throat emergency, a switch adds Mass Eye and Ear to the comparison.")
+               "For an eye, ear, nose, or throat emergency, choosing that type of emergency adds Mass Eye and Ear to the comparison.")
 
     st.subheader("What would make it live")
     st.write("ERNow is built so that live hospital data could plug in directly. If Boston hospitals published these fields, ERNow could switch from typical performance to current conditions:")
