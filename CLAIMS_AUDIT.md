@@ -24,7 +24,7 @@ Checked October 2, 2026. This distinguishes primary-source checks from reproduct
 
 ## Consumer integration
 
-`python scripts/verify_consumer_outputs.py` renders the home page with deterministic routes and checks that all eight saved forecast medians and ranges appear in their correct hospital cards, totals use the point forecast, peer differences match saved outputs, and the lowest-total badge follows the selected forecast. It also checks missing-route behavior. The consumer summary reads the selected model and its held-out error from saved results, rather than hard-coding which model won. All candidate models are evaluated; only the selected point model is used for totals, alongside conformal ranges, peer matching, and simulation shares.
+`python scripts/verify_consumer_outputs.py` renders the home page with deterministic routes and checks that all eight saved forecast medians and ranges appear in their correct hospital cards, totals use the point forecast, peer differences match saved outputs, and the lowest-total badge follows the selected forecast. It also checks missing-route behavior. The check also verifies navigation preserves session location and preferences, only one navigation button is active, and changing systems leaves a valid sort option. The consumer summary reads the selected model and its held-out error from saved results, rather than hard-coding which model won. All candidate models are evaluated; only the selected point model is used for totals, alongside conformal ranges, peer matching, and simulation shares.
 
 ## Claims corrected or qualified
 

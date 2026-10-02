@@ -62,8 +62,26 @@ def main():
     forecast = pd.read_csv(ROOT / 'data/boston_forecast.csv')
     at = AppTest.from_string(fixture, default_timeout=30).run()
     check(at, forecast[forecast.ed_type == 'general'])
+    assert at.radio(key='er_sort').value == 'Fastest overall'
     at.radio(key='emergency_type').set_value('Eye, ear, nose, or throat').run()
     check(at, forecast)
+    at.selectbox(key='my_system').set_value('Mass General Brigham').run()
+    at.radio(key='er_sort').set_value('Mass General Brigham first').run()
+    for key, view in [('nav_methodology','Methodology'),('nav_model','Forecast Model'),('nav_home','ERNow')]:
+        at.button(key=key).click().run()
+        assert not at.exception, [e.message for e in at.exception]
+        assert at.session_state['ernow_view'] == view
+        assert at.session_state['origin'][2] == 'Verification location'
+        # The selected navigation button is the sole primary button.
+        assert at.button(key=key).proto.type == 'primary'
+        assert sum(button.proto.type == 'primary' for button in at.button) == 1
+    assert at.radio(key='emergency_type').value == 'Eye, ear, nose, or throat'
+    assert at.selectbox(key='my_system').value == 'Mass General Brigham'
+    assert at.radio(key='er_sort').value == 'Mass General Brigham first'
+    at.selectbox(key='my_system').set_value('Tufts Medicine').run()
+    assert not at.exception
+    assert at.radio(key='er_sort').value in at.radio(key='er_sort').options
+    print('Navigation: all views, exactly one active button, location/preferences preserved, changed-system sort valid PASS')
     at.session_state['routes_available'] = False
     at.session_state['origin'] = (42.36, -71.06, 'Missing-route verification')
     at.run()

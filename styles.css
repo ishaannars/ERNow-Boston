@@ -523,3 +523,15 @@ hr, [data-testid="stDivider"] {margin:.55rem 0 .35rem !important}
 /* Keep controls and supporting labels in normal flow. */
 [data-testid="stRadio"] {margin:.1rem 0 .2rem}
 .brand-pitch {margin:.15rem 0 .65rem !important}
+
+/* Active navigation uses the emergency banner red without changing button fill. */
+:is(.st-key-nav_home,.st-key-nav_methodology,.st-key-nav_model) button[kind="primary"] {
+  border-color:var(--beni) !important;
+  box-shadow:inset 0 0 0 1px var(--beni) !important;
+}
+:is(.st-key-nav_home,.st-key-nav_methodology,.st-key-nav_model) button:focus-visible {
+  outline:2px solid var(--beni);outline-offset:3px;
+}
+
+/* The model indicator is static; only the loading spinner animates. */
+.model-dot {animation:none !important;box-shadow:none !important}
