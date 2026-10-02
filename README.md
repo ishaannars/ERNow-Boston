@@ -2,7 +2,7 @@
 
 **For urgent, non-life-threatening visits: find the ER that gets you seen and home fastest, not just the closest, in about 15 seconds.**
 
-Live ER wait times could be years away. ERNow brings ER transparency to Boston now: models tested on 4,438 U.S. hospitals predict which ER will likely get you seen fastest.
+Live ER wait times could be years away. ERNow brings ER transparency to Boston now: models built on 4,438 U.S. hospitals predict which ER will usually get you in and out fastest, drive included.
 
 Today people search "ER near me" and go to the closest one, with no information about the ED itself. From 83% of Boston locations, that isn't the ER that would get them seen and home fastest. Hospitals don't publish live waits, but ERNow doesn't need them to help: a hospital's ED time predicts next year's with R² 0.93 across 4,000+ U.S. hospitals. ERNow assembles CMS, CHIA, the CDC, the Weather Service, and road routing into one screen, labels every number by source and period, and is built so live hospital data can plug in the day it exists.
 
