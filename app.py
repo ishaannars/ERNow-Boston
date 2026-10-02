@@ -468,10 +468,12 @@ def render_home():
     st.title("ERNow Boston")
     _nat, _ = load_national()
     n_hosp = f"{_nat['split']['hospitals']:,}" if _nat else "4,000+"
-    st.markdown('<div class="brand-sub">For urgent, non-life-threatening visits: compare ERs by estimated drive + hospital median visit time, '
-                f'in one screen.</div>'
-                '<div class="brand-pitch">ERNow compares published performance now: '
-                f'models built on {n_hosp} reporting U.S. hospitals compare typical ED visit times, drive included.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="brand-sub">Compare ERs in about 10 seconds. '
+                'Find the shortest estimated total visit, not just the closest.</div>'
+                '<div class="brand-pitch">For urgent, non-life-threatening needs: ERNow combines road travel with '
+                'tested forecasts of hospital arrival-to-departure medians to compare time through the whole visit. '
+                f'Built on {n_hosp} reporting U.S. hospitals. Estimates are typical, not live; '
+                'time to first clinician and your own discharge time are not predicted.</div>', unsafe_allow_html=True)
 
     national, _fc = load_national()
     if national:
@@ -490,8 +492,9 @@ def render_home():
         if "ernow" in ds and "quick" in ds:
             secs = lambda v: f"{int(round(v))} seconds" if v < 60 else fmt_seconds(v)
             measured = (f'<div class="live-proof" title="Median times, measured with timing_test.py">'
-                        f'<b>Recorded decision median: ERNow {secs(ds["ernow"]["median_seconds"])} ({ds["ernow"]["participants"]} participants).</b> '
-                        f'Nearest-ER search: {secs(ds["quick"]["median_seconds"])} ({ds["quick"]["participants"]} participants). Small convenience sample, not a controlled trial.</div>')
+                        f'<b>A comparison in {secs(ds["ernow"]["median_seconds"])}.</b> Recorded median versus '
+                        f'{secs(ds["quick"]["median_seconds"])} for a nearest-ER search '
+                        f'({ds["ernow"]["participants"]} ERNow / {ds["quick"]["participants"]} search participants).</div>')
         tiles = "".join(f'<div class="live-tile"><div class="live-k">{html.escape(k)}</div><div class="live-v">{html.escape(v)}</div>'
                         f'<div class="live-c">{html.escape(c)}</div><div class="live-t">{html.escape(t)}</div></div>'
                         for (k, v, c), t in zip(live, techniques))
@@ -507,6 +510,19 @@ def render_home():
         )
     else:
         st.markdown('<div class="model-bar"><div class="model-line-1"><span class="model-dot"></span>National model results not found</div><div class="model-line-2">Run <code>python national_model.py</code> to build them.</div></div>', unsafe_allow_html=True)
+
+    if national and "ernow" in ds and "quick" in ds:
+        with st.expander("About the 10-second comparison"):
+            st.caption("The headline rounds the recorded nine-second ERNow median. These are decision times, not hospital waits. "
+                       "Five participants used each method in a small convenience sample, not a controlled trial. "
+                       "Results vary with connection, location permission, and the decision. The search protocol selected the nearest ER; "
+                       "the study does not establish faster treatment or discharge. Full protocol: TIMING_TEST.md.")
+
+    # Widget state is normally discarded by Streamlit when another view omits it.
+    # Restore visit preferences from durable session state before rendering widgets.
+    for key, value in st.session_state.get("visit_preferences", {}).items():
+        if key not in st.session_state:
+            st.session_state[key] = value
 
     if national is None or _fc is None:
         loading_slot.empty()
@@ -667,7 +683,9 @@ def render_home():
 
     st.subheader(f"Compare {len(ranked)} Boston ERs" + (" for this problem" if focus == "specialty" else ""))
     sort_opts = ["Closest", "Fastest overall"] + ([f"{my_system} first"] if my_system != "Any" else [])
-    sort_by = st.radio("Sort by", sort_opts, index=0, horizontal=True, key="er_sort")
+    if st.session_state.get("er_sort") not in sort_opts:
+        st.session_state.pop("er_sort", None)
+    sort_by = st.radio("Sort by", sort_opts, index=1, horizontal=True, key="er_sort")
     if sort_by == "Closest":
         ranked = ranked.sort_values(["route_ok", "route_time_min"], ascending=[False, True]).reset_index(drop=True)
     elif sort_by.endswith(" first"):
@@ -1201,6 +1219,10 @@ def render_forecast_model():
 
 
 def _set_ernow_view(view_name):
+    preferences = st.session_state.setdefault("visit_preferences", {})
+    for key in ("emergency_type", "my_system", "er_sort"):
+        if key in st.session_state:
+            preferences[key] = st.session_state[key]
     st.session_state["ernow_view"] = view_name
 
 
@@ -1249,15 +1271,16 @@ with nav3:
         args=("Forecast Model",),
     )
 
-loading_slot = st.empty()
-loading_slot.markdown('<div class="ernow-loading-wrap"><div class="ernow-loading"></div></div>', unsafe_allow_html=True)
-try:
-    if current_view == "Methodology":
-        render_methodology()
-    elif current_view == "Forecast Model":
-        render_forecast_model()
-    else:
-        render_home()
-finally:
-    # Clear the one loader after all cards, specialist routes, and the map render.
-    loading_slot.empty()
+with st.container(key="ernow_view_" + current_view.lower().replace(" ", "_")):
+    loading_slot = st.empty()
+    loading_slot.markdown('<div class="ernow-loading-wrap"><div class="ernow-loading"></div></div>', unsafe_allow_html=True)
+    try:
+        if current_view == "Methodology":
+            render_methodology()
+        elif current_view == "Forecast Model":
+            render_forecast_model()
+        else:
+            render_home()
+    finally:
+        # Clear the one loader after all cards, specialist routes, and the map render.
+        loading_slot.empty()

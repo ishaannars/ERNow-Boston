@@ -2,7 +2,9 @@
 
 **Version 27** · Compact cards, consistent controls, and a source/claims audit (October 2, 2026).
 
-**Compare Boston ERs by estimated drive time plus a forecast of each hospital’s median ED visit duration, in one screen.**
+**Compare ERs in about 10 seconds. Find the shortest estimated total visit, not just the closest.**
+
+The 10-second headline rounds the recorded nine-second median from five ERNow participants. It describes decision time, not treatment or discharge time; speed varies. ERNow combines road travel with forecasts of hospital arrival-to-departure medians to compare total time through a visit.
 
 ERNow uses historical CMS performance to compare seven general emergency departments, with specialist, pediatric, and veterans’ services listed separately. The national panel contains **4,438 eligible reporting hospitals** and **35,164 labeled release pairs** across ten saved CMS releases. It does not measure a live queue, time to first clinician, clinical suitability, or your personal visit length.
 
@@ -92,7 +94,7 @@ Peer comparisons use 25 nearest reporting hospitals, matched with ED volume, typ
 - **Comparison at a glance:** lowest estimated drive + hospital median, with its difference from the closest routed ED. This is not a clinical recommendation or a personal discharge-time prediction.
 - **Type of emergency:** General or Eye, ear, nose, or throat. The latter brings Mass Eye and Ear into the comparison and identifies its specialist role; services and suitability vary.
 - **Other services:** specialist, pediatric, and veterans’ EDs listed with their service population. VA eligibility rules and hospital age policies vary.
-- **Each card:** explicit forecast median used for drive + median totals, target-80% forecast range, peer difference, drive/distance, drive + forecast median, simulation share, and CMS OP-22 left-before-seen rate with the national median (2024).
+- **Each card:** sorted by Fastest overall by default (Closest remains available), with explicit forecast median used for drive + median totals, target-80% forecast range, peer difference, drive/distance, drive + forecast median, simulation share, and CMS OP-22 left-before-seen rate with the national median (2024).
 - **Fastest in simulation:** fraction of 4,000 independent lognormal hospital-median scenarios won by an ER. The spread is approximated from forecast bounds. These percentages are uncalibrated, exclude unavailable routes, and are not probabilities for an individual visit.
 - **Directions:** published ER street address; route estimates use approximate address coordinates without live traffic, parking, or ambulance conditions. Some original campus coordinates remain approximate.
 - **Context:** weather, latest weekly respiratory illness, and detected events. Context never changes median forecasts or ranking. Missing weather/illness feeds display as unavailable; event checks may fail or miss events.
@@ -100,7 +102,7 @@ Peer comparisons use 25 nearest reporting hospitals, matched with ED volume, typ
 
 ## Version 27: controls and compact layout
 
-Cards retain all metrics while removing reserved header space and tightening internal gaps. Instrument Sans is shared by body text, **Change location**, field labels, and selections. Serif headings and time estimates preserve the visual hierarchy. One loader covers the render; routes and context calls run concurrently with caching. Styles live in `styles.css`.
+Cards retain all metrics while removing reserved header space and tightening internal gaps. Instrument Sans is shared by body text, **Change location**, field labels, and selections. Serif headings and time estimates preserve the visual hierarchy. The active navigation button has the emergency banner’s red border. Switching views preserves emergency type, hospital system, sort preference, and session location. One loader covers the render; routes and context calls run concurrently with caching. Styles live in `styles.css`.
 
 - **Change location:** clears the location saved for this session so you can use device location again or choose a Boston area. Switching views remembers the location during the session.
 - **Your doctors’ hospital system (optional):** highlights affiliated ERs and names the lowest-total routed option in that system. You can sort that system first. **Any** compares all systems. Affiliation may help care continuity, but sharing records varies. This preference is not an insurance-network filter.
