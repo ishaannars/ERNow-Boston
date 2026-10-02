@@ -1,0 +1,5415 @@
+{
+  "scope": "Retrospective public hospital-median prediction/decision research; future confirmation required",
+  "candidate_configurations": 321,
+  "new_variants": 8,
+  "validation_release": "2025-11-01",
+  "later_release": "2026-08-01",
+  "joint_gate": "Validation MAE improves at least 2%, county regret improves, tie-aware shortest accuracy does not worsen",
+  "passes_MAE_gate_count": 4,
+  "passes_joint_gate_count": 0,
+  "selected_using_validation_only": {
+    "candidate": "Persistence baseline",
+    "validation": {
+      "MAE": 11.804638265691958,
+      "county_regret_min": 3.402027027027027,
+      "county_shortest_accuracy_tie_aware": 0.7635135135135135
+    },
+    "later_release": {
+      "MAE": 9.421458800099577,
+      "county_regret_min": 1.6040955631399318,
+      "county_shortest_accuracy_tie_aware": 0.8395904436860068
+    },
+    "validation_MAE_gain": 0.0,
+    "passes_MAE_gate": false,
+    "passes_joint_gate": false
+  },
+  "all_validation_scores": [
+    {
+      "candidate": "Continuous pooling recency=False offset=False",
+      "validation": {
+        "MAE": 11.540253514569853,
+        "county_regret_min": 3.804054054054054,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.276299614913114,
+        "county_regret_min": 1.6484641638225257,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": 0.022396683843374565,
+      "passes_MAE_gate": true,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Continuous pooling recency=True offset=False",
+      "validation": {
+        "MAE": 11.540768280226363,
+        "county_regret_min": 3.6317567567567566,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.25947188829856,
+        "county_regret_min": 1.6075085324232081,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": 0.022353076775972536,
+      "passes_MAE_gate": true,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.0,0.7,0.0",
+      "validation": {
+        "MAE": 11.563472942118732,
+        "county_regret_min": 3.7195945945945947,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.285614484067489,
+        "county_regret_min": 1.621160409556314,
+        "county_shortest_accuracy_tie_aware": 0.8361774744027304
+      },
+      "validation_MAE_gain": 0.020429708911464783,
+      "passes_MAE_gate": true,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.4,0.0,0.6,0.0",
+      "validation": {
+        "MAE": 11.568127673584792,
+        "county_regret_min": 3.6317567567567566,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.270398813713902,
+        "county_regret_min": 1.6143344709897611,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": 0.02003539513739616,
+      "passes_MAE_gate": true,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.0,0.8,0.0",
+      "validation": {
+        "MAE": 11.568566970391819,
+        "county_regret_min": 3.7972972972972974,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.310868257366712,
+        "county_regret_min": 1.6450511945392492,
+        "county_shortest_accuracy_tie_aware": 0.8361774744027304
+      },
+      "validation_MAE_gain": 0.01999818122222663,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.0,0.9,0.0",
+      "validation": {
+        "MAE": 11.582545045743942,
+        "county_regret_min": 3.7972972972972974,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.344315608158063,
+        "county_regret_min": 1.6450511945392492,
+        "county_shortest_accuracy_tie_aware": 0.8361774744027304
+      },
+      "validation_MAE_gain": 0.01881406401020269,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.5,0.0,0.5,0.0",
+      "validation": {
+        "MAE": 11.583549031495538,
+        "county_regret_min": 3.6722972972972974,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.265818706334153,
+        "county_regret_min": 1.6075085324232081,
+        "county_shortest_accuracy_tie_aware": 0.8361774744027304
+      },
+      "validation_MAE_gain": 0.018729013902863523,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.0,0.6,0.1",
+      "validation": {
+        "MAE": 11.59090063590771,
+        "county_regret_min": 3.7432432432432434,
+        "county_shortest_accuracy_tie_aware": 0.7567567567567568
+      },
+      "later_release": {
+        "MAE": 9.277017132901364,
+        "county_regret_min": 1.6143344709897611,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": 0.018106241375090426,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.0,0.7,0.1",
+      "validation": {
+        "MAE": 11.59501258025501,
+        "county_regret_min": 3.831081081081081,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.301556799059036,
+        "county_regret_min": 1.6450511945392492,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": 0.01775790843554992,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.4,0.0,0.5,0.1",
+      "validation": {
+        "MAE": 11.59788919072915,
+        "county_regret_min": 3.5135135135135136,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.265112650358176,
+        "county_regret_min": 1.6143344709897611,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": 0.017514223672883467,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Partial pooling (shrink toward state & peer means)",
+      "validation": {
+        "MAE": 11.603624375955716,
+        "county_regret_min": 3.7736486486486487,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.387127085141406,
+        "county_regret_min": 1.68259385665529,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": 0.01702838199798562,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.0,1.0,0.0",
+      "validation": {
+        "MAE": 11.603624375955716,
+        "county_regret_min": 3.7736486486486487,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.387127085141406,
+        "county_regret_min": 1.68259385665529,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": 0.01702838199798562,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.1,0.6,0.0",
+      "validation": {
+        "MAE": 11.606655101073981,
+        "county_regret_min": 3.635135135135135,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.284107124432914,
+        "county_regret_min": 1.6450511945392492,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": 0.016771641803999926,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.0,0.8,0.1",
+      "validation": {
+        "MAE": 11.606853683684738,
+        "county_regret_min": 3.804054054054054,
+        "county_shortest_accuracy_tie_aware": 0.7567567567567568
+      },
+      "later_release": {
+        "MAE": 9.333602487759132,
+        "county_regret_min": 1.651877133105802,
+        "county_shortest_accuracy_tie_aware": 0.8361774744027304
+      },
+      "validation_MAE_gain": 0.016754819381636143,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.4,0.1,0.5,0.0",
+      "validation": {
+        "MAE": 11.609592303803533,
+        "county_regret_min": 3.3817567567567566,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.266813821300163,
+        "county_regret_min": 1.6143344709897611,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": 0.016522824122047974,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.6,0.0,0.4,0.0",
+      "validation": {
+        "MAE": 11.612161808474658,
+        "county_regret_min": 3.5405405405405403,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.27483563847812,
+        "county_regret_min": 1.6075085324232081,
+        "county_shortest_accuracy_tie_aware": 0.8361774744027304
+      },
+      "validation_MAE_gain": 0.016305155048816466,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.1,0.7,0.0",
+      "validation": {
+        "MAE": 11.61285245347137,
+        "county_regret_min": 3.695945945945946,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.310505743540627,
+        "county_regret_min": 1.68259385665529,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": 0.016246648809051467,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.5,0.0,0.4,0.1",
+      "validation": {
+        "MAE": 11.617883443327868,
+        "county_regret_min": 3.5067567567567566,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.2641869024362,
+        "county_regret_min": 1.6040955631399318,
+        "county_shortest_accuracy_tie_aware": 0.8395904436860068
+      },
+      "validation_MAE_gain": 0.0158204612594407,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.5,0.1,0.4,0.0",
+      "validation": {
+        "MAE": 11.623751675008949,
+        "county_regret_min": 3.4222972972972974,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.261054915891878,
+        "county_regret_min": 1.6143344709897611,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": 0.01532334889148812,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.0,0.9,0.1",
+      "validation": {
+        "MAE": 11.625648742361433,
+        "county_regret_min": 3.9864864864864864,
+        "county_shortest_accuracy_tie_aware": 0.7567567567567568
+      },
+      "later_release": {
+        "MAE": 9.373890924663351,
+        "county_regret_min": 1.68259385665529,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": 0.015162643640739604,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.1,0.8,0.0",
+      "validation": {
+        "MAE": 11.626716470144778,
+        "county_regret_min": 3.675675675675676,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.344519503495075,
+        "county_regret_min": 1.68259385665529,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": 0.015072193788798871,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.0,0.6,0.2",
+      "validation": {
+        "MAE": 11.638025107668247,
+        "county_regret_min": 3.8445945945945947,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.305033344277449,
+        "county_regret_min": 1.6723549488054608,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": 0.014114211234065754,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.0,0.5,0.2",
+      "validation": {
+        "MAE": 11.639544922097343,
+        "county_regret_min": 3.695945945945946,
+        "county_shortest_accuracy_tie_aware": 0.7567567567567568
+      },
+      "later_release": {
+        "MAE": 9.283066596276768,
+        "county_regret_min": 1.6791808873720135,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": 0.013985464008196558,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.0,0.7,0.2",
+      "validation": {
+        "MAE": 11.646639487814008,
+        "county_regret_min": 3.8445945945945947,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.336114352208579,
+        "county_regret_min": 1.8327645051194539,
+        "county_shortest_accuracy_tie_aware": 0.8225255972696246
+      },
+      "validation_MAE_gain": 0.013384465861791317,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.6,0.0,0.3,0.1",
+      "validation": {
+        "MAE": 11.648250837412434,
+        "county_regret_min": 3.5067567567567566,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.276269906135997,
+        "county_regret_min": 1.6040955631399318,
+        "county_shortest_accuracy_tie_aware": 0.8395904436860068
+      },
+      "validation_MAE_gain": 0.013247964466140072,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.1,0.9,0.0",
+      "validation": {
+        "MAE": 11.648297021639864,
+        "county_regret_min": 3.739864864864865,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.38955353346808,
+        "county_regret_min": 1.68259385665529,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": 0.013244052086413438,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.6,0.1,0.3,0.0",
+      "validation": {
+        "MAE": 11.648570645105957,
+        "county_regret_min": 3.3682432432432434,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.267296025705349,
+        "county_regret_min": 1.6075085324232081,
+        "county_shortest_accuracy_tie_aware": 0.8361774744027304
+      },
+      "validation_MAE_gain": 0.01322087276825612,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.7,0.0,0.3,0.0",
+      "validation": {
+        "MAE": 11.649644387261489,
+        "county_regret_min": 3.570945945945946,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.295214424089304,
+        "county_regret_min": 1.6040955631399318,
+        "county_shortest_accuracy_tie_aware": 0.8395904436860068
+      },
+      "validation_MAE_gain": 0.01312991342402503,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.1,0.5,0.1",
+      "validation": {
+        "MAE": 11.650154668109408,
+        "county_regret_min": 3.7128378378378377,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.286725245471688,
+        "county_regret_min": 1.6143344709897611,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": 0.013086686275811443,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.4,0.0,0.4,0.2",
+      "validation": {
+        "MAE": 11.65109785668566,
+        "county_regret_min": 3.699324324324324,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.272987731928117,
+        "county_regret_min": 1.6791808873720135,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": 0.01300678644703035,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.1,0.6,0.1",
+      "validation": {
+        "MAE": 11.65380480150748,
+        "county_regret_min": 3.8445945945945947,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.311541787235761,
+        "county_regret_min": 1.6450511945392492,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": 0.01277747447991251,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.4,0.1,0.4,0.1",
+      "validation": {
+        "MAE": 11.657062225491977,
+        "county_regret_min": 3.5878378378378377,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.27188429500954,
+        "county_regret_min": 1.6143344709897611,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": 0.012501530066269306,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.0,0.8,0.2",
+      "validation": {
+        "MAE": 11.664115784458174,
+        "county_regret_min": 3.8682432432432434,
+        "county_shortest_accuracy_tie_aware": 0.7567567567567568
+      },
+      "later_release": {
+        "MAE": 9.374997046993695,
+        "county_regret_min": 1.825938566552901,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": 0.011904005702757292,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.1,0.7,0.1",
+      "validation": {
+        "MAE": 11.665811901774372,
+        "county_regret_min": 3.9054054054054053,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.344223509198885,
+        "county_regret_min": 1.7747440273037542,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": 0.011760323424823582,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.5,0.0,0.3,0.2",
+      "validation": {
+        "MAE": 11.67031745481645,
+        "county_regret_min": 3.699324324324324,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.276217462867443,
+        "county_regret_min": 1.6723549488054608,
+        "county_shortest_accuracy_tie_aware": 0.8361774744027304
+      },
+      "validation_MAE_gain": 0.011378646922700408,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.2,0.5,0.0",
+      "validation": {
+        "MAE": 11.67125639856702,
+        "county_regret_min": 3.60472972972973,
+        "county_shortest_accuracy_tie_aware": 0.7567567567567568
+      },
+      "later_release": {
+        "MAE": 9.298701711882694,
+        "county_regret_min": 1.6928327645051195,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": 0.011299106683564153,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.4,0.2,0.4,0.0",
+      "validation": {
+        "MAE": 11.673300054308934,
+        "county_regret_min": 3.60472972972973,
+        "county_shortest_accuracy_tie_aware": 0.7567567567567568
+      },
+      "later_release": {
+        "MAE": 9.280062446468751,
+        "county_regret_min": 1.6143344709897611,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": 0.011125983569080233,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.5,0.1,0.3,0.1",
+      "validation": {
+        "MAE": 11.674261857976212,
+        "county_regret_min": 3.5912162162162162,
+        "county_shortest_accuracy_tie_aware": 0.7567567567567568
+      },
+      "later_release": {
+        "MAE": 9.269253869226382,
+        "county_regret_min": 1.6109215017064846,
+        "county_shortest_accuracy_tie_aware": 0.8361774744027304
+      },
+      "validation_MAE_gain": 0.011044506810061305,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.2,0.6,0.0",
+      "validation": {
+        "MAE": 11.677852352144445,
+        "county_regret_min": 3.685810810810811,
+        "county_shortest_accuracy_tie_aware": 0.7567567567567568
+      },
+      "later_release": {
+        "MAE": 9.325976167354442,
+        "county_regret_min": 1.6996587030716723,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": 0.010740347200302924,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.7,0.1,0.2,0.0",
+      "validation": {
+        "MAE": 11.683494896194963,
+        "county_regret_min": 3.4527027027027026,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.286574207613592,
+        "county_regret_min": 1.6040955631399318,
+        "county_shortest_accuracy_tie_aware": 0.8395904436860068
+      },
+      "validation_MAE_gain": 0.010262353387742174,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.7,0.0,0.2,0.1",
+      "validation": {
+        "MAE": 11.686470584576218,
+        "county_regret_min": 3.4527027027027026,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.30012532203833,
+        "county_regret_min": 1.6040955631399318,
+        "county_shortest_accuracy_tie_aware": 0.8395904436860068
+      },
+      "validation_MAE_gain": 0.010010275491386555,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.1,0.8,0.1",
+      "validation": {
+        "MAE": 11.686561784510333,
+        "county_regret_min": 3.8682432432432434,
+        "county_shortest_accuracy_tie_aware": 0.7567567567567568
+      },
+      "later_release": {
+        "MAE": 9.386012879676207,
+        "county_regret_min": 1.819112627986348,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": 0.010002549720205534,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.5,0.2,0.3,0.0",
+      "validation": {
+        "MAE": 11.68715731017279,
+        "county_regret_min": 3.4121621621621623,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.27208303655825,
+        "county_regret_min": 1.6143344709897611,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": 0.009952101273666747,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.2,0.7,0.0",
+      "validation": {
+        "MAE": 11.691713759162772,
+        "county_regret_min": 3.760135135135135,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.360983485291314,
+        "county_regret_min": 1.7679180887372015,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": 0.009566113250363717,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.8,0.0,0.2,0.0",
+      "validation": {
+        "MAE": 11.69463015618482,
+        "county_regret_min": 3.570945945945946,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.328919589659478,
+        "county_regret_min": 1.6040955631399318,
+        "county_shortest_accuracy_tie_aware": 0.8395904436860068
+      },
+      "validation_MAE_gain": 0.00931905807116995,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.6,0.0,0.2,0.2",
+      "validation": {
+        "MAE": 11.700265511020628,
+        "county_regret_min": 3.75,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.290305057098646,
+        "county_regret_min": 1.6723549488054608,
+        "county_shortest_accuracy_tie_aware": 0.8361774744027304
+      },
+      "validation_MAE_gain": 0.008841673274705086,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.6,0.1,0.2,0.1",
+      "validation": {
+        "MAE": 11.700738696399219,
+        "county_regret_min": 3.5371621621621623,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.278541438035525,
+        "county_regret_min": 1.6040955631399318,
+        "county_shortest_accuracy_tie_aware": 0.8395904436860068
+      },
+      "validation_MAE_gain": 0.008801588575120034,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.0,0.5,0.3",
+      "validation": {
+        "MAE": 11.701864574906624,
+        "county_regret_min": 3.7972972972972974,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.321842343244173,
+        "county_regret_min": 1.7474402730375427,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": 0.008706212632031862,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.0,0.4,0.3",
+      "validation": {
+        "MAE": 11.705936469790393,
+        "county_regret_min": 3.7804054054054053,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.303338919260758,
+        "county_regret_min": 1.7474402730375427,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": 0.008361272381248952,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.0,0.6,0.3",
+      "validation": {
+        "MAE": 11.707874178350789,
+        "county_regret_min": 3.8445945945945947,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.350711009177333,
+        "county_regret_min": 1.7235494880546076,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": 0.008197124313618076,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.6,0.2,0.2,0.0",
+      "validation": {
+        "MAE": 11.710231597651335,
+        "county_regret_min": 3.4527027027027026,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.275694178927312,
+        "county_regret_min": 1.6075085324232081,
+        "county_shortest_accuracy_tie_aware": 0.8361774744027304
+      },
+      "validation_MAE_gain": 0.00799742151481242,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.1,0.5,0.2",
+      "validation": {
+        "MAE": 11.712981138934866,
+        "county_regret_min": 3.7128378378378377,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.324483534271089,
+        "county_regret_min": 1.7508532423208192,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": 0.00776450109644411,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.1,0.4,0.2",
+      "validation": {
+        "MAE": 11.71375192794684,
+        "county_regret_min": 3.7128378378378377,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.302201441129549,
+        "county_regret_min": 1.7508532423208192,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": 0.007699205659631558,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.2,0.8,0.0",
+      "validation": {
+        "MAE": 11.71662164593933,
+        "county_regret_min": 3.574324324324324,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.406316056121124,
+        "county_regret_min": 1.7508532423208192,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": 0.007456104776071948,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.4,0.0,0.3,0.3",
+      "validation": {
+        "MAE": 11.718887531244452,
+        "county_regret_min": 3.8716216216216215,
+        "county_shortest_accuracy_tie_aware": 0.7466216216216216
+      },
+      "later_release": {
+        "MAE": 9.296559351667709,
+        "county_regret_min": 1.6791808873720135,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": 0.00726415604760422,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.0,0.7,0.3",
+      "validation": {
+        "MAE": 11.723034831377841,
+        "county_regret_min": 3.6013513513513513,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.389162618780734,
+        "county_regret_min": 1.8532423208191127,
+        "county_shortest_accuracy_tie_aware": 0.8225255972696246
+      },
+      "validation_MAE_gain": 0.006912828032289875,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.1,0.6,0.2",
+      "validation": {
+        "MAE": 11.72306594255049,
+        "county_regret_min": 3.4695945945945947,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.356172054721586,
+        "county_regret_min": 1.8532423208191127,
+        "county_shortest_accuracy_tie_aware": 0.8225255972696246
+      },
+      "validation_MAE_gain": 0.006910192528181369,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.4,0.1,0.3,0.2",
+      "validation": {
+        "MAE": 11.724206510780014,
+        "county_regret_min": 3.7972972972972974,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.289951482711013,
+        "county_regret_min": 1.6791808873720135,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": 0.006813572182529648,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.8,0.1,0.1,0.0",
+      "validation": {
+        "MAE": 11.725566881149849,
+        "county_regret_min": 3.4527027027027026,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.31671660270181,
+        "county_regret_min": 1.6040955631399318,
+        "county_shortest_accuracy_tie_aware": 0.8395904436860068
+      },
+      "validation_MAE_gain": 0.00669833185587021,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.2,0.4,0.1",
+      "validation": {
+        "MAE": 11.729583309106253,
+        "county_regret_min": 3.7128378378378377,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.31017379805692,
+        "county_regret_min": 1.7508532423208192,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": 0.006358090345202516,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.8,0.0,0.1,0.1",
+      "validation": {
+        "MAE": 11.73215107108545,
+        "county_regret_min": 3.5033783783783785,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.336087110044527,
+        "county_regret_min": 1.6040955631399318,
+        "county_shortest_accuracy_tie_aware": 0.8395904436860068
+      },
+      "validation_MAE_gain": 0.0061405688996992724,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.2,0.5,0.1",
+      "validation": {
+        "MAE": 11.734491288491641,
+        "county_regret_min": 3.489864864864865,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.335065103159161,
+        "county_regret_min": 1.8293515358361774,
+        "county_shortest_accuracy_tie_aware": 0.8191126279863481
+      },
+      "validation_MAE_gain": 0.005942323315758502,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.7,0.1,0.1,0.1",
+      "validation": {
+        "MAE": 11.735714638879813,
+        "county_regret_min": 3.5371621621621623,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.29902873468722,
+        "county_regret_min": 1.6040955631399318,
+        "county_shortest_accuracy_tie_aware": 0.8395904436860068
+      },
+      "validation_MAE_gain": 0.005838690289431292,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.4,0.2,0.3,0.1",
+      "validation": {
+        "MAE": 11.736547386888208,
+        "county_regret_min": 3.60472972972973,
+        "county_shortest_accuracy_tie_aware": 0.7567567567567568
+      },
+      "later_release": {
+        "MAE": 9.293952991210533,
+        "county_regret_min": 1.6143344709897611,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": 0.005768146153333875,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.7,0.0,0.1,0.2",
+      "validation": {
+        "MAE": 11.739573817641,
+        "county_regret_min": 3.5878378378378377,
+        "county_shortest_accuracy_tie_aware": 0.7567567567567568
+      },
+      "later_release": {
+        "MAE": 9.316449450095966,
+        "county_regret_min": 1.6040955631399318,
+        "county_shortest_accuracy_tie_aware": 0.8395904436860068
+      },
+      "validation_MAE_gain": 0.005511769745630946,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.5,0.0,0.2,0.3",
+      "validation": {
+        "MAE": 11.740399130298071,
+        "county_regret_min": 3.75,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.30130432112137,
+        "county_regret_min": 1.6723549488054608,
+        "county_shortest_accuracy_tie_aware": 0.8361774744027304
+      },
+      "validation_MAE_gain": 0.005441855476468582,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.7,0.2,0.1,0.0",
+      "validation": {
+        "MAE": 11.74217833366909,
+        "county_regret_min": 3.5371621621621623,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.29180418369901,
+        "county_regret_min": 1.6040955631399318,
+        "county_shortest_accuracy_tie_aware": 0.8395904436860068
+      },
+      "validation_MAE_gain": 0.00529113477406562,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.5,0.1,0.2,0.2",
+      "validation": {
+        "MAE": 11.74241582273065,
+        "county_regret_min": 3.64527027027027,
+        "county_shortest_accuracy_tie_aware": 0.7567567567567568
+      },
+      "later_release": {
+        "MAE": 9.290503555916274,
+        "county_regret_min": 1.6723549488054608,
+        "county_shortest_accuracy_tie_aware": 0.8361774744027304
+      },
+      "validation_MAE_gain": 0.005271016490369429,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.1,0.7,0.2",
+      "validation": {
+        "MAE": 11.74252661296131,
+        "county_regret_min": 3.689189189189189,
+        "county_shortest_accuracy_tie_aware": 0.7567567567567568
+      },
+      "later_release": {
+        "MAE": 9.3969909873087,
+        "county_regret_min": 1.825938566552901,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": 0.0052616311768878266,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.2,0.6,0.1",
+      "validation": {
+        "MAE": 11.747196744324118,
+        "county_regret_min": 3.5574324324324325,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.369327130773438,
+        "county_regret_min": 1.825938566552901,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": 0.004866012839612632,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.9,0.0,0.1,0.0",
+      "validation": {
+        "MAE": 11.74730956136786,
+        "county_regret_min": 3.570945945945946,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.37203220949027,
+        "county_regret_min": 1.6040955631399318,
+        "county_shortest_accuracy_tie_aware": 0.8395904436860068
+      },
+      "validation_MAE_gain": 0.004856455829799766,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.5,0.2,0.2,0.1",
+      "validation": {
+        "MAE": 11.752801184649886,
+        "county_regret_min": 3.635135135135135,
+        "county_shortest_accuracy_tie_aware": 0.7567567567567568
+      },
+      "later_release": {
+        "MAE": 9.289039168745179,
+        "county_regret_min": 1.6109215017064846,
+        "county_shortest_accuracy_tie_aware": 0.8361774744027304
+      },
+      "validation_MAE_gain": 0.004391246887482048,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.3,0.4,0.0",
+      "validation": {
+        "MAE": 11.75820306167729,
+        "county_regret_min": 3.3817567567567566,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.327843189209084,
+        "county_regret_min": 1.7610921501706485,
+        "county_shortest_accuracy_tie_aware": 0.8225255972696246
+      },
+      "validation_MAE_gain": 0.003933640571572861,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.4,0.3,0.3,0.0",
+      "validation": {
+        "MAE": 11.759735900102745,
+        "county_regret_min": 3.3344594594594597,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.307592131416177,
+        "county_regret_min": 1.6928327645051195,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": 0.0038037900508746114,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.3,0.5,0.0",
+      "validation": {
+        "MAE": 11.765323274306816,
+        "county_regret_min": 3.314189189189189,
+        "county_shortest_accuracy_tie_aware": 0.7702702702702703
+      },
+      "later_release": {
+        "MAE": 9.356341014278716,
+        "county_regret_min": 1.757679180887372,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": 0.003330469811972492,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.6,0.1,0.1,0.2",
+      "validation": {
+        "MAE": 11.769277921922118,
+        "county_regret_min": 3.64527027027027,
+        "county_shortest_accuracy_tie_aware": 0.7567567567567568
+      },
+      "later_release": {
+        "MAE": 9.300882429673031,
+        "county_regret_min": 1.6723549488054608,
+        "county_shortest_accuracy_tie_aware": 0.8361774744027304
+      },
+      "validation_MAE_gain": 0.0029954618662570986,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.2,0.7,0.1",
+      "validation": {
+        "MAE": 11.769612245244398,
+        "county_regret_min": 3.652027027027027,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.413519075377174,
+        "county_regret_min": 1.819112627986348,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": 0.002967140513687516,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.6,0.0,0.1,0.3",
+      "validation": {
+        "MAE": 11.771208724161792,
+        "county_regret_min": 3.695945945945946,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.316332371285041,
+        "county_regret_min": 1.6723549488054608,
+        "county_shortest_accuracy_tie_aware": 0.8361774744027304
+      },
+      "validation_MAE_gain": 0.0028318988500751763,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.5,0.3,0.2,0.0",
+      "validation": {
+        "MAE": 11.772359225992453,
+        "county_regret_min": 3.550675675675676,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.298690501187444,
+        "county_regret_min": 1.6143344709897611,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": 0.0027344370045898625,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.6,0.2,0.1,0.1",
+      "validation": {
+        "MAE": 11.77663576219383,
+        "county_regret_min": 3.5371621621621623,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.295337504233567,
+        "county_regret_min": 1.6040955631399318,
+        "county_shortest_accuracy_tie_aware": 0.8395904436860068
+      },
+      "validation_MAE_gain": 0.0023721610834540607,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.9,0.1,0.0,0.0",
+      "validation": {
+        "MAE": 11.77710209604714,
+        "county_regret_min": 3.4527027027027026,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.359175260717588,
+        "county_regret_min": 1.6040955631399318,
+        "county_shortest_accuracy_tie_aware": 0.8395904436860068
+      },
+      "validation_MAE_gain": 0.002332656793461174,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.8,0.1,0.0,0.1",
+      "validation": {
+        "MAE": 11.78077731088415,
+        "county_regret_min": 3.4527027027027026,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.330799537773858,
+        "county_regret_min": 1.6040955631399318,
+        "county_shortest_accuracy_tie_aware": 0.8395904436860068
+      },
+      "validation_MAE_gain": 0.002021320287056705,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.3,0.6,0.0",
+      "validation": {
+        "MAE": 11.782032084913414,
+        "county_regret_min": 3.3412162162162162,
+        "county_shortest_accuracy_tie_aware": 0.7736486486486487
+      },
+      "later_release": {
+        "MAE": 9.393148332493697,
+        "county_regret_min": 1.7508532423208192,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": 0.001915025286648997,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.0,0.4,0.4",
+      "validation": {
+        "MAE": 11.782142125801908,
+        "county_regret_min": 3.6317567567567566,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.351510762530525,
+        "county_regret_min": 1.7406143344709897,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": 0.001905703451789087,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.8,0.2,0.0,0.0",
+      "validation": {
+        "MAE": 11.782362613094735,
+        "county_regret_min": 3.4527027027027026,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.318483709195597,
+        "county_regret_min": 1.6040955631399318,
+        "county_shortest_accuracy_tie_aware": 0.8395904436860068
+      },
+      "validation_MAE_gain": 0.0018870254298229971,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.0,0.5,0.4",
+      "validation": {
+        "MAE": 11.785016405431893,
+        "county_regret_min": 3.560810810810811,
+        "county_shortest_accuracy_tie_aware": 0.7567567567567568
+      },
+      "later_release": {
+        "MAE": 9.377567002673311,
+        "county_regret_min": 1.7406143344709897,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": 0.0016622161406751879,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.8,0.0,0.0,0.2",
+      "validation": {
+        "MAE": 11.78680407579833,
+        "county_regret_min": 3.5878378378378377,
+        "county_shortest_accuracy_tie_aware": 0.7567567567567568
+      },
+      "later_release": {
+        "MAE": 9.354577736090464,
+        "county_regret_min": 1.6040955631399318,
+        "county_shortest_accuracy_tie_aware": 0.8395904436860068
+      },
+      "validation_MAE_gain": 0.0015107781782234264,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.9,0.0,0.0,0.1",
+      "validation": {
+        "MAE": 11.787794380458278,
+        "county_regret_min": 3.5033783783783785,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.384135195366616,
+        "county_regret_min": 1.6040955631399318,
+        "county_shortest_accuracy_tie_aware": 0.8395904436860068
+      },
+      "validation_MAE_gain": 0.0014268870298748126,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.0,0.3,0.4",
+      "validation": {
+        "MAE": 11.788768591493264,
+        "county_regret_min": 3.6317567567567566,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.335600038789758,
+        "county_regret_min": 1.7406143344709897,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": 0.0013443592121594738,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.1,0.4,0.3",
+      "validation": {
+        "MAE": 11.79080189418294,
+        "county_regret_min": 3.581081081081081,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.350265592531235,
+        "county_regret_min": 1.7303754266211604,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": 0.0011721131302456778,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.6,0.3,0.1,0.0",
+      "validation": {
+        "MAE": 11.793405082727467,
+        "county_regret_min": 3.429054054054054,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.302210290963073,
+        "county_regret_min": 1.6143344709897611,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": 0.0009515906130844742,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.1,0.3,0.3",
+      "validation": {
+        "MAE": 11.794249065123356,
+        "county_regret_min": 3.581081081081081,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.33089208901084,
+        "county_regret_min": 1.7303754266211604,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": 0.0008800947843353724,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.1,0.5,0.3",
+      "validation": {
+        "MAE": 11.79693621778363,
+        "county_regret_min": 3.4763513513513513,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.379724170861314,
+        "county_regret_min": 1.7610921501706485,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": 0.0006524594599999212,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.0,0.6,0.4",
+      "validation": {
+        "MAE": 11.798174711624908,
+        "county_regret_min": 3.4763513513513513,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.41466267988999,
+        "county_regret_min": 1.819112627986348,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": 0.0005475435944390927,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.4,0.0,0.2,0.4",
+      "validation": {
+        "MAE": 11.804224402436569,
+        "county_regret_min": 3.8716216216216215,
+        "county_shortest_accuracy_tie_aware": 0.7466216216216216
+      },
+      "later_release": {
+        "MAE": 9.330676825574432,
+        "county_regret_min": 1.7508532423208192,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": 3.5059376329416025e-05,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Persistence baseline",
+      "validation": {
+        "MAE": 11.804638265691958,
+        "county_regret_min": 3.402027027027027,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.421458800099577,
+        "county_regret_min": 1.6040955631399318,
+        "county_shortest_accuracy_tie_aware": 0.8395904436860068
+      },
+      "validation_MAE_gain": 0.0,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 1.0,0.0,0.0,0.0",
+      "validation": {
+        "MAE": 11.804638265691958,
+        "county_regret_min": 3.402027027027027,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.421458800099577,
+        "county_regret_min": 1.6040955631399318,
+        "county_shortest_accuracy_tie_aware": 0.8395904436860068
+      },
+      "validation_MAE_gain": 0.0,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.7,0.1,0.0,0.2",
+      "validation": {
+        "MAE": 11.805719024018712,
+        "county_regret_min": 3.695945945945946,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.323445813668927,
+        "county_regret_min": 1.6723549488054608,
+        "county_shortest_accuracy_tie_aware": 0.8361774744027304
+      },
+      "validation_MAE_gain": -9.155370138658192e-05,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.3,0.7,0.0",
+      "validation": {
+        "MAE": 11.807652989124783,
+        "county_regret_min": 3.47972972972973,
+        "county_shortest_accuracy_tie_aware": 0.7702702702702703
+      },
+      "later_release": {
+        "MAE": 9.440783118579349,
+        "county_regret_min": 1.7508532423208192,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.00025538465177588066,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.2,0.4,0.2",
+      "validation": {
+        "MAE": 11.807678643419953,
+        "county_regret_min": 3.4763513513513513,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.357104269563761,
+        "county_regret_min": 1.7713310580204777,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.00025755789034476173,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.4,0.1,0.2,0.3",
+      "validation": {
+        "MAE": 11.807689461941726,
+        "county_regret_min": 3.581081081081081,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.32071485190833,
+        "county_regret_min": 1.7474402730375427,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.0002584743539864043,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.2,0.3,0.2",
+      "validation": {
+        "MAE": 11.808605627819022,
+        "county_regret_min": 3.4966216216216215,
+        "county_shortest_accuracy_tie_aware": 0.7567567567567568
+      },
+      "later_release": {
+        "MAE": 9.333511220554401,
+        "county_regret_min": 1.733788395904437,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.0003360850233415924,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.7,0.0,0.0,0.3",
+      "validation": {
+        "MAE": 11.809774250440803,
+        "county_regret_min": 3.695945945945946,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.343766363896524,
+        "county_regret_min": 1.6723549488054608,
+        "county_shortest_accuracy_tie_aware": 0.8361774744027304
+      },
+      "validation_MAE_gain": -0.0004350819257012972,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.7,0.2,0.0,0.1",
+      "validation": {
+        "MAE": 11.809910510735865,
+        "county_regret_min": 3.5371621621621623,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.313780056904536,
+        "county_regret_min": 1.6040955631399318,
+        "county_shortest_accuracy_tie_aware": 0.8395904436860068
+      },
+      "validation_MAE_gain": -0.00044662487110924687,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.1,0.6,0.3",
+      "validation": {
+        "MAE": 11.814411465393944,
+        "county_regret_min": 3.4695945945945947,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.418872583440155,
+        "county_regret_min": 1.8532423208191127,
+        "county_shortest_accuracy_tie_aware": 0.8225255972696246
+      },
+      "validation_MAE_gain": -0.0008279118327911839,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.4,0.2,0.2,0.2",
+      "validation": {
+        "MAE": 11.817557077466885,
+        "county_regret_min": 3.527027027027027,
+        "county_shortest_accuracy_tie_aware": 0.7567567567567568
+      },
+      "later_release": {
+        "MAE": 9.320912838380336,
+        "county_regret_min": 1.7303754266211604,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": -0.0010943843838462364,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.2,0.5,0.2",
+      "validation": {
+        "MAE": 11.818450886594526,
+        "county_regret_min": 3.4695945945945947,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.389506152888368,
+        "county_regret_min": 1.8532423208191127,
+        "county_shortest_accuracy_tie_aware": 0.8225255972696246
+      },
+      "validation_MAE_gain": -0.0011701011578399978,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.7,0.3,0.0,0.0",
+      "validation": {
+        "MAE": 11.82267149621339,
+        "county_regret_min": 3.554054054054054,
+        "county_shortest_accuracy_tie_aware": 0.7567567567567568
+      },
+      "later_release": {
+        "MAE": 9.315798870334381,
+        "county_regret_min": 1.6040955631399318,
+        "county_shortest_accuracy_tie_aware": 0.8395904436860068
+      },
+      "validation_MAE_gain": -0.001527639400340064,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.5,0.0,0.1,0.4",
+      "validation": {
+        "MAE": 11.8272290264231,
+        "county_regret_min": 3.8716216216216215,
+        "county_shortest_accuracy_tie_aware": 0.7466216216216216
+      },
+      "later_release": {
+        "MAE": 9.336147546360696,
+        "county_regret_min": 1.7508532423208192,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.0019137190164308926,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.5,0.1,0.1,0.3",
+      "validation": {
+        "MAE": 11.82735037819163,
+        "county_regret_min": 3.8344594594594597,
+        "county_shortest_accuracy_tie_aware": 0.7466216216216216
+      },
+      "later_release": {
+        "MAE": 9.321885836117692,
+        "county_regret_min": 1.7406143344709897,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": -0.001923999023814238,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.3,0.3,0.1",
+      "validation": {
+        "MAE": 11.83427948156545,
+        "county_regret_min": 3.4425675675675675,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.348165719685957,
+        "county_regret_min": 1.8122866894197953,
+        "county_shortest_accuracy_tie_aware": 0.8225255972696246
+      },
+      "validation_MAE_gain": -0.0025109804473752995,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.5,0.2,0.1,0.2",
+      "validation": {
+        "MAE": 11.835401793421067,
+        "county_regret_min": 3.527027027027027,
+        "county_shortest_accuracy_tie_aware": 0.7567567567567568
+      },
+      "later_release": {
+        "MAE": 9.31778734027282,
+        "county_regret_min": 1.7474402730375427,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.0026060542506005646,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.3,0.4,0.1",
+      "validation": {
+        "MAE": 11.83848536436519,
+        "county_regret_min": 3.4222972972972974,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.37459978124708,
+        "county_regret_min": 1.8122866894197953,
+        "county_shortest_accuracy_tie_aware": 0.8225255972696246
+      },
+      "validation_MAE_gain": -0.0028672711447332855,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.2,0.6,0.2",
+      "validation": {
+        "MAE": 11.839223559418189,
+        "county_regret_min": 3.4695945945945947,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.432082403482527,
+        "county_regret_min": 1.825938566552901,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.002929805466953317,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.4,0.3,0.2,0.1",
+      "validation": {
+        "MAE": 11.839630185456134,
+        "county_regret_min": 3.3344594594594597,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.330015237136838,
+        "county_regret_min": 1.733788395904437,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.0029642517607568752,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.3,0.5,0.1",
+      "validation": {
+        "MAE": 11.85273274402119,
+        "county_regret_min": 3.3986486486486487,
+        "county_shortest_accuracy_tie_aware": 0.7702702702702703
+      },
+      "later_release": {
+        "MAE": 9.40992175758277,
+        "county_regret_min": 1.825938566552901,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.004074201788038634,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.5,0.3,0.1,0.1",
+      "validation": {
+        "MAE": 11.85301325569948,
+        "county_regret_min": 3.3344594594594597,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.32381445475394,
+        "county_regret_min": 1.7474402730375427,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.004097964623627215,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.6,0.1,0.0,0.3",
+      "validation": {
+        "MAE": 11.854746782887226,
+        "county_regret_min": 3.695945945945946,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.334536143465328,
+        "county_regret_min": 1.6723549488054608,
+        "county_shortest_accuracy_tie_aware": 0.8361774744027304
+      },
+      "validation_MAE_gain": -0.004244815983976302,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.6,0.0,0.0,0.4",
+      "validation": {
+        "MAE": 11.857233757145641,
+        "county_regret_min": 3.695945945945946,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.352938861754936,
+        "county_regret_min": 1.68259385665529,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": -0.004455493702550939,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.6,0.2,0.0,0.2",
+      "validation": {
+        "MAE": 11.86002554788492,
+        "county_regret_min": 3.7837837837837838,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.326463857008815,
+        "county_regret_min": 1.6723549488054608,
+        "county_shortest_accuracy_tie_aware": 0.8361774744027304
+      },
+      "validation_MAE_gain": -0.004691993176439313,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.4,0.3,0.0",
+      "validation": {
+        "MAE": 11.871960512293382,
+        "county_regret_min": 3.2364864864864864,
+        "county_shortest_accuracy_tie_aware": 0.777027027027027
+      },
+      "later_release": {
+        "MAE": 9.371046360607474,
+        "county_regret_min": 1.757679180887372,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.005703033425181969,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.4,0.4,0.2,0.0",
+      "validation": {
+        "MAE": 11.872407473829977,
+        "county_regret_min": 3.2635135135135136,
+        "county_shortest_accuracy_tie_aware": 0.7702702702702703
+      },
+      "later_release": {
+        "MAE": 9.349469040533172,
+        "county_regret_min": 1.757679180887372,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.005740896638483095,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.6,0.3,0.0,0.1",
+      "validation": {
+        "MAE": 11.875406270136402,
+        "county_regret_min": 3.418918918918919,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.328660477148583,
+        "county_regret_min": 1.6109215017064846,
+        "county_shortest_accuracy_tie_aware": 0.8361774744027304
+      },
+      "validation_MAE_gain": -0.005994932064129266,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.3,0.6,0.1",
+      "validation": {
+        "MAE": 11.876812105301418,
+        "county_regret_min": 3.5,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.456122623047284,
+        "county_regret_min": 1.8395904436860069,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.006114023825636528,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.0,0.3,0.5",
+      "validation": {
+        "MAE": 11.87954886284555,
+        "county_regret_min": 3.6317567567567566,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.392396103633759,
+        "county_regret_min": 1.7406143344709897,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.006345861301934708,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.4,0.4,0.0",
+      "validation": {
+        "MAE": 11.881460624998832,
+        "county_regret_min": 3.2905405405405403,
+        "county_shortest_accuracy_tie_aware": 0.7736486486486487
+      },
+      "later_release": {
+        "MAE": 9.399540130904528,
+        "county_regret_min": 1.7815699658703072,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.006507811385474183,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.0,0.4,0.5",
+      "validation": {
+        "MAE": 11.8824099253106,
+        "county_regret_min": 3.6114864864864864,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.41541660394392,
+        "county_regret_min": 1.7406143344709897,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.006588228954433228,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.5,0.4,0.1,0.0",
+      "validation": {
+        "MAE": 11.883387122289756,
+        "county_regret_min": 3.2871621621621623,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.339294365573055,
+        "county_regret_min": 1.733788395904437,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.00667100971883805,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.1,0.3,0.4",
+      "validation": {
+        "MAE": 11.88349681710004,
+        "county_regret_min": 3.6317567567567566,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.387661426608387,
+        "county_regret_min": 1.7406143344709897,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.006680302236559799,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.0,0.2,0.5",
+      "validation": {
+        "MAE": 11.88634049042008,
+        "county_regret_min": 3.6317567567567566,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.37841503211804,
+        "county_regret_min": 1.7406143344709897,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.006921196811729091,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.1,0.4,0.4",
+      "validation": {
+        "MAE": 11.88800878511178,
+        "county_regret_min": 3.560810810810811,
+        "county_shortest_accuracy_tie_aware": 0.7567567567567568
+      },
+      "later_release": {
+        "MAE": 9.415621019164623,
+        "county_regret_min": 1.7781569965870307,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.007062522166572771,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.1,0.2,0.4",
+      "validation": {
+        "MAE": 11.889937290522175,
+        "county_regret_min": 3.6317567567567566,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.3699779574718,
+        "county_regret_min": 1.7303754266211604,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": -0.007225890612685859,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.0,0.5,0.5",
+      "validation": {
+        "MAE": 11.893878011449202,
+        "county_regret_min": 3.6317567567567566,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.449262134722407,
+        "county_regret_min": 1.7679180887372015,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.007559718794315273,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.4,0.5,0.0",
+      "validation": {
+        "MAE": 11.898620702613613,
+        "county_regret_min": 3.39527027027027,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.438079191023439,
+        "county_regret_min": 1.764505119453925,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.007961483851207651,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.2,0.3,0.3",
+      "validation": {
+        "MAE": 11.899472514570515,
+        "county_regret_min": 3.560810810810811,
+        "county_shortest_accuracy_tie_aware": 0.7567567567567568
+      },
+      "later_release": {
+        "MAE": 9.391321199953033,
+        "county_regret_min": 1.7679180887372015,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.008033642941366104,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.4,0.0,0.1,0.5",
+      "validation": {
+        "MAE": 11.90245547257804,
+        "county_regret_min": 3.6722972972972974,
+        "county_shortest_accuracy_tie_aware": 0.7466216216216216
+      },
+      "later_release": {
+        "MAE": 9.374747268513788,
+        "county_regret_min": 1.733788395904437,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": -0.008286336665679128,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.1,0.5,0.4",
+      "validation": {
+        "MAE": 11.902717731697948,
+        "county_regret_min": 3.4763513513513513,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.452457840345179,
+        "county_regret_min": 1.8225255972696246,
+        "county_shortest_accuracy_tie_aware": 0.8225255972696246
+      },
+      "validation_MAE_gain": -0.008308553282063702,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.2,0.2,0.3",
+      "validation": {
+        "MAE": 11.903145953817106,
+        "county_regret_min": 3.581081081081081,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.37000771127244,
+        "county_regret_min": 1.7303754266211604,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": -0.008344829033130274,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.6,0.4,0.0,0.0",
+      "validation": {
+        "MAE": 11.903658609059253,
+        "county_regret_min": 3.3344594594594597,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.342100194391001,
+        "county_regret_min": 1.627986348122867,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": -0.008388257322130777,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.4,0.1,0.1,0.4",
+      "validation": {
+        "MAE": 11.904017458699604,
+        "county_regret_min": 3.6317567567567566,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.36259975839309,
+        "county_regret_min": 1.7303754266211604,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": -0.008418656359549193,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.2,0.4,0.3",
+      "validation": {
+        "MAE": 11.906657334886079,
+        "county_regret_min": 3.4763513513513513,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.422959044781585,
+        "county_regret_min": 1.7713310580204777,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.008642286777276409,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.4,0.2,0.1,0.3",
+      "validation": {
+        "MAE": 11.913849964128,
+        "county_regret_min": 3.527027027027027,
+        "county_shortest_accuracy_tie_aware": 0.7567567567567568
+      },
+      "later_release": {
+        "MAE": 9.35891431386686,
+        "county_regret_min": 1.7303754266211604,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": -0.009251592126583441,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.5,0.1,0.0,0.4",
+      "validation": {
+        "MAE": 11.924118315762804,
+        "county_regret_min": 3.6182432432432434,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.365734997180784,
+        "county_regret_min": 1.7235494880546076,
+        "county_shortest_accuracy_tie_aware": 0.8361774744027304
+      },
+      "validation_MAE_gain": -0.0101214494999049,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.4,0.6,0.0",
+      "validation": {
+        "MAE": 11.925729511348527,
+        "county_regret_min": 3.527027027027027,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.48692846151303,
+        "county_regret_min": 1.8327645051194539,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.010257937848760612,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.2,0.5,0.3",
+      "validation": {
+        "MAE": 11.925833072779447,
+        "county_regret_min": 3.445945945945946,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.463814735843894,
+        "county_regret_min": 1.8532423208191127,
+        "county_shortest_accuracy_tie_aware": 0.8225255972696246
+      },
+      "validation_MAE_gain": -0.010266710792800726,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.5,0.0,0.0,0.5",
+      "validation": {
+        "MAE": 11.926318553430745,
+        "county_regret_min": 3.6013513513513513,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.38260091748515,
+        "county_regret_min": 1.733788395904437,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": -0.010307837055238522,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.3,0.2,0.2",
+      "validation": {
+        "MAE": 11.92831731681683,
+        "county_regret_min": 3.4425675675675675,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.378752830449145,
+        "county_regret_min": 1.7849829351535835,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.010477157227623213,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.3,0.3,0.2",
+      "validation": {
+        "MAE": 11.928930342162403,
+        "county_regret_min": 3.4054054054054053,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.403907325770128,
+        "county_regret_min": 1.825938566552901,
+        "county_shortest_accuracy_tie_aware": 0.8225255972696246
+      },
+      "validation_MAE_gain": -0.010529088115446728,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.5,0.2,0.0,0.3",
+      "validation": {
+        "MAE": 11.93097981500409,
+        "county_regret_min": 3.5777027027027026,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.358774641015996,
+        "county_regret_min": 1.7303754266211604,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": -0.010702704010788766,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.4,0.3,0.1,0.2",
+      "validation": {
+        "MAE": 11.935715522237036,
+        "county_regret_min": 3.527027027027027,
+        "county_shortest_accuracy_tie_aware": 0.7567567567567568
+      },
+      "later_release": {
+        "MAE": 9.364270813165263,
+        "county_regret_min": 1.7303754266211604,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": -0.01110387744163499,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.3,0.4,0.2",
+      "validation": {
+        "MAE": 11.940290498690189,
+        "county_regret_min": 3.3986486486486487,
+        "county_shortest_accuracy_tie_aware": 0.7702702702702703
+      },
+      "later_release": {
+        "MAE": 9.439747820543435,
+        "county_regret_min": 1.8771331058020477,
+        "county_shortest_accuracy_tie_aware": 0.8191126279863481
+      },
+      "validation_MAE_gain": -0.011491434972004111,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.5,0.3,0.0,0.2",
+      "validation": {
+        "MAE": 11.950304663192146,
+        "county_regret_min": 3.527027027027027,
+        "county_shortest_accuracy_tie_aware": 0.7567567567567568
+      },
+      "later_release": {
+        "MAE": 9.360813362440515,
+        "county_regret_min": 1.7303754266211604,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": -0.012339759526858174,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.3,0.5,0.2",
+      "validation": {
+        "MAE": 11.963535096582746,
+        "county_regret_min": 3.4121621621621623,
+        "county_shortest_accuracy_tie_aware": 0.7702702702702703
+      },
+      "later_release": {
+        "MAE": 9.484362380786179,
+        "county_regret_min": 1.8395904436860069,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.013460542145759202,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.4,0.2,0.1",
+      "validation": {
+        "MAE": 11.964179097698004,
+        "county_regret_min": 3.3513513513513513,
+        "county_shortest_accuracy_tie_aware": 0.7702702702702703
+      },
+      "later_release": {
+        "MAE": 9.39789430926351,
+        "county_regret_min": 1.825938566552901,
+        "county_shortest_accuracy_tie_aware": 0.8225255972696246
+      },
+      "validation_MAE_gain": -0.013515097067372528,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.4,0.4,0.1,0.1",
+      "validation": {
+        "MAE": 11.967468031859367,
+        "county_regret_min": 3.3716216216216215,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.380072567844264,
+        "county_regret_min": 1.7849829351535835,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.013793710785754865,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.4,0.3,0.1",
+      "validation": {
+        "MAE": 11.968801620529604,
+        "county_regret_min": 3.3445945945945947,
+        "county_shortest_accuracy_tie_aware": 0.7736486486486487
+      },
+      "later_release": {
+        "MAE": 9.425924213954621,
+        "county_regret_min": 1.8771331058020477,
+        "county_shortest_accuracy_tie_aware": 0.8191126279863481
+      },
+      "validation_MAE_gain": -0.01390668236863779,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.5,0.4,0.0,0.1",
+      "validation": {
+        "MAE": 11.97870580318066,
+        "county_regret_min": 3.2635135135135136,
+        "county_shortest_accuracy_tie_aware": 0.7702702702702703
+      },
+      "later_release": {
+        "MAE": 9.372777968966767,
+        "county_regret_min": 1.7849829351535835,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.014745690089851937,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.4,0.4,0.1",
+      "validation": {
+        "MAE": 11.98447429576386,
+        "county_regret_min": 3.4932432432432434,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.464494133970316,
+        "county_regret_min": 1.870307167235495,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.015234353313016147,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.1,0.2,0.5",
+      "validation": {
+        "MAE": 11.993613692007964,
+        "county_regret_min": 3.6317567567567566,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.435988394364367,
+        "county_regret_min": 1.7406143344709897,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.016008574092882588,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.0,0.2,0.6",
+      "validation": {
+        "MAE": 11.99389663124984,
+        "county_regret_min": 3.6317567567567566,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.443521711514334,
+        "county_regret_min": 1.7167235494880546,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.01603254257336517,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.0,0.3,0.6",
+      "validation": {
+        "MAE": 11.994901187568548,
+        "county_regret_min": 3.6317567567567566,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.464262451526391,
+        "county_regret_min": 1.7167235494880546,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.01611764101485047,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.1,0.3,0.5",
+      "validation": {
+        "MAE": 11.998670630493008,
+        "county_regret_min": 3.6114864864864864,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.460101619846876,
+        "county_regret_min": 1.7781569965870307,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.016436959814767782,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.1,0.1,0.5",
+      "validation": {
+        "MAE": 11.99883434034954,
+        "county_regret_min": 3.6317567567567566,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.420848723905841,
+        "county_regret_min": 1.7406143344709897,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.016450828080177393,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.0,0.1,0.6",
+      "validation": {
+        "MAE": 12.001520454038326,
+        "county_regret_min": 3.6317567567567566,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.43212737691287,
+        "county_regret_min": 1.7406143344709897,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.016678375390677624,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.0,0.4,0.6",
+      "validation": {
+        "MAE": 12.006436634824585,
+        "county_regret_min": 3.679054054054054,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.494203414194594,
+        "county_regret_min": 1.7167235494880546,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.0170948371810018,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.2,0.2,0.4",
+      "validation": {
+        "MAE": 12.00648790663585,
+        "county_regret_min": 3.560810810810811,
+        "county_shortest_accuracy_tie_aware": 0.7567567567567568
+      },
+      "later_release": {
+        "MAE": 9.43617532495852,
+        "county_regret_min": 1.7679180887372015,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.017099180542493375,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.4,0.5,0.1,0.0",
+      "validation": {
+        "MAE": 12.0088724269876,
+        "county_regret_min": 3.2635135135135136,
+        "county_shortest_accuracy_tie_aware": 0.7702702702702703
+      },
+      "later_release": {
+        "MAE": 9.404382748483439,
+        "county_regret_min": 1.757679180887372,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.01730117913813678,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.2,0.1,0.4",
+      "validation": {
+        "MAE": 12.009714557186266,
+        "county_regret_min": 3.5777027027027026,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.417407586693678,
+        "county_regret_min": 1.7303754266211604,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": -0.017372518062694464,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.4,0.5,0.1",
+      "validation": {
+        "MAE": 12.010499302986092,
+        "county_regret_min": 3.543918918918919,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.51124930106417,
+        "county_regret_min": 1.870307167235495,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.01743899581340269,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.5,0.2,0.0",
+      "validation": {
+        "MAE": 12.010566491311051,
+        "county_regret_min": 3.2837837837837838,
+        "county_shortest_accuracy_tie_aware": 0.7736486486486487
+      },
+      "later_release": {
+        "MAE": 9.425749361402708,
+        "county_regret_min": 1.78839590443686,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.01744468750199535,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.4,0.1,0.0,0.5",
+      "validation": {
+        "MAE": 12.011932279304022,
+        "county_regret_min": 3.6182432432432434,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.41603734819659,
+        "county_regret_min": 1.7406143344709897,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.01756038676886229,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.1,0.4,0.5",
+      "validation": {
+        "MAE": 12.013153192679075,
+        "county_regret_min": 3.679054054054054,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.49482040578892,
+        "county_regret_min": 1.7542662116040955,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.017663813349802382,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.2,0.3,0.4",
+      "validation": {
+        "MAE": 12.014332838430745,
+        "county_regret_min": 3.608108108108108,
+        "county_shortest_accuracy_tie_aware": 0.7567567567567568
+      },
+      "later_release": {
+        "MAE": 9.465471076771308,
+        "county_regret_min": 1.7679180887372015,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.017763744048661545,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.5,0.5,0.0,0.0",
+      "validation": {
+        "MAE": 12.015960773205324,
+        "county_regret_min": 3.2635135135135136,
+        "county_shortest_accuracy_tie_aware": 0.7702702702702703
+      },
+      "later_release": {
+        "MAE": 9.393259440461621,
+        "county_regret_min": 1.7167235494880546,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.01790165041545877,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.4,0.0,0.0,0.6",
+      "validation": {
+        "MAE": 12.016615466983284,
+        "county_regret_min": 3.6722972972972974,
+        "county_shortest_accuracy_tie_aware": 0.7466216216216216
+      },
+      "later_release": {
+        "MAE": 9.431321399837094,
+        "county_regret_min": 1.733788395904437,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": -0.017957111138881654,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.5,0.3,0.0",
+      "validation": {
+        "MAE": 12.02035931714587,
+        "county_regret_min": 3.3817567567567566,
+        "county_shortest_accuracy_tie_aware": 0.7702702702702703
+      },
+      "later_release": {
+        "MAE": 9.456186620373783,
+        "county_regret_min": 1.8805460750853242,
+        "county_shortest_accuracy_tie_aware": 0.8225255972696246
+      },
+      "validation_MAE_gain": -0.018274261912867296,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.4,0.2,0.0,0.4",
+      "validation": {
+        "MAE": 12.021475362726589,
+        "county_regret_min": 3.5777027027027026,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.409542305328062,
+        "county_regret_min": 1.7303754266211604,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": -0.018368804884502765,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.2,0.4,0.4",
+      "validation": {
+        "MAE": 12.031264167725192,
+        "county_regret_min": 3.52027027027027,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.50466178169664,
+        "county_regret_min": 1.8532423208191127,
+        "county_shortest_accuracy_tie_aware": 0.8225255972696246
+      },
+      "validation_MAE_gain": -0.019198038680429574,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.3,0.1,0.3",
+      "validation": {
+        "MAE": 12.033464881956244,
+        "county_regret_min": 3.5033783783783785,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.422693738190745,
+        "county_regret_min": 1.7815699658703072,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.019384466606598982,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.3,0.2,0.3",
+      "validation": {
+        "MAE": 12.03467617431297,
+        "county_regret_min": 3.4527027027027026,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.44526657314952,
+        "county_regret_min": 1.7815699658703072,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.0194870781673655,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.5,0.4,0.0",
+      "validation": {
+        "MAE": 12.040353476535588,
+        "county_regret_min": 3.3817567567567566,
+        "county_shortest_accuracy_tie_aware": 0.7702702702702703
+      },
+      "later_release": {
+        "MAE": 9.497208490991373,
+        "county_regret_min": 1.863481228668942,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.01996801643034618,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.4,0.3,0.0,0.3",
+      "validation": {
+        "MAE": 12.042629530066238,
+        "county_regret_min": 3.527027027027027,
+        "county_shortest_accuracy_tie_aware": 0.7567567567567568
+      },
+      "later_release": {
+        "MAE": 9.411633015614418,
+        "county_regret_min": 1.7440273037542662,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": -0.020160826534258103,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.3,0.3,0.3",
+      "validation": {
+        "MAE": 12.045420932792197,
+        "county_regret_min": 3.4527027027027026,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.479087421639417,
+        "county_regret_min": 1.825938566552901,
+        "county_shortest_accuracy_tie_aware": 0.8225255972696246
+      },
+      "validation_MAE_gain": -0.02039729313858185,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.3,0.4,0.3",
+      "validation": {
+        "MAE": 12.06613858721153,
+        "county_regret_min": 3.4932432432432434,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.522133948137585,
+        "county_regret_min": 1.8668941979522184,
+        "county_shortest_accuracy_tie_aware": 0.8225255972696246
+      },
+      "validation_MAE_gain": -0.022152336703071596,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.5,0.5,0.0",
+      "validation": {
+        "MAE": 12.068290869109212,
+        "county_regret_min": 3.510135135135135,
+        "county_shortest_accuracy_tie_aware": 0.7702702702702703
+      },
+      "later_release": {
+        "MAE": 9.546485638174875,
+        "county_regret_min": 1.863481228668942,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.022334661806919787,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.4,0.1,0.2",
+      "validation": {
+        "MAE": 12.06948678196296,
+        "county_regret_min": 3.3986486486486487,
+        "county_shortest_accuracy_tie_aware": 0.7702702702702703
+      },
+      "later_release": {
+        "MAE": 9.437105619015538,
+        "county_regret_min": 1.7849829351535835,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.022435970532086236,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.4,0.4,0.0,0.2",
+      "validation": {
+        "MAE": 12.073147669688867,
+        "county_regret_min": 3.456081081081081,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.423239743774669,
+        "county_regret_min": 1.7815699658703072,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.022746093353600116,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.4,0.2,0.2",
+      "validation": {
+        "MAE": 12.073315455340515,
+        "county_regret_min": 3.364864864864865,
+        "county_shortest_accuracy_tie_aware": 0.7702702702702703
+      },
+      "later_release": {
+        "MAE": 9.46329020299462,
+        "county_regret_min": 1.8566552901023892,
+        "county_shortest_accuracy_tie_aware": 0.8225255972696246
+      },
+      "validation_MAE_gain": -0.022760306889658688,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.4,0.3,0.2",
+      "validation": {
+        "MAE": 12.087338544961634,
+        "county_regret_min": 3.4932432432432434,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.500494524867698,
+        "county_regret_min": 1.9078498293515358,
+        "county_shortest_accuracy_tie_aware": 0.8191126279863481
+      },
+      "validation_MAE_gain": -0.02394823737134688,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.4,0.4,0.2",
+      "validation": {
+        "MAE": 12.111392343026319,
+        "county_regret_min": 3.543918918918919,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.546064443249314,
+        "county_regret_min": 1.870307167235495,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.025985893885955402,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.4,0.5,0.0,0.1",
+      "validation": {
+        "MAE": 12.114360969912411,
+        "county_regret_min": 3.364864864864865,
+        "county_shortest_accuracy_tie_aware": 0.7702702702702703
+      },
+      "later_release": {
+        "MAE": 9.442409707305485,
+        "county_regret_min": 1.8156996587030716,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.026237373585652923,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.5,0.1,0.1",
+      "validation": {
+        "MAE": 12.115753742294562,
+        "county_regret_min": 3.445945945945946,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.461023273219986,
+        "county_regret_min": 1.8566552901023892,
+        "county_shortest_accuracy_tie_aware": 0.8225255972696246
+      },
+      "validation_MAE_gain": -0.02635535876663031,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.1,0.1,0.6",
+      "validation": {
+        "MAE": 12.120896888853926,
+        "county_regret_min": 3.6587837837837838,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.495406182133816,
+        "county_regret_min": 1.7167235494880546,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.02679104738695104,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.0,0.1,0.7",
+      "validation": {
+        "MAE": 12.1217021696455,
+        "county_regret_min": 3.722972972972973,
+        "county_shortest_accuracy_tie_aware": 0.7432432432432432
+      },
+      "later_release": {
+        "MAE": 9.50615837773996,
+        "county_regret_min": 1.7167235494880546,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.026859264707418617,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.5,0.2,0.1",
+      "validation": {
+        "MAE": 12.122710001955463,
+        "county_regret_min": 3.439189189189189,
+        "county_shortest_accuracy_tie_aware": 0.7702702702702703
+      },
+      "later_release": {
+        "MAE": 9.490188435824715,
+        "county_regret_min": 1.9078498293515358,
+        "county_shortest_accuracy_tie_aware": 0.8191126279863481
+      },
+      "validation_MAE_gain": -0.026944640666196618,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.0,0.2,0.7",
+      "validation": {
+        "MAE": 12.122795307070183,
+        "county_regret_min": 3.7027027027027026,
+        "county_shortest_accuracy_tie_aware": 0.7466216216216216
+      },
+      "later_release": {
+        "MAE": 9.524240772161233,
+        "county_regret_min": 1.7167235494880546,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.02695186707269892,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.1,0.2,0.6",
+      "validation": {
+        "MAE": 12.125493998201478,
+        "county_regret_min": 3.679054054054054,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.517625810913742,
+        "county_regret_min": 1.7167235494880546,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.027180479849351125,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.1,0.0,0.6",
+      "validation": {
+        "MAE": 12.125637116033515,
+        "county_regret_min": 3.6317567567567566,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.482901213952754,
+        "county_regret_min": 1.7406143344709897,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.02719260371361676,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.0,0.0,0.7",
+      "validation": {
+        "MAE": 12.129306530148988,
+        "county_regret_min": 3.6283783783783785,
+        "county_shortest_accuracy_tie_aware": 0.7466216216216216
+      },
+      "later_release": {
+        "MAE": 9.498950293455579,
+        "county_regret_min": 1.7167235494880546,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.027503448826603938,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.2,0.1,0.5",
+      "validation": {
+        "MAE": 12.131572131865049,
+        "county_regret_min": 3.6587837837837838,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.49261645281558,
+        "county_regret_min": 1.7781569965870307,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.0276953735315435,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.2,0.0,0.5",
+      "validation": {
+        "MAE": 12.132367324010971,
+        "county_regret_min": 3.625,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.476950685627068,
+        "county_regret_min": 1.7406143344709897,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.027762736217974426,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.0,0.3,0.7",
+      "validation": {
+        "MAE": 12.135492970228384,
+        "county_regret_min": 3.7027027027027026,
+        "county_shortest_accuracy_tie_aware": 0.7466216216216216
+      },
+      "later_release": {
+        "MAE": 9.552879993865648,
+        "county_regret_min": 1.7167235494880546,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.028027517412201997,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.1,0.3,0.6",
+      "validation": {
+        "MAE": 12.139353934837644,
+        "county_regret_min": 3.679054054054054,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.549103592200149,
+        "county_regret_min": 1.7542662116040955,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.028354589239593775,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.2,0.2,0.5",
+      "validation": {
+        "MAE": 12.140255412663459,
+        "county_regret_min": 3.6554054054054053,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.517991069643706,
+        "county_regret_min": 1.7781569965870307,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.028430955647909206,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.5,0.3,0.1",
+      "validation": {
+        "MAE": 12.140873316973801,
+        "county_regret_min": 3.489864864864865,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.53043269246588,
+        "county_regret_min": 1.8805460750853242,
+        "county_shortest_accuracy_tie_aware": 0.8225255972696246
+      },
+      "validation_MAE_gain": -0.02848329984486253,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Continuous pooling recency=False offset=True",
+      "validation": {
+        "MAE": 12.142786543297316,
+        "county_regret_min": 3.52027027027027,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.481742077313354,
+        "county_regret_min": 1.6757679180887373,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.028645373961870835,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.3,0.0,0.4",
+      "validation": {
+        "MAE": 12.15533079490234,
+        "county_regret_min": 3.581081081081081,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.478872865587297,
+        "county_regret_min": 1.7815699658703072,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.029708028430621702,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.3,0.1,0.4",
+      "validation": {
+        "MAE": 12.156021402273586,
+        "county_regret_min": 3.483108108108108,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.497983186023232,
+        "county_regret_min": 1.7815699658703072,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.02976653148304087,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.2,0.3,0.5",
+      "validation": {
+        "MAE": 12.156405418122832,
+        "county_regret_min": 3.60472972972973,
+        "county_shortest_accuracy_tie_aware": 0.7567567567567568
+      },
+      "later_release": {
+        "MAE": 9.55416511346912,
+        "county_regret_min": 1.7679180887372015,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.029799062412037003,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.3,0.2,0.4",
+      "validation": {
+        "MAE": 12.165303565745829,
+        "county_regret_min": 3.5033783783783785,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.528847503246675,
+        "county_regret_min": 1.7815699658703072,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.030552846426652458,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.4,0.6,0.0,0.0",
+      "validation": {
+        "MAE": 12.166353964522687,
+        "county_regret_min": 3.3378378378378377,
+        "county_shortest_accuracy_tie_aware": 0.7702702702702703
+      },
+      "later_release": {
+        "MAE": 9.470646423106057,
+        "county_regret_min": 1.8566552901023892,
+        "county_shortest_accuracy_tie_aware": 0.8225255972696246
+      },
+      "validation_MAE_gain": -0.030641828295746132,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.5,0.4,0.1",
+      "validation": {
+        "MAE": 12.167922640812247,
+        "county_regret_min": 3.543918918918919,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.578684900866309,
+        "county_regret_min": 1.870307167235495,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.030774714730235297,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.6,0.1,0.0",
+      "validation": {
+        "MAE": 12.169897709931877,
+        "county_regret_min": 3.331081081081081,
+        "county_shortest_accuracy_tie_aware": 0.7736486486486487
+      },
+      "later_release": {
+        "MAE": 9.493571912476975,
+        "county_regret_min": 1.8566552901023892,
+        "county_shortest_accuracy_tie_aware": 0.8225255972696246
+      },
+      "validation_MAE_gain": -0.030942027702913988,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.6,0.2,0.0",
+      "validation": {
+        "MAE": 12.180859893062078,
+        "county_regret_min": 3.3817567567567566,
+        "county_shortest_accuracy_tie_aware": 0.7702702702702703
+      },
+      "later_release": {
+        "MAE": 9.526463269018523,
+        "county_regret_min": 1.8805460750853242,
+        "county_shortest_accuracy_tie_aware": 0.8225255972696246
+      },
+      "validation_MAE_gain": -0.031870661252157095,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.3,0.3,0.4",
+      "validation": {
+        "MAE": 12.183995379832998,
+        "county_regret_min": 3.5135135135135136,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.568722180134696,
+        "county_regret_min": 1.9078498293515358,
+        "county_shortest_accuracy_tie_aware": 0.8191126279863481
+      },
+      "validation_MAE_gain": -0.03213627606392411,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.4,0.0,0.3",
+      "validation": {
+        "MAE": 12.189857506411437,
+        "county_regret_min": 3.483108108108108,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.488936235285532,
+        "county_regret_min": 1.8122866894197953,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.03263287125358594,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.4,0.1,0.3",
+      "validation": {
+        "MAE": 12.194158021503586,
+        "county_regret_min": 3.445945945945946,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.513027476417749,
+        "county_regret_min": 1.8122866894197953,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.032997178485654866,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.6,0.3,0.0",
+      "validation": {
+        "MAE": 12.20258089514809,
+        "county_regret_min": 3.3817567567567566,
+        "county_shortest_accuracy_tie_aware": 0.7702702702702703
+      },
+      "later_release": {
+        "MAE": 9.568509602802926,
+        "county_regret_min": 1.8805460750853242,
+        "county_shortest_accuracy_tie_aware": 0.8225255972696246
+      },
+      "validation_MAE_gain": -0.033710700870240196,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.4,0.2,0.3",
+      "validation": {
+        "MAE": 12.206018747216556,
+        "county_regret_min": 3.439189189189189,
+        "county_shortest_accuracy_tie_aware": 0.7702702702702703
+      },
+      "later_release": {
+        "MAE": 9.54764877753584,
+        "county_regret_min": 1.9078498293515358,
+        "county_shortest_accuracy_tie_aware": 0.8191126279863481
+      },
+      "validation_MAE_gain": -0.03400192979154104,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.4,0.3,0.3",
+      "validation": {
+        "MAE": 12.228019345270909,
+        "county_regret_min": 3.5912162162162162,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.590543165141778,
+        "county_regret_min": 1.9078498293515358,
+        "county_shortest_accuracy_tie_aware": 0.8191126279863481
+      },
+      "validation_MAE_gain": -0.03586565467316616,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.6,0.4,0.0",
+      "validation": {
+        "MAE": 12.232815401603604,
+        "county_regret_min": 3.4527027027027026,
+        "county_shortest_accuracy_tie_aware": 0.777027027027027
+      },
+      "later_release": {
+        "MAE": 9.619540050716651,
+        "county_regret_min": 1.863481228668942,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.036271940424982496,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.5,0.0,0.2",
+      "validation": {
+        "MAE": 12.234297093814773,
+        "county_regret_min": 3.445945945945946,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.508453889325159,
+        "county_regret_min": 1.8156996587030716,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.03639745822381868,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.5,0.1,0.2",
+      "validation": {
+        "MAE": 12.241971490595075,
+        "county_regret_min": 3.439189189189189,
+        "county_shortest_accuracy_tie_aware": 0.7702702702702703
+      },
+      "later_release": {
+        "MAE": 9.536507734336439,
+        "county_regret_min": 1.8566552901023892,
+        "county_shortest_accuracy_tie_aware": 0.8225255972696246
+      },
+      "validation_MAE_gain": -0.03704757528861746,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.5,0.2,0.2",
+      "validation": {
+        "MAE": 12.257642030419742,
+        "county_regret_min": 3.5878378378378377,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.574291968262838,
+        "county_regret_min": 1.9078498293515358,
+        "county_shortest_accuracy_tie_aware": 0.8191126279863481
+      },
+      "validation_MAE_gain": -0.03837506533718682,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Continuous pooling recency=True offset=True",
+      "validation": {
+        "MAE": 12.263288929357822,
+        "county_regret_min": 3.3614864864864864,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.33583426436254,
+        "county_regret_min": 1.6757679180887373,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.03885342806300551,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.1,0.0,0.7",
+      "validation": {
+        "MAE": 12.26540358169429,
+        "county_regret_min": 3.52027027027027,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.564657331993901,
+        "county_regret_min": 1.7167235494880546,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.03903256547398515,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.0,0.0,0.8",
+      "validation": {
+        "MAE": 12.26684383932265,
+        "county_regret_min": 3.4966216216216215,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.578372041474248,
+        "county_regret_min": 1.7167235494880546,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.03915457324719629,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.0,0.1,0.8",
+      "validation": {
+        "MAE": 12.26949922191025,
+        "county_regret_min": 3.4763513513513513,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.59443292620985,
+        "county_regret_min": 1.7167235494880546,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.03937951725037836,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.1,0.1,0.7",
+      "validation": {
+        "MAE": 12.27004956169904,
+        "county_regret_min": 3.641891891891892,
+        "county_shortest_accuracy_tie_aware": 0.7466216216216216
+      },
+      "later_release": {
+        "MAE": 9.58413334132862,
+        "county_regret_min": 1.7167235494880546,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.03942613789019833,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Boost full absolute_error leaves 7",
+      "validation": {
+        "MAE": 12.272672408297817,
+        "county_regret_min": 3.39527027027027,
+        "county_shortest_accuracy_tie_aware": 0.7702702702702703
+      },
+      "later_release": {
+        "MAE": 9.552108649360278,
+        "county_regret_min": 1.7372013651877134,
+        "county_shortest_accuracy_tie_aware": 0.8361774744027304
+      },
+      "validation_MAE_gain": -0.0396483256895821,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.2,0.0,0.6",
+      "validation": {
+        "MAE": 12.274841938516508,
+        "county_regret_min": 3.733108108108108,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.558574454300619,
+        "county_regret_min": 1.7679180887372015,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.0398321119412115,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.0,0.2,0.8",
+      "validation": {
+        "MAE": 12.279970762149437,
+        "county_regret_min": 3.574324324324324,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.620748725353323,
+        "county_regret_min": 1.7167235494880546,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.040266587231134965,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.5,0.3,0.2",
+      "validation": {
+        "MAE": 12.282504659260871,
+        "county_regret_min": 3.641891891891892,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.621006022960618,
+        "county_regret_min": 1.9624573378839592,
+        "county_shortest_accuracy_tie_aware": 0.8225255972696246
+      },
+      "validation_MAE_gain": -0.040481239900230115,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.2,0.1,0.6",
+      "validation": {
+        "MAE": 12.2825800989467,
+        "county_regret_min": 3.7533783783783785,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.581835258681762,
+        "county_regret_min": 1.7679180887372015,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.04048763058193772,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Boost full absolute_error leaves 15",
+      "validation": {
+        "MAE": 12.283410312165465,
+        "county_regret_min": 3.5912162162162162,
+        "county_shortest_accuracy_tie_aware": 0.7567567567567568
+      },
+      "later_release": {
+        "MAE": 9.580902723318601,
+        "county_regret_min": 1.8293515358361774,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.04055795998975853,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.1,0.2,0.7",
+      "validation": {
+        "MAE": 12.284580471797552,
+        "county_regret_min": 3.641891891891892,
+        "county_shortest_accuracy_tie_aware": 0.7466216216216216
+      },
+      "later_release": {
+        "MAE": 9.613811060648766,
+        "county_regret_min": 1.7542662116040955,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.040657087096049205,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.6,0.0,0.1",
+      "validation": {
+        "MAE": 12.287726825438726,
+        "county_regret_min": 3.439189189189189,
+        "county_shortest_accuracy_tie_aware": 0.7702702702702703
+      },
+      "later_release": {
+        "MAE": 9.537300736928424,
+        "county_regret_min": 1.8566552901023892,
+        "county_shortest_accuracy_tie_aware": 0.8225255972696246
+      },
+      "validation_MAE_gain": -0.04092362246717696,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Recency-weighted absolute boost",
+      "validation": {
+        "MAE": 12.28958191543936,
+        "county_regret_min": 3.2432432432432434,
+        "county_shortest_accuracy_tie_aware": 0.7702702702702703
+      },
+      "later_release": {
+        "MAE": 9.45899628707457,
+        "county_regret_min": 1.7815699658703072,
+        "county_shortest_accuracy_tie_aware": 0.8361774744027304
+      },
+      "validation_MAE_gain": -0.041080771712997066,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.3,0.0,0.5",
+      "validation": {
+        "MAE": 12.296284936936633,
+        "county_regret_min": 3.6317567567567566,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.560640332213325,
+        "county_regret_min": 1.7815699658703072,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.04164860118361746,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.6,0.1,0.1",
+      "validation": {
+        "MAE": 12.297895477278907,
+        "county_regret_min": 3.5878378378378377,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.568436596098701,
+        "county_regret_min": 1.9078498293515358,
+        "county_shortest_accuracy_tie_aware": 0.8191126279863481
+      },
+      "validation_MAE_gain": -0.04178503402518574,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.2,0.2,0.6",
+      "validation": {
+        "MAE": 12.298185430586678,
+        "county_regret_min": 3.7533783783783785,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.613930197952183,
+        "county_regret_min": 1.7679180887372015,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.04180959668447648,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.3,0.1,0.5",
+      "validation": {
+        "MAE": 12.306625034851056,
+        "county_regret_min": 3.6722972972972974,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.587189145229317,
+        "county_regret_min": 1.8225255972696246,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.04252453636110398,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.6,0.2,0.1",
+      "validation": {
+        "MAE": 12.316396332605922,
+        "county_regret_min": 3.5878378378378377,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.609677661900221,
+        "county_regret_min": 1.9726962457337884,
+        "county_shortest_accuracy_tie_aware": 0.8191126279863481
+      },
+      "validation_MAE_gain": -0.04335228707526739,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.3,0.2,0.5",
+      "validation": {
+        "MAE": 12.324354352626788,
+        "county_regret_min": 3.7027027027027026,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.625125875554918,
+        "county_regret_min": 1.7986348122866893,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.04402643056376321,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.4,0.0,0.4",
+      "validation": {
+        "MAE": 12.329956691795555,
+        "county_regret_min": 3.6283783783783785,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.571334789089665,
+        "county_regret_min": 1.8122866894197953,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.04450101852170607,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.4,0.1,0.4",
+      "validation": {
+        "MAE": 12.340673084154487,
+        "county_regret_min": 3.6283783783783785,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.603589031122812,
+        "county_regret_min": 1.8122866894197953,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.04540883052896394,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Polynomial correction ridge 10000",
+      "validation": {
+        "MAE": 12.341350085061286,
+        "county_regret_min": 3.4527027027027026,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.617786533690966,
+        "county_regret_min": 1.6040955631399318,
+        "county_shortest_accuracy_tie_aware": 0.8361774744027304
+      },
+      "validation_MAE_gain": -0.045466180944246704,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.6,0.3,0.1",
+      "validation": {
+        "MAE": 12.344189867127797,
+        "county_regret_min": 3.564189189189189,
+        "county_shortest_accuracy_tie_aware": 0.7702702702702703
+      },
+      "later_release": {
+        "MAE": 9.659743319707207,
+        "county_regret_min": 1.9624573378839592,
+        "county_shortest_accuracy_tie_aware": 0.8225255972696246
+      },
+      "validation_MAE_gain": -0.04570674588173951,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.3,0.7,0.0,0.0",
+      "validation": {
+        "MAE": 12.346079659764282,
+        "county_regret_min": 3.47972972972973,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.57412526379905,
+        "county_regret_min": 1.9488054607508531,
+        "county_shortest_accuracy_tie_aware": 0.8191126279863481
+      },
+      "validation_MAE_gain": -0.04586683487336707,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.7,0.1,0.0",
+      "validation": {
+        "MAE": 12.35921775517373,
+        "county_regret_min": 3.4763513513513513,
+        "county_shortest_accuracy_tie_aware": 0.7702702702702703
+      },
+      "later_release": {
+        "MAE": 9.608685266548092,
+        "county_regret_min": 1.9726962457337884,
+        "county_shortest_accuracy_tie_aware": 0.8191126279863481
+      },
+      "validation_MAE_gain": -0.04697979531431784,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Robust offset trend -0.1",
+      "validation": {
+        "MAE": 12.360272246029744,
+        "county_regret_min": 3.5574324324324325,
+        "county_shortest_accuracy_tie_aware": 0.7567567567567568
+      },
+      "later_release": {
+        "MAE": 9.570799103808811,
+        "county_regret_min": 1.57679180887372,
+        "county_shortest_accuracy_tie_aware": 0.8395904436860068
+      },
+      "validation_MAE_gain": -0.04706912383352191,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.4,0.2,0.4",
+      "validation": {
+        "MAE": 12.361237118875167,
+        "county_regret_min": 3.6114864864864864,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.6450888352812,
+        "county_regret_min": 2.0,
+        "county_shortest_accuracy_tie_aware": 0.8156996587030717
+      },
+      "validation_MAE_gain": -0.04715086059018536,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Polynomial correction ridge 100",
+      "validation": {
+        "MAE": 12.364819726260768,
+        "county_regret_min": 3.574324324324324,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.63697338159635,
+        "county_regret_min": 1.6552901023890785,
+        "county_shortest_accuracy_tie_aware": 0.8361774744027304
+      },
+      "validation_MAE_gain": -0.04745435209115012,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.5,0.0,0.3",
+      "validation": {
+        "MAE": 12.374641278752996,
+        "county_regret_min": 3.543918918918919,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.593046013289573,
+        "county_regret_min": 1.8156996587030716,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.048286360007968154,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.7,0.2,0.0",
+      "validation": {
+        "MAE": 12.381430579890292,
+        "county_regret_min": 3.391891891891892,
+        "county_shortest_accuracy_tie_aware": 0.777027027027027
+      },
+      "later_release": {
+        "MAE": 9.652719068159307,
+        "county_regret_min": 1.9726962457337884,
+        "county_shortest_accuracy_tie_aware": 0.8191126279863481
+      },
+      "validation_MAE_gain": -0.048861498439530804,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Polynomial correction ridge 1000",
+      "validation": {
+        "MAE": 12.382921732427103,
+        "county_regret_min": 3.550675675675676,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.66495748756575,
+        "county_regret_min": 1.5870307167235496,
+        "county_shortest_accuracy_tie_aware": 0.8395904436860068
+      },
+      "validation_MAE_gain": -0.04898781764586735,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.5,0.1,0.3",
+      "validation": {
+        "MAE": 12.389245577907069,
+        "county_regret_min": 3.5371621621621623,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.628235065966459,
+        "county_regret_min": 2.0,
+        "county_shortest_accuracy_tie_aware": 0.8156996587030717
+      },
+      "validation_MAE_gain": -0.049523526181582955,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Robust Huber history",
+      "validation": {
+        "MAE": 12.409376336736697,
+        "county_regret_min": 3.449324324324324,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.49694119237889,
+        "county_regret_min": 1.6245733788395904,
+        "county_shortest_accuracy_tie_aware": 0.8361774744027304
+      },
+      "validation_MAE_gain": -0.05122885237426544,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.5,0.2,0.3",
+      "validation": {
+        "MAE": 12.411133090945135,
+        "county_regret_min": 3.608108108108108,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.672464237531758,
+        "county_regret_min": 2.0,
+        "county_shortest_accuracy_tie_aware": 0.8156996587030717
+      },
+      "validation_MAE_gain": -0.051377671352780485,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.7,0.3,0.0",
+      "validation": {
+        "MAE": 12.412364040347805,
+        "county_regret_min": 3.5,
+        "county_shortest_accuracy_tie_aware": 0.7736486486486487
+      },
+      "later_release": {
+        "MAE": 9.704778468926099,
+        "county_regret_min": 1.9556313993174061,
+        "county_shortest_accuracy_tie_aware": 0.8225255972696246
+      },
+      "validation_MAE_gain": -0.05148194811035345,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Robust offset trend 0",
+      "validation": {
+        "MAE": 12.428031257877489,
+        "county_regret_min": 3.402027027027027,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.528503858600946,
+        "county_regret_min": 1.6040955631399318,
+        "county_shortest_accuracy_tie_aware": 0.8395904436860068
+      },
+      "validation_MAE_gain": -0.052809156719127115,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.0,0.0,0.9",
+      "validation": {
+        "MAE": 12.428308746436345,
+        "county_regret_min": 3.574324324324324,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.672894452360342,
+        "county_regret_min": 1.6928327645051195,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": -0.052832663458817875,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.6,0.0,0.2",
+      "validation": {
+        "MAE": 12.428363400956554,
+        "county_regret_min": 3.5371621621621623,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.622145922309707,
+        "county_regret_min": 1.9488054607508531,
+        "county_shortest_accuracy_tie_aware": 0.8191126279863481
+      },
+      "validation_MAE_gain": -0.05283729337792087,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.1,0.0,0.8",
+      "validation": {
+        "MAE": 12.428930006010951,
+        "county_regret_min": 3.641891891891892,
+        "county_shortest_accuracy_tie_aware": 0.7466216216216216
+      },
+      "later_release": {
+        "MAE": 9.65996020511716,
+        "county_regret_min": 1.7167235494880546,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.05288529188847613,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Robust offset trend -0.2",
+      "validation": {
+        "MAE": 12.433375346609528,
+        "county_regret_min": 3.445945945945946,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.791287030121982,
+        "county_regret_min": 1.7030716723549488,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": -0.053261867646116734,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Robust Huber full",
+      "validation": {
+        "MAE": 12.434988732322665,
+        "county_regret_min": 3.52027027027027,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.534068175761574,
+        "county_regret_min": 1.825938566552901,
+        "county_shortest_accuracy_tie_aware": 0.8225255972696246
+      },
+      "validation_MAE_gain": -0.05339854152606316,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.0,0.1,0.9",
+      "validation": {
+        "MAE": 12.43699239020651,
+        "county_regret_min": 3.574324324324324,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.697338654247948,
+        "county_regret_min": 1.6928327645051195,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": -0.05356827632341554,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.2,0.0,0.7",
+      "validation": {
+        "MAE": 12.438287906361992,
+        "county_regret_min": 3.5945945945945947,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.65352824689682,
+        "county_regret_min": 1.7679180887372015,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.0536780226897442,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.1,0.1,0.8",
+      "validation": {
+        "MAE": 12.44110231082227,
+        "county_regret_min": 3.6182432432432434,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.68722547314312,
+        "county_regret_min": 1.7542662116040955,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.05391643782766975,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.6,0.1,0.2",
+      "validation": {
+        "MAE": 12.444994838610542,
+        "county_regret_min": 3.5878378378378377,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.660505530965176,
+        "county_regret_min": 2.0,
+        "county_shortest_accuracy_tie_aware": 0.8156996587030717
+      },
+      "validation_MAE_gain": -0.05424618344974319,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.2,0.1,0.7",
+      "validation": {
+        "MAE": 12.452994677342007,
+        "county_regret_min": 3.5844594594594597,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.684633985808656,
+        "county_regret_min": 1.7986348122866893,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.05492386950427597,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.3,0.0,0.6",
+      "validation": {
+        "MAE": 12.459897909543505,
+        "county_regret_min": 3.699324324324324,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.656579267761657,
+        "county_regret_min": 1.7986348122866893,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.055508659317070386,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.6,0.2,0.2",
+      "validation": {
+        "MAE": 12.470386873646872,
+        "county_regret_min": 3.5844594594594597,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.707467537289071,
+        "county_regret_min": 1.9726962457337884,
+        "county_shortest_accuracy_tie_aware": 0.8191126279863481
+      },
+      "validation_MAE_gain": -0.05639720531630288,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.3,0.1,0.6",
+      "validation": {
+        "MAE": 12.476850175412668,
+        "county_regret_min": 3.7533783783783785,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.692212237470887,
+        "county_regret_min": 1.8907849829351535,
+        "county_shortest_accuracy_tie_aware": 0.8225255972696246
+      },
+      "validation_MAE_gain": -0.05694472753768087,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.7,0.0,0.1",
+      "validation": {
+        "MAE": 12.487017007001988,
+        "county_regret_min": 3.5844594594594597,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.65874408464595,
+        "county_regret_min": 2.0,
+        "county_shortest_accuracy_tie_aware": 0.8156996587030717
+      },
+      "validation_MAE_gain": -0.05780598489775324,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.4,0.0,0.5",
+      "validation": {
+        "MAE": 12.491217033366485,
+        "county_regret_min": 3.699324324324324,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.668845997047814,
+        "county_regret_min": 1.8805460750853242,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.05816177948204859,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.7,0.1,0.1",
+      "validation": {
+        "MAE": 12.506428468168739,
+        "county_regret_min": 3.5844594594594597,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.69991246444453,
+        "county_regret_min": 1.9726962457337884,
+        "county_shortest_accuracy_tie_aware": 0.8191126279863481
+      },
+      "validation_MAE_gain": -0.05945037761270555,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Boost history absolute_error leaves 7",
+      "validation": {
+        "MAE": 12.508659645927546,
+        "county_regret_min": 3.179054054054054,
+        "county_shortest_accuracy_tie_aware": 0.7702702702702703
+      },
+      "later_release": {
+        "MAE": 9.50491538298949,
+        "county_regret_min": 1.6143344709897611,
+        "county_shortest_accuracy_tie_aware": 0.8361774744027304
+      },
+      "validation_MAE_gain": -0.059639386179388465,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.4,0.1,0.5",
+      "validation": {
+        "MAE": 12.511128233329913,
+        "county_regret_min": 3.7027027027027026,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.708664159320136,
+        "county_regret_min": 1.8805460750853242,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.059848506302072835,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Robust offset trend 0.1",
+      "validation": {
+        "MAE": 12.515175195361733,
+        "county_regret_min": 3.679054054054054,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.689444859347772,
+        "county_regret_min": 1.5255972696245734,
+        "county_shortest_accuracy_tie_aware": 0.8464163822525598
+      },
+      "validation_MAE_gain": -0.06019133442952018,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.5,0.0,0.4",
+      "validation": {
+        "MAE": 12.531770375970979,
+        "county_regret_min": 3.564189189189189,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.69031270172139,
+        "county_regret_min": 1.9044368600682593,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.06159715307772684,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.7,0.2,0.1",
+      "validation": {
+        "MAE": 12.535357523046134,
+        "county_regret_min": 3.5,
+        "county_shortest_accuracy_tie_aware": 0.7736486486486487
+      },
+      "later_release": {
+        "MAE": 9.751077575401759,
+        "county_regret_min": 1.9726962457337884,
+        "county_shortest_accuracy_tie_aware": 0.8191126279863481
+      },
+      "validation_MAE_gain": -0.06190102914698192,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.2,0.8,0.0,0.0",
+      "validation": {
+        "MAE": 12.551364443740296,
+        "county_regret_min": 3.4121621621621623,
+        "county_shortest_accuracy_tie_aware": 0.7736486486486487
+      },
+      "later_release": {
+        "MAE": 9.702418902950017,
+        "county_regret_min": 1.9726962457337884,
+        "county_shortest_accuracy_tie_aware": 0.8191126279863481
+      },
+      "validation_MAE_gain": -0.06325701484801627,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.5,0.1,0.4",
+      "validation": {
+        "MAE": 12.554175852916025,
+        "county_regret_min": 3.5574324324324325,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.733578201640036,
+        "county_regret_min": 2.0,
+        "county_shortest_accuracy_tie_aware": 0.8156996587030717
+      },
+      "validation_MAE_gain": -0.06349517624800605,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Boost history absolute_error leaves 15",
+      "validation": {
+        "MAE": 12.571906086897364,
+        "county_regret_min": 3.3783783783783785,
+        "county_shortest_accuracy_tie_aware": 0.7736486486486487
+      },
+      "later_release": {
+        "MAE": 9.501336919282407,
+        "county_regret_min": 1.6075085324232081,
+        "county_shortest_accuracy_tie_aware": 0.8395904436860068
+      },
+      "validation_MAE_gain": -0.06499714806470025,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.8,0.1,0.0",
+      "validation": {
+        "MAE": 12.573836594280744,
+        "county_regret_min": 3.5,
+        "county_shortest_accuracy_tie_aware": 0.7736486486486487
+      },
+      "later_release": {
+        "MAE": 9.747485730451745,
+        "county_regret_min": 1.9726962457337884,
+        "county_shortest_accuracy_tie_aware": 0.8191126279863481
+      },
+      "validation_MAE_gain": -0.06516068610287884,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Boost full squared_error leaves 7",
+      "validation": {
+        "MAE": 12.582823090463734,
+        "county_regret_min": 3.6655405405405403,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.74493521044378,
+        "county_regret_min": 1.8464163822525597,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "validation_MAE_gain": -0.06592195434174619,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Boost full squared_error leaves 15",
+      "validation": {
+        "MAE": 12.584132255445411,
+        "county_regret_min": 3.6554054054054053,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.772736765582206,
+        "county_regret_min": 1.8088737201365188,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.06603285693377914,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.6,0.0,0.3",
+      "validation": {
+        "MAE": 12.585699213050557,
+        "county_regret_min": 3.5844594594594597,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.720606636649899,
+        "county_regret_min": 2.0,
+        "county_shortest_accuracy_tie_aware": 0.8156996587030717
+      },
+      "validation_MAE_gain": -0.06616559777427589,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.8,0.2,0.0",
+      "validation": {
+        "MAE": 12.60632256999687,
+        "county_regret_min": 3.5,
+        "county_shortest_accuracy_tie_aware": 0.7736486486486487
+      },
+      "later_release": {
+        "MAE": 9.800550635936114,
+        "county_regret_min": 2.0648464163822524,
+        "county_shortest_accuracy_tie_aware": 0.8191126279863481
+      },
+      "validation_MAE_gain": -0.06791265316743011,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Gradient boosting",
+      "validation": {
+        "MAE": 12.60643801492187,
+        "county_regret_min": 3.574324324324324,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.78090052984484,
+        "county_regret_min": 1.6928327645051195,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": -0.06792243279154087,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.0,0.0,1.0",
+      "validation": {
+        "MAE": 12.60643801492187,
+        "county_regret_min": 3.574324324324324,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 9.78090052984484,
+        "county_regret_min": 1.6928327645051195,
+        "county_shortest_accuracy_tie_aware": 0.8327645051194539
+      },
+      "validation_MAE_gain": -0.06792243279154087,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.1,0.0,0.9",
+      "validation": {
+        "MAE": 12.609451283994726,
+        "county_regret_min": 3.550675675675676,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.768692947489747,
+        "county_regret_min": 1.7679180887372015,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.06817769424089959,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.6,0.1,0.3",
+      "validation": {
+        "MAE": 12.609964577914006,
+        "county_regret_min": 3.60472972972973,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.765714129406629,
+        "county_regret_min": 2.0,
+        "county_shortest_accuracy_tie_aware": 0.8156996587030717
+      },
+      "validation_MAE_gain": -0.06822117663381388,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Boost history squared_error leaves 7",
+      "validation": {
+        "MAE": 12.61338327624085,
+        "county_regret_min": 3.5067567567567566,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.680517372286428,
+        "county_regret_min": 1.5904436860068258,
+        "county_shortest_accuracy_tie_aware": 0.8430034129692833
+      },
+      "validation_MAE_gain": -0.06851078299445756,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.2,0.0,0.8",
+      "validation": {
+        "MAE": 12.619705400380452,
+        "county_regret_min": 3.6655405405405403,
+        "county_shortest_accuracy_tie_aware": 0.7466216216216216
+      },
+      "later_release": {
+        "MAE": 9.763031154045526,
+        "county_regret_min": 1.8907849829351535,
+        "county_shortest_accuracy_tie_aware": 0.8225255972696246
+      },
+      "validation_MAE_gain": -0.06904634571118873,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.3,0.0,0.7",
+      "validation": {
+        "MAE": 12.641154267431737,
+        "county_regret_min": 3.5945945945945947,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.767815235722775,
+        "county_regret_min": 1.8907849829351535,
+        "county_shortest_accuracy_tie_aware": 0.8225255972696246
+      },
+      "validation_MAE_gain": -0.07086333209980356,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.7,0.0,0.2",
+      "validation": {
+        "MAE": 12.644983235438088,
+        "county_regret_min": 3.5844594594594597,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.757108198911492,
+        "county_regret_min": 2.0,
+        "county_shortest_accuracy_tie_aware": 0.8156996587030717
+      },
+      "validation_MAE_gain": -0.07118769341610753,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Boost history squared_error leaves 15",
+      "validation": {
+        "MAE": 12.64863076317982,
+        "county_regret_min": 3.3885135135135136,
+        "county_shortest_accuracy_tie_aware": 0.7702702702702703
+      },
+      "later_release": {
+        "MAE": 9.649205927618578,
+        "county_regret_min": 1.6075085324232081,
+        "county_shortest_accuracy_tie_aware": 0.8395904436860068
+      },
+      "validation_MAE_gain": -0.07149668448043633,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.7,0.1,0.2",
+      "validation": {
+        "MAE": 12.671431493774962,
+        "county_regret_min": 3.5844594594594597,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 9.804589061833989,
+        "county_regret_min": 1.9726962457337884,
+        "county_shortest_accuracy_tie_aware": 0.8191126279863481
+      },
+      "validation_MAE_gain": -0.07342819056151706,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.4,0.0,0.6",
+      "validation": {
+        "MAE": 12.671461857052629,
+        "county_regret_min": 3.699324324324324,
+        "county_shortest_accuracy_tie_aware": 0.7533783783783784
+      },
+      "later_release": {
+        "MAE": 9.780619277914079,
+        "county_regret_min": 1.8907849829351535,
+        "county_shortest_accuracy_tie_aware": 0.8225255972696246
+      },
+      "validation_MAE_gain": -0.07343076270959825,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.8,0.0,0.1",
+      "validation": {
+        "MAE": 12.70932701774449,
+        "county_regret_min": 3.52027027027027,
+        "county_shortest_accuracy_tie_aware": 0.7702702702702703
+      },
+      "later_release": {
+        "MAE": 9.800491038868126,
+        "county_regret_min": 2.0238907849829353,
+        "county_shortest_accuracy_tie_aware": 0.8191126279863481
+      },
+      "validation_MAE_gain": -0.07663841379043745,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.5,0.0,0.5",
+      "validation": {
+        "MAE": 12.710438081182277,
+        "county_regret_min": 3.641891891891892,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.802018931435189,
+        "county_regret_min": 1.931740614334471,
+        "county_shortest_accuracy_tie_aware": 0.8225255972696246
+      },
+      "validation_MAE_gain": -0.07673253471246655,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.8,0.1,0.1",
+      "validation": {
+        "MAE": 12.738919396363508,
+        "county_regret_min": 3.527027027027027,
+        "county_shortest_accuracy_tie_aware": 0.7736486486486487
+      },
+      "later_release": {
+        "MAE": 9.851259579518569,
+        "county_regret_min": 2.0238907849829353,
+        "county_shortest_accuracy_tie_aware": 0.8191126279863481
+      },
+      "validation_MAE_gain": -0.07914525711362708,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.6,0.0,0.4",
+      "validation": {
+        "MAE": 12.76115870924279,
+        "county_regret_min": 3.60472972972973,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.832250226346858,
+        "county_regret_min": 2.0,
+        "county_shortest_accuracy_tie_aware": 0.8156996587030717
+      },
+      "validation_MAE_gain": -0.08102920411638426,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.1,0.9,0.0,0.0",
+      "validation": {
+        "MAE": 12.781188404957746,
+        "county_regret_min": 3.52027027027027,
+        "county_shortest_accuracy_tie_aware": 0.777027027027027
+      },
+      "later_release": {
+        "MAE": 9.851133136237223,
+        "county_regret_min": 2.0238907849829353,
+        "county_shortest_accuracy_tie_aware": 0.8191126279863481
+      },
+      "validation_MAE_gain": -0.08272596900355289,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.9,0.1,0.0",
+      "validation": {
+        "MAE": 12.813864650077655,
+        "county_regret_min": 3.52027027027027,
+        "county_shortest_accuracy_tie_aware": 0.777027027027027
+      },
+      "later_release": {
+        "MAE": 9.905228839012468,
+        "county_regret_min": 2.0750853242320817,
+        "county_shortest_accuracy_tie_aware": 0.8156996587030717
+      },
+      "validation_MAE_gain": -0.08549405425821721,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.7,0.0,0.3",
+      "validation": {
+        "MAE": 12.819880180940553,
+        "county_regret_min": 3.6486486486486487,
+        "county_shortest_accuracy_tie_aware": 0.7601351351351351
+      },
+      "later_release": {
+        "MAE": 9.869358287550991,
+        "county_regret_min": 2.0,
+        "county_shortest_accuracy_tie_aware": 0.8156996587030717
+      },
+      "validation_MAE_gain": -0.08600364470288024,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Robust offset trend 0.2",
+      "validation": {
+        "MAE": 12.823090496596924,
+        "county_regret_min": 3.8074324324324325,
+        "county_shortest_accuracy_tie_aware": 0.7567567567567568
+      },
+      "later_release": {
+        "MAE": 9.9814787154593,
+        "county_regret_min": 1.5255972696245734,
+        "county_shortest_accuracy_tie_aware": 0.8395904436860068
+      },
+      "validation_MAE_gain": -0.08627559845394961,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Recency-weighted ridge",
+      "validation": {
+        "MAE": 12.828620301034238,
+        "county_regret_min": 3.5844594594594597,
+        "county_shortest_accuracy_tie_aware": 0.7702702702702703
+      },
+      "later_release": {
+        "MAE": 9.795445237778061,
+        "county_regret_min": 1.9385665529010239,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.08674404181602902,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.8,0.0,0.2",
+      "validation": {
+        "MAE": 12.884375867479285,
+        "county_regret_min": 3.6317567567567566,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "later_release": {
+        "MAE": 9.911955472891966,
+        "county_regret_min": 2.0238907849829353,
+        "county_shortest_accuracy_tie_aware": 0.8191126279863481
+      },
+      "validation_MAE_gain": -0.09146723325909867,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Ridge alpha 1000",
+      "validation": {
+        "MAE": 12.927613316675236,
+        "county_regret_min": 3.5067567567567566,
+        "county_shortest_accuracy_tie_aware": 0.7702702702702703
+      },
+      "later_release": {
+        "MAE": 10.068957574838011,
+        "county_regret_min": 1.9965870307167235,
+        "county_shortest_accuracy_tie_aware": 0.8225255972696246
+      },
+      "validation_MAE_gain": -0.095129984139116,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,0.9,0.0,0.1",
+      "validation": {
+        "MAE": 12.95549564446723,
+        "county_regret_min": 3.52027027027027,
+        "county_shortest_accuracy_tie_aware": 0.777027027027027
+      },
+      "later_release": {
+        "MAE": 9.96373690133285,
+        "county_regret_min": 2.0238907849829353,
+        "county_shortest_accuracy_tie_aware": 0.8191126279863481
+      },
+      "validation_MAE_gain": -0.09749196484233069,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Ridge alpha 100",
+      "validation": {
+        "MAE": 12.98990357946978,
+        "county_regret_min": 3.550675675675676,
+        "county_shortest_accuracy_tie_aware": 0.7736486486486487
+      },
+      "later_release": {
+        "MAE": 10.077132300831078,
+        "county_regret_min": 2.04778156996587,
+        "county_shortest_accuracy_tie_aware": 0.8191126279863481
+      },
+      "validation_MAE_gain": -0.10040674581470088,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Ridge regression",
+      "validation": {
+        "MAE": 13.035542533307652,
+        "county_regret_min": 3.550675675675676,
+        "county_shortest_accuracy_tie_aware": 0.7736486486486487
+      },
+      "later_release": {
+        "MAE": 10.02326754479105,
+        "county_regret_min": 2.15358361774744,
+        "county_shortest_accuracy_tie_aware": 0.8191126279863481
+      },
+      "validation_MAE_gain": -0.1042729340714399,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Blend 0.0,1.0,0.0,0.0",
+      "validation": {
+        "MAE": 13.035542533307652,
+        "county_regret_min": 3.550675675675676,
+        "county_shortest_accuracy_tie_aware": 0.7736486486486487
+      },
+      "later_release": {
+        "MAE": 10.02326754479105,
+        "county_regret_min": 2.15358361774744,
+        "county_shortest_accuracy_tie_aware": 0.8191126279863481
+      },
+      "validation_MAE_gain": -0.1042729340714399,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Ridge alpha 1",
+      "validation": {
+        "MAE": 13.053634390540003,
+        "county_regret_min": 3.550675675675676,
+        "county_shortest_accuracy_tie_aware": 0.7736486486486487
+      },
+      "later_release": {
+        "MAE": 9.994555829474567,
+        "county_regret_min": 2.15358361774744,
+        "county_shortest_accuracy_tie_aware": 0.8191126279863481
+      },
+      "validation_MAE_gain": -0.10580553988494734,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "OOF residual stack ridge 1000",
+      "validation": {
+        "MAE": 13.117698061807836,
+        "county_regret_min": 3.641891891891892,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 10.123667921391284,
+        "county_regret_min": 1.7508532423208192,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.11123253136286682,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "OOF residual stack ridge 100",
+      "validation": {
+        "MAE": 13.11937348281698,
+        "county_regret_min": 3.641891891891892,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 10.126660850046504,
+        "county_regret_min": 1.7508532423208192,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.11137446040562393,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "OOF residual stack ridge 10",
+      "validation": {
+        "MAE": 13.119542305818493,
+        "county_regret_min": 3.641891891891892,
+        "county_shortest_accuracy_tie_aware": 0.7668918918918919
+      },
+      "later_release": {
+        "MAE": 10.126961520803938,
+        "county_regret_min": 1.7508532423208192,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.11138876181814616,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    },
+    {
+      "candidate": "Robust offset trend 0.3",
+      "validation": {
+        "MAE": 13.280564658432064,
+        "county_regret_min": 4.101351351351352,
+        "county_shortest_accuracy_tie_aware": 0.75
+      },
+      "later_release": {
+        "MAE": 10.41782424695046,
+        "county_regret_min": 1.7849829351535835,
+        "county_shortest_accuracy_tie_aware": 0.825938566552901
+      },
+      "validation_MAE_gain": -0.12502936214738747,
+      "passes_MAE_gate": false,
+      "passes_joint_gate": false
+    }
+  ],
+  "rolling_selection": [
+    {
+      "release": "2022-07-01",
+      "training_releases": [
+        "2020-10-01",
+        "2021-10-01"
+      ],
+      "candidate": "Blend 0.0,0.2,0.8,0.0",
+      "score": {
+        "MAE": 11.77044242224393,
+        "county_regret_min": 3.0202020202020203,
+        "county_shortest_accuracy_tie_aware": 0.7744107744107744
+      },
+      "baseline": {
+        "MAE": 12.006629270780214,
+        "county_regret_min": 3.6464646464646466,
+        "county_shortest_accuracy_tie_aware": 0.7575757575757576
+      },
+      "boston_assumed_drive": {
+        "points": 2001,
+        "hospitals": 7,
+        "observed_shortest_hospitals": [
+          "Boston Medical Center\u2013Brighton"
+        ],
+        "metrics": {
+          "selected": {
+            "mean_regret_min": 0.0,
+            "p90_regret_min": 0.0,
+            "shortest_total_accuracy": 1.0,
+            "hospital_median_MAE": 17.43593046184409
+          },
+          "persistence": {
+            "mean_regret_min": 0.0,
+            "p90_regret_min": 0.0,
+            "shortest_total_accuracy": 1.0,
+            "hospital_median_MAE": 20.571428571428573
+          },
+          "closest": {
+            "mean_regret_min": 81.48220551474076,
+            "p90_regret_min": 150.76297847963772,
+            "shortest_total_accuracy": 0.16591704147926037
+          }
+        },
+        "scope": "Current seven-general-ER ID/coordinate set applied retrospectively; grid extends outside Boston; distance-based drive assumptions, not observed trips or patient outcomes"
+      }
+    },
+    {
+      "release": "2023-10-01",
+      "training_releases": [
+        "2020-10-01",
+        "2021-10-01",
+        "2022-07-01"
+      ],
+      "candidate": "Blend 0.0,0.3,0.6,0.1",
+      "score": {
+        "MAE": 14.347485923661964,
+        "county_regret_min": 3.2086092715231787,
+        "county_shortest_accuracy_tie_aware": 0.7649006622516556
+      },
+      "baseline": {
+        "MAE": 14.487792725460887,
+        "county_regret_min": 3.771523178807947,
+        "county_shortest_accuracy_tie_aware": 0.7450331125827815
+      },
+      "boston_assumed_drive": {
+        "points": 2001,
+        "hospitals": 7,
+        "observed_shortest_hospitals": [
+          "Boston Medical Center\u2013Brighton"
+        ],
+        "metrics": {
+          "selected": {
+            "mean_regret_min": 0.0,
+            "p90_regret_min": 0.0,
+            "shortest_total_accuracy": 1.0,
+            "hospital_median_MAE": 21.98320306942202
+          },
+          "persistence": {
+            "mean_regret_min": 0.0,
+            "p90_regret_min": 0.0,
+            "shortest_total_accuracy": 1.0,
+            "hospital_median_MAE": 18.285714285714285
+          },
+          "closest": {
+            "mean_regret_min": 87.1033949200381,
+            "p90_regret_min": 154.76297847963772,
+            "shortest_total_accuracy": 0.16591704147926037
+          }
+        },
+        "scope": "Current seven-general-ER ID/coordinate set applied retrospectively; grid extends outside Boston; distance-based drive assumptions, not observed trips or patient outcomes"
+      }
+    },
+    {
+      "release": "2024-10-01",
+      "training_releases": [
+        "2020-10-01",
+        "2021-10-01",
+        "2022-07-01",
+        "2023-10-01"
+      ],
+      "candidate": "Blend 0.0,0.3,0.6,0.1",
+      "score": {
+        "MAE": 13.558545742207762,
+        "county_regret_min": 3.578767123287671,
+        "county_shortest_accuracy_tie_aware": 0.7294520547945206
+      },
+      "baseline": {
+        "MAE": 13.56710393541877,
+        "county_regret_min": 4.260273972602739,
+        "county_shortest_accuracy_tie_aware": 0.7123287671232876
+      },
+      "boston_assumed_drive": {
+        "points": 2001,
+        "hospitals": 7,
+        "observed_shortest_hospitals": [
+          "Boston Medical Center\u2013Brighton"
+        ],
+        "metrics": {
+          "selected": {
+            "mean_regret_min": 0.0,
+            "p90_regret_min": 0.0,
+            "shortest_total_accuracy": 1.0,
+            "hospital_median_MAE": 15.634658794897534
+          },
+          "persistence": {
+            "mean_regret_min": 0.0,
+            "p90_regret_min": 0.0,
+            "shortest_total_accuracy": 1.0,
+            "hospital_median_MAE": 15.714285714285714
+          },
+          "closest": {
+            "mean_regret_min": 77.01643839829897,
+            "p90_regret_min": 140.76297847963772,
+            "shortest_total_accuracy": 0.16591704147926037
+          }
+        },
+        "scope": "Current seven-general-ER ID/coordinate set applied retrospectively; grid extends outside Boston; distance-based drive assumptions, not observed trips or patient outcomes"
+      }
+    },
+    {
+      "release": "2025-11-01",
+      "training_releases": [
+        "2020-10-01",
+        "2021-10-01",
+        "2022-07-01",
+        "2023-10-01",
+        "2024-10-01"
+      ],
+      "candidate": "Blend 0.0,0.4,0.3,0.3",
+      "score": {
+        "MAE": 12.228019345270909,
+        "county_regret_min": 3.5912162162162162,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "baseline": {
+        "MAE": 11.804638265691958,
+        "county_regret_min": 3.402027027027027,
+        "county_shortest_accuracy_tie_aware": 0.7635135135135135
+      },
+      "boston_assumed_drive": {
+        "points": 2001,
+        "hospitals": 7,
+        "observed_shortest_hospitals": [
+          "Boston Medical Center\u2013Brighton"
+        ],
+        "metrics": {
+          "selected": {
+            "mean_regret_min": 0.0,
+            "p90_regret_min": 0.0,
+            "shortest_total_accuracy": 1.0,
+            "hospital_median_MAE": 15.712200772924092
+          },
+          "persistence": {
+            "mean_regret_min": 0.0,
+            "p90_regret_min": 0.0,
+            "shortest_total_accuracy": 1.0,
+            "hospital_median_MAE": 15.714285714285714
+          },
+          "closest": {
+            "mean_regret_min": 96.22783270114755,
+            "p90_regret_min": 159.76297847963772,
+            "shortest_total_accuracy": 0.16591704147926037
+          }
+        },
+        "scope": "Current seven-general-ER ID/coordinate set applied retrospectively; grid extends outside Boston; distance-based drive assumptions, not observed trips or patient outcomes"
+      }
+    },
+    {
+      "release": "2026-08-01",
+      "training_releases": [
+        "2020-10-01",
+        "2021-10-01",
+        "2022-07-01",
+        "2023-10-01",
+        "2024-10-01",
+        "2025-11-01"
+      ],
+      "candidate": "Blend 0.2,0.2,0.3,0.3",
+      "score": {
+        "MAE": 9.391321199953033,
+        "county_regret_min": 1.7679180887372015,
+        "county_shortest_accuracy_tie_aware": 0.8293515358361775
+      },
+      "baseline": {
+        "MAE": 9.421458800099577,
+        "county_regret_min": 1.6040955631399318,
+        "county_shortest_accuracy_tie_aware": 0.8395904436860068
+      },
+      "boston_assumed_drive": {
+        "points": 2001,
+        "hospitals": 7,
+        "observed_shortest_hospitals": [
+          "Boston Medical Center\u2013Brighton"
+        ],
+        "metrics": {
+          "selected": {
+            "mean_regret_min": 0.0,
+            "p90_regret_min": 0.0,
+            "shortest_total_accuracy": 1.0,
+            "hospital_median_MAE": 15.938746722803147
+          },
+          "persistence": {
+            "mean_regret_min": 0.0,
+            "p90_regret_min": 0.0,
+            "shortest_total_accuracy": 1.0,
+            "hospital_median_MAE": 17.857142857142858
+          },
+          "closest": {
+            "mean_regret_min": 84.22283519989817,
+            "p90_regret_min": 144.76297847963772,
+            "shortest_total_accuracy": 0.16591704147926037
+          }
+        },
+        "scope": "Current seven-general-ER ID/coordinate set applied retrospectively; grid extends outside Boston; distance-based drive assumptions, not observed trips or patient outcomes"
+      }
+    }
+  ],
+  "source_sha256": {
+    "data/national_ed_panel.csv.gz": "c7d12356577868c667a4fd8c52411ca5602e7ddea5cc0e021c4e6fe55237000f",
+    "national_model.py": "455704ce96e242a18e23dd7b021224b733c2d6a77a446871d8501870641904e6",
+    "data/ensemble_oof_predictions.csv.gz": "5ab9caf568f6de49ec592c5edf3904912c896e20748afc9a12095e633739728f"
+  },
+  "final_cache_sha256": "70fcbfb1422bfc95e6c581f5f8e0d0cd82a026efb5aff6a944b53083ef8afd70",
+  "production_changed": false,
+  "environment": {
+    "python": "3.13.5",
+    "scikit_learn": "1.6.1",
+    "pandas": "2.2.3",
+    "numpy": "2.1.3",
+    "scipy": "1.15.3"
+  }
+}

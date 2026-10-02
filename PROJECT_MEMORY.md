@@ -23,3 +23,7 @@ Use ACCURACY_ROADMAP.md as the research and evidence plan. Improve decision-focu
 ## Completed ensemble experiment
 
 `research/README.md` documents 35 convex combinations of the four base models with chronological weight selection. Five evaluated later folds: blends slightly improved county shortest-median selection but increased MAE (12.38 vs 12.26 min); Boston median MAE improved (16.33 vs 17.63 min), but the assumed-drive grid gave no ranking separation. The joint promotion gate returned Persistence for a future candidate. Production and the UI were kept unchanged. This is retrospective evidence, not proof no ensemble can ever help.
+
+## Expanded search completed
+
+`research/EXPANDED_RESULTS.md` documents 321 candidate configurations, including finer blends, residual stacking, robust losses, recency weighting, continuous pooling and polynomial corrections. Four clear the original 2% MAE-only validation rule (best 2.24% gain); none clears the previously declared research joint gate because validation county regret worsens. Production and UI remain unchanged. Distinguish the original MAE-only production rule from the research ranking safeguards and all-history research nominations from preceding-release validation. Larger generated prediction caches are ignored; rebuild via the research commands.
