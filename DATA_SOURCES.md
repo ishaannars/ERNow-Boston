@@ -58,3 +58,6 @@ Share of ED patients who left before being seen, calendar year 2024 (latest rele
 
 ### Restricted emergency departments
 Mass Eye and Ear (eye and ENT emergencies; CMS OP-18b available, so it gets a forecast range), Boston Children's Hospital (pediatric; no CMS ED-time data), and VA Boston's West Roxbury ED (enrolled veterans; not in CMS Hospital Compare, location from VA Boston). Shown separately and never ranked against general EDs.
+
+### Hospital systems
+Each ED's parent system (Mass General Brigham, Beth Israel Lahey Health, Boston Medical Center Health System, Tufts Medicine, Boston Children's, VA Boston), from each system's public list of hospitals. Used only for the optional "your doctors' system" tag; it never changes the ranking.

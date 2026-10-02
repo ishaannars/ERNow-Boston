@@ -130,10 +130,12 @@ def main():
         mark_quick()
         return
     who = input("Participant name (or initials): ").strip() or "participant"
-    print("Which manual run? 1 = quick search ('ER near me', the headline)   2 = full comparison (two lookups per ER)   3 = both")
-    which = input("Enter 1, 2, or 3: ").strip()
-    runs = {"1": ["quick"], "2": ["full"], "3": ["quick", "full"]}.get(which, ["quick"])
-    do_ernow = input("Also time an ERNow run? (y/n; say n if you already recorded one): ").strip().lower() != "n"
+    print("Which manual run? 1 = quick search ('ER near me', the headline)   2 = full comparison (two lookups per ER)   "
+          "3 = both   0 = none (ERNow run only)")
+    which = input("Enter 0, 1, 2, or 3: ").strip()
+    runs = {"0": [], "1": ["quick"], "2": ["full"], "3": ["quick", "full"]}.get(which, ["quick"])
+    do_ernow = True if which == "0" else (
+        input("Also time an ERNow run? (y/n; every participant should do one): ").strip().lower() != "n")
     mode = input("Time with this script's stopwatch (1) or type in times you measured yourself (2)? Enter 1 or 2: ").strip()
     labels = {"full": ("FULL COMPARISON", FULL_STEPS), "quick": ("QUICK SEARCH", QUICK_STEPS), "ernow": ("ERNOW RUN", ERNOW_STEPS)}
     results = []

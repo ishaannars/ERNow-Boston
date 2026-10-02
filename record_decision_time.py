@@ -58,8 +58,10 @@ def readme_text(s):
             tail = (f" The quick search only finds the closest ER, which isn't the fastest overall from "
                     f"{ch['closest_not_fastest_share']:.0%} of Boston locations (typically ~{hm(ch['median_minutes_saved_when_different'])} "
                     f"longer in the ED for a non-emergency).")
-        lines.append(f"- **ERNow vs the usual search** (\"ER near me\", pick the closest): **{fmt(e)} in ERNow vs {fmt(q)}**, "
-                     f"and ERNow also shows the usually quickest ER ({n} participant{'s' if n != 1 else ''}).{tail}")
+        ne = s["ernow"]["participants"]
+        lines.append(f"- **ERNow vs the usual search** (\"ER near me\", pick the closest): **{fmt(e)} in ERNow "
+                     f"({ne} participant{'s' if ne != 1 else ''}) vs {fmt(q)} for the search ({n} participant{'s' if n != 1 else ''})**, "
+                     f"and ERNow also shows the usually quickest ER.{tail}")
     if "full" in s:
         f, n = s["full"]["median_seconds"], s["full"]["participants"]
         lines.append(f"- **Information ERNow assembles:** gathering the same facts by hand (each ER's ED time and drive time) took "

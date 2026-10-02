@@ -47,7 +47,7 @@ Tesla's real achievement wasn't a faster car. It pulled a needed but slow-arrivi
 ## Decision time (measured)
 
 <!-- DECISION_TIME:START -->
-- **ERNow vs the usual search** ("ER near me", pick the closest): **15 s in ERNow vs 20 s**, and ERNow also shows the usually quickest ER (5 participants). The quick search only finds the closest ER, which isn't the fastest overall from 83% of Boston locations (typically ~1h 38m longer in the ED for a non-emergency).
+- **ERNow vs the usual search** ("ER near me", pick the closest): **15 s in ERNow (1 participant) vs 20 s for the search (5 participants)**, and ERNow also shows the usually quickest ER. The quick search only finds the closest ER, which isn't the fastest overall from 83% of Boston locations (typically ~1h 38m longer in the ED for a non-emergency).
 - **Information ERNow assembles:** gathering the same facts by hand (each ER's ED time and drive time) took 6 min 21 s (1 participant).
 
 Timed with `python timing_test.py` (protocol in `TIMING_TEST.md`).
@@ -100,6 +100,8 @@ Run year by year, ERNow's promotion rule averaged **12.8 min** error vs **12.9 m
 - **Type of emergency:** General (default) or Eye, ear, nose, or throat, which puts Mass Eye and Ear, the specialist ED, first
 - **Other Boston emergency departments:** Mass Eye and Ear, Boston Children's, and VA Boston West Roxbury, each labeled with who it serves, with drive time (and a forecast range where CMS publishes ED times)
 - **Your location is remembered** for the visit, so switching pages doesn't ask again
+- **Your doctors' hospital system (optional):** pick Mass General Brigham, Beth Israel Lahey Health, Boston Medical Center Health System, or Tufts Medicine to tag its ERs and see the quickest one in your system, since records follow you within a system. Ranking stays time-based
+- **Insurance, answered:** every ER must treat you (EMTALA), and emergency care is billed at in-network cost-sharing even out of network (No Surprises Act), so insurance isn't a reason to skip the quickest ER
 - **All 7 Boston ERs**, sorted by closest (default) or fastest overall, each with:
   - typical ED visit (arrival to leaving) with a tested range, and how it compares with 25 similar U.S. hospitals
   - drive time, drive + typical visit, chance it's the fastest (4,000 simulated trips), and how often patients left before being seen (CMS OP-22, 2024)
@@ -130,6 +132,7 @@ streamlit run app.py
 - **Traffic-aware drive times:** today's routes exclude live traffic.
 - **More cities:** the national model already covers every U.S. hospital; the next step is the city layer.
 - **Live hospital data:** if hospitals publish current waits, ERNow's cards can switch from typical to live.
+- **Urgent care for minor problems** and **MBTA transit times** as additional ways to decide.
 
 ## Stack
 
