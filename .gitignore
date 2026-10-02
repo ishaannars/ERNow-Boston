@@ -2,3 +2,7 @@ __pycache__/
 *.pyc
 .DS_Store
 data/cms_archives/*.zip
+
+# Expanded research prediction caches: rebuild with research scripts.
+data/expanded_oof_predictions.csv.gz
+data/final_accuracy_oof_predictions.csv.gz
