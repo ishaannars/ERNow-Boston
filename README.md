@@ -133,6 +133,10 @@ streamlit run app.py
 
 The original CMS archive ZIPs are not in this checkout. The audit reproduces the saved panel’s statistics; it does not independently reconstruct the entire national panel from raw archives. Retraining and updating saved forecasts are manual.
 
+## Ensemble experiment
+
+A [chronological experiment](research/README.md) tested 35 blends of the four existing models. Across five later evaluation releases, blends slightly improved county selection but increased hospital-median error (12.38 vs 12.26 minutes) while improving Boston median error (16.33 vs 17.63 minutes) without changing the Boston ranking under assumed driving. Production retains Persistence; the UI and consumer forecasts are unchanged. Full results and reproduction commands are in the research report.
+
 ## Coming next
 
 - Calibrate the simulation shares against future hospital-median rankings.

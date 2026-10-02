@@ -19,3 +19,7 @@ All four final-test models and seven rolling historical folds were refitted from
 ## Direction
 
 Use ACCURACY_ROADMAP.md as the research and evidence plan. Improve decision-focused ranking, test ensembles with chronological out-of-sample predictions, restore raw source provenance, and acquire appropriate outcomes before claiming individual or live accuracy. Do not fabricate gains, add heuristic time multipliers, average models without validation, or equate predictive hospital medians with clinical suitability. Preserve a reproducible benchmark and prospectively evaluate future releases.
+
+## Completed ensemble experiment
+
+`research/README.md` documents 35 convex combinations of the four base models with chronological weight selection. Five evaluated later folds: blends slightly improved county shortest-median selection but increased MAE (12.38 vs 12.26 min); Boston median MAE improved (16.33 vs 17.63 min), but the assumed-drive grid gave no ranking separation. The joint promotion gate returned Persistence for a future candidate. Production and the UI were kept unchanged. This is retrospective evidence, not proof no ensemble can ever help.
