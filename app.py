@@ -479,12 +479,12 @@ def render_home():
         vals_lm = {m["model"]: m["validation_MAE"] for m in national["models"]}
         best_gain = (vals_lm["Persistence baseline"] - vals_lm[national["best_learned_model"]]) / vals_lm["Persistence baseline"]
         live = [
-            ("Hospital median visit", "Latest reported median", f"Persistence selected: best challenger improved selection-release error by {best_gain:.1%}, below the {national['promotion_margin']:.0%} rule."),
-            ("The range on each card", f"{iv['test_coverage']:.0%} held true", "Held-out hospital medians, not individual visits (target 80%)."),
+            ("Hospital median visit", "Latest reported median" if national["selected_model"] == "Persistence baseline" else "Selected model forecast", f"Selected: {national['selected_model']}. Challenger validation gain {best_gain:.1%}; promotion threshold {national['promotion_margin']:.0%}."),
+            ("The range on each card", f"{iv['test_coverage']:.0%} median coverage", "Held-out hospital medians, not individual visits (target 80%)."),
             ("Vs similar hospitals", "25 look-alikes", "Matched on ED size, type, ownership, rating, and case mix."),
             ("Fastest in simulation", "4,000 scenarios", "Drive + uncertain hospital medians; percentages not yet calibrated."),
         ]
-        techniques = ["Method: persistence", "Method: conformal ranges", "Method: nearest neighbors", "Method: trip simulation"]
+        techniques = [f"Method: {national['selected_model']}", "Method: conformal ranges", "Method: nearest neighbors", "Method: trip simulation"]
         ds = decision_summary()
         measured = ""
         if "ernow" in ds and "quick" in ds:
@@ -500,7 +500,7 @@ def render_home():
       <div class="live-head"><span class="model-dot"></span><span class="live-title">4 methods behind the comparison</span></div>
       {measured}
       <div class="live-meta">{sp['hospitals']:,} U.S. hospitals · {sp['total_rows']:,} labeled release pairs · CMS {html.escape(national['releases'][0][:4])}–{html.escape(national['releases'][-1][:4])} ·
-      on a held-out release, selected the shortest observed median in {rk['local_groups']} counties {rk['fastest_pick_accuracy']:.0%} of the time vs {rk['fastest_pick_random_baseline']:.0%} by chance</div>
+      hospital-median error {next(m['MAE'] for m in national['models'] if m['model'] == national['selected_model']):.1f} min · on a held-out release, selected the shortest observed median in {rk['local_groups']} counties {rk['fastest_pick_accuracy']:.0%} of the time vs {rk['fastest_pick_random_baseline']:.0%} by chance</div>
       <div class="live-grid">{tiles}</div>
     </div>""",
             unsafe_allow_html=True,
@@ -722,7 +722,7 @@ def render_home():
       <div class="er-tags"><span class="rank-chip">#{pos}</span>{tags}{flag}</div>
       <div class="er-head"><span class="er-title">{html.escape(str(row['hospital']))}</span></div>
       <div class="er-system">{html.escape(str(sys_map.get(row['hospital'], '')))}</div>
-      <div class="er-wait-label" title="Forecast range for a hospital median, not an individual visit. Latest CMS reporting period ends {row['visit_period_end']}.">Median ED visit · forecast range</div><div class="er-wait">{visit_range}</div>{peer}
+      <div class="er-wait-label" title="Forecast range for a hospital median, not an individual visit. Latest CMS reporting period ends {row['visit_period_end']}.">Forecast median {fmt_minutes(row["visit_mid"])} · target-80% range</div><div class="er-wait">{visit_range}</div>{peer}
       <div class="er-stats">
         <div class="er-stat"><div class="er-stat-k">Drive</div><div class="er-stat-v">{drive} <span>{drive_sub}</span></div></div>
         <div class="er-stat"><div class="er-stat-k">Drive + typical visit</div><div class="er-stat-v">{total}</div></div>
@@ -748,7 +748,7 @@ def render_home():
             dist = f"{route['miles']:.1f} mi" if route else ""
             fc = fc_map.get(str(o.get("cms_provider_id") or "").split(".")[0].zfill(6), {})
             if fc:
-                visit_k, visit_v = "Hospital median visit · forecast range", fmt_range(fc["lo80"], fc["hi80"])
+                visit_k, visit_v = f"Forecast median {fmt_minutes(fc['forecast_op18b'])} · target-80% range", fmt_range(fc["lo80"], fc["hi80"])
                 visit_class = "er-wait er-wait-sm"
             else:
                 visit_k, visit_v = "Typical ED visit", "No public ED-time data"

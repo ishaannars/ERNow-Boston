@@ -22,6 +22,10 @@ Checked October 2, 2026. This distinguishes primary-source checks from reproduct
 - **Timing CSV:** ERNow median 9 seconds (5 participants), nearest-search median 20 seconds (5), full manual comparison 381 seconds (1). These are recorded convenience-sample results, without timestamps or starting locations, not an independently observed controlled trial.
 - **Geographic calculation:** rerunning `boston_choice_analysis.py` after address corrections gives 2,001 grid points, 83.41% closest/lowest-total disagreement, median estimated difference 98.34 minutes, extra driving 13.39 minutes. Sensitivity spans 75.36%–83.41%. The grid extends outside Boston city boundaries. Travel is assumed from distance, not measured trips or live traffic.
 
+## Consumer integration
+
+`python scripts/verify_consumer_outputs.py` renders the home page with deterministic routes and checks that all eight saved forecast medians and ranges appear in their correct hospital cards, totals use the point forecast, peer differences match saved outputs, and the lowest-total badge follows the selected forecast. It also checks missing-route behavior. The consumer summary reads the selected model and its held-out error from saved results, rather than hard-coding which model won. All candidate models are evaluated; only the selected point model is used for totals, alongside conformal ranges, peer matching, and simulation shares.
+
 ## Claims corrected or qualified
 
 - “Gets you seen/home fastest” is replaced by comparisons of estimated drive plus hospital medians. Clinical appropriateness and individual outcomes are not evaluated.
