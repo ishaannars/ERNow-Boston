@@ -1060,6 +1060,10 @@ hr, [data-testid="stDivider"] {margin:.55rem 0 .35rem !important}
 .live-tile{display:flex !important;flex-direction:column !important}
 .live-tile .live-c{flex:1 1 auto}
 .live-tile .live-t{margin-top:auto !important;padding-top:.35rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.er-system{font-size:.72rem;color:var(--soft-ink);margin:-.25rem 0 .35rem}
+.er-head{min-height:2.3em !important}
+[data-testid="stSelectbox"]:has(input[aria-label*="hospital system"]){margin-top:.1rem}
 </style>
 """, unsafe_allow_html=True)
 
@@ -1157,9 +1161,16 @@ def render_home():
     # General EDs are compared and ranked; specialty, pediatric, and VA EDs serve specific patients
     # and are shown separately so no one is sent to an ED that can't treat them.
     status_slot = st.empty()
-    em_type = st.radio("Type of emergency", ["General", "Eye, ear, nose, or throat"], index=0, horizontal=True,
-                       key="emergency_type", help="Eye, ear, nose, or throat brings in Mass Eye and Ear, the specialist ED.")
+    sel_l, sel_r = st.columns([1, 1])
+    with sel_l:
+        em_type = st.radio("Type of emergency", ["General", "Eye, ear, nose, or throat"], index=0, horizontal=True,
+                           key="emergency_type", help="Eye, ear, nose, or throat brings in Mass Eye and Ear, the specialist ED.")
+    SYSTEMS = ["Any", "Mass General Brigham", "Beth Israel Lahey Health", "Boston Medical Center Health System", "Tufts Medicine"]
+    with sel_r:
+        my_system = st.selectbox("Your doctors' hospital system (optional)", SYSTEMS, index=0, key="my_system",
+                                 help="Your records follow you within a system. ERNow still ranks by time, and shows the quickest ER in your system.")
     focus = "specialty" if em_type != "General" else None
+    sys_map = dict(zip(df_all["hospital"], df_all.get("health_system", pd.Series([""] * len(df_all)))))
     general = df_all[df_all["ed_type"] == "general"]
     # Eye/ENT: Mass Eye and Ear has public ED-time data, so it joins the full comparison.
     df = (pd.concat([general, df_all[df_all["ed_type"] == "specialty"]]) if focus == "specialty" else general).reset_index(drop=True)
@@ -1227,16 +1238,34 @@ def render_home():
                     f"{html.escape(str(closest['hospital']))} (~{fmt_minutes(closest['route_time_min'])} away), "
                     f"even after {fmt_minutes(max(extra, 0))} more driving." if net > 0 else
                     f"About the same total time as the closest ER, {html.escape(str(closest['hospital']))}.")
+        if my_system != "Any":
+            in_sys = ranked[ranked["hospital"].map(sys_map) == my_system]
+            in_sys = in_sys[in_sys["route_ok"]].sort_values("access_mid")
+            if sys_map.get(best["hospital"]) == my_system:
+                note += f" It's in your system ({html.escape(my_system)})."
+            elif len(in_sys):
+                q = in_sys.iloc[0]
+                diff = (q["route_time_min"] + q["visit_mid"]) - (best["route_time_min"] + best["visit_mid"])
+                note += (f" Quickest in your system ({html.escape(my_system)}): <b>{html.escape(str(q['hospital']))}</b>, "
+                         f"usually about {fmt_minutes(max(diff, 0))} longer overall.")
         st.markdown(f'<div class="answer-one"><div class="answer-k">{label}</div>'
                     f'<div class="answer-v">{html.escape(str(best["hospital"]))}</div>{opt_rows(best)}'
                     f'<div class="answer-note">{note}</div></div>', unsafe_allow_html=True)
         st.caption("“Usually” means typical public CMS times, not tonight's queue. Emergency or getting worse? "
                    "Go to the closest ER or call 911.")
+        st.markdown('<div class="note"><strong>Insurance:</strong> every ER must examine and stabilize you regardless of insurance (EMTALA), '
+                    'and emergency care at an out-of-network ER is billed at your in-network cost-sharing (No Surprises Act). '
+                    'Follow-up care after you are stable can depend on your plan.</div>', unsafe_allow_html=True)
 
     st.subheader(f"All {len(ranked)} Boston ERs" + (" for this problem" if focus == "specialty" else ""))
-    sort_by = st.radio("Sort by", ["Closest", "Fastest overall"], index=0, horizontal=True, key="er_sort")
+    sort_opts = ["Closest", "Fastest overall"] + ([f"{my_system} first"] if my_system != "Any" else [])
+    sort_by = st.radio("Sort by", sort_opts, index=0, horizontal=True, key="er_sort")
     if sort_by == "Closest":
         ranked = ranked.sort_values(["route_ok", "route_time_min"], ascending=[False, True]).reset_index(drop=True)
+    elif sort_by.endswith(" first"):
+        # Your system's ERs first, each group ordered by usual total time (drive + typical visit)
+        ranked = ranked.assign(_in=ranked["hospital"].map(sys_map) == my_system)
+        ranked = ranked.sort_values(["_in", "route_ok", "access_mid"], ascending=[False, False, True]).drop(columns="_in").reset_index(drop=True)
     if specialist is not None:   # the eye/ENT specialist leads when that's the emergency
         ranked = pd.concat([ranked[ranked["hospital"] == specialist["hospital"]],
                             ranked[ranked["hospital"] != specialist["hospital"]]]).reset_index(drop=True)
@@ -1253,6 +1282,8 @@ def render_home():
             tags += '<span class="best-label">Eye &amp; ENT specialist</span>'
         if row["hospital"] == fastest["hospital"]:
             tags += '<span class="best-label">Usually quickest</span>'
+        if my_system != "Any" and sys_map.get(row["hospital"]) == my_system:
+            tags += '<span class="closest-label">Your system</span>'
         has_fc = pd.notna(row.get("visit_mid"))
         visit_range = (fmt_range(row["visit_lo"], row["visit_hi"]) if has_fc
                        else fmt_range(row["modeled_wait_low"], row["modeled_wait_high"]))
@@ -1282,6 +1313,7 @@ def render_home():
         cards.append(f"""<div class="er-card{top}">
       <div class="er-tags"><span class="rank-chip">#{pos}</span>{tags}{flag}</div>
       <div class="er-head"><span class="er-title">{html.escape(str(row['hospital']))}</span></div>
+      <div class="er-system">{html.escape(str(sys_map.get(row['hospital'], '')))}</div>
       <div class="er-wait-label">Typical ED visit · tested range</div><div class="er-wait">{visit_range}</div>{peer}
       <div class="er-stats">
         <div class="er-stat"><div class="er-stat-k">Drive</div><div class="er-stat-v">{drive} <span>{drive_sub}</span></div></div>
@@ -1317,6 +1349,7 @@ def render_home():
             ocards.append(f"""<div class="er-card er-other">
       <div class="er-tags"><span class="closest-label">{html.escape(tag_names.get(o['ed_type'], 'Restricted'))}</span></div>
       <div class="er-head"><span class="er-title">{html.escape(str(o['hospital']))}</span></div>
+      <div class="er-system">{html.escape(str(o.get('health_system') or ''))}</div>
       <div class="er-peer" style="margin:.1rem 0 .35rem">{html.escape(str(o.get('who_for') or ''))}</div>
       <div class="er-wait-label">{visit_k}</div><div class="er-wait er-wait-sm">{visit_v}</div>
       <div class="er-stats">
@@ -1479,6 +1512,8 @@ def render_methodology():
     - **Drive + typical visit:** the two added together, which is how ERNow ranks "usually quickest" (the expected total, not a guarantee).
     - **Chance fastest:** how often this ER came out quickest across 4,000 simulated trips (a trip simulation, known in statistics as Monte Carlo, using each ER's range plus your drive).
     - **Left before seen (2024):** the share of patients who left before being seen (CMS OP-22). A high number signals long waits.
+    - **Hospital system:** the network each ER belongs to. If you pick your doctors' system, ERNow tags its ERs and names the quickest one in it, because records follow you within a system. Ranking stays time-based.
+    - **Insurance:** not a ranking factor. Every ER must treat you (EMTALA), and emergency care is billed at in-network cost-sharing even out of network (No Surprises Act).
     """)
     st.caption("Sort by Closest (the default) or by Fastest overall (drive + typical visit). ERs without a route are listed last. "
                "For an eye, ear, nose, or throat emergency, choosing that type of emergency adds Mass Eye and Ear to the comparison.")
@@ -1499,6 +1534,7 @@ def render_methodology():
         ["Case complexity (peers)", "CMS Complications & Deaths (patient volumes)", "Latest release", "Heart-attack/stroke volume, cardiac surgery, inpatient volume"],
         ["Hospital utilization", "CHIA Hospital Profiles", "HFY 2024", "Annual ED visits and inpatient occupancy (context)"],
         ["Left before being seen", "CMS Hospital Compare OP-22", "2024", "Shown on each ER card"],
+        ["Hospital system", "Each health system's public hospital list", "Current", "Shown on each card; optional 'your system' filter"],
         ["Provider wait", "CMS Hospital Compare OP-20 (no longer published)", "2019 or earlier", "Context table on the Forecast Model page only"],
         ["Weather", "National Weather Service", "Current observation + alerts", "Boston-wide context"],
         ["Respiratory illness", "CDC Massachusetts ARI", "Latest reporting week", "Statewide context"],
