@@ -2,7 +2,7 @@
 
 **For urgent, non-life-threatening visits: find the ER that gets you seen and home fastest, not just the closest, in about 15 seconds.**
 
-Live ER wait times could be years away. ERNow brings ER transparency to Boston now: models built on 4,438 U.S. hospitals predict which ER will usually get you in and out fastest, drive included.
+Live ER wait times could be years away. ERNow brings ER transparency to Boston now: models built on 4,438 U.S. hospitals predict which ER will usually get you in and out fastest.
 
 Today people search "ER near me" and go to the closest one, with no information about the ED itself. From 83% of Boston locations, that isn't the ER that would get them seen and home fastest. Hospitals don't publish live waits, but ERNow doesn't need them to help: a hospital's ED time predicts next year's with R² 0.93 across 4,000+ U.S. hospitals. ERNow assembles CMS, CHIA, the CDC, the Weather Service, and road routing into one screen, labels every number by source and period, and is built so live hospital data can plug in the day it exists.
 
@@ -47,7 +47,7 @@ Tesla's real achievement wasn't a faster car. It pulled a needed but slow-arrivi
 ## Decision time (measured)
 
 <!-- DECISION_TIME:START -->
-- **ERNow vs the usual search** ("ER near me", pick the closest): **15 s in ERNow vs 45 s**, and ERNow also shows the likely fastest ER (1 participant). The quick search only finds the closest ER, which isn't the fastest overall from 83% of Boston locations (typically ~1h 38m longer in the ED for a non-emergency).
+- **ERNow vs the usual search** ("ER near me", pick the closest): **15 s in ERNow vs 20 s**, and ERNow also shows the usually quickest ER (5 participants). The quick search only finds the closest ER, which isn't the fastest overall from 83% of Boston locations (typically ~1h 38m longer in the ED for a non-emergency).
 - **Information ERNow assembles:** gathering the same facts by hand (each ER's ED time and drive time) took 6 min 21 s (1 participant).
 
 Timed with `python timing_test.py` (protocol in `TIMING_TEST.md`).
@@ -96,9 +96,10 @@ Run year by year, ERNow's promotion rule averaged **12.8 min** error vs **12.9 m
 
 ## What the app shows
 
-- **Your two best options:** the closest ER and the ER likely to be fastest overall, side by side with the same three facts (drive, typical ED visit, drive + visit), plus how much sooner you're typically done at the faster one, after its extra drive
-- **Eye, ear, nose, or throat emergency switch:** turning it on adds Mass Eye and Ear to the full comparison. Boston Children's and VA Boston West Roxbury are always shown in their own section, labeled with who they serve
+- **Your best option:** the ER that usually gets you in and out fastest (drive + typical visit), with how much sooner you're typically done than at the closest ER. If the closest ER is also the quickest, it says so
+- **Type of emergency:** General (default) or Eye, ear, nose, or throat, which puts Mass Eye and Ear, the specialist ED, first
 - **Other Boston emergency departments:** Mass Eye and Ear, Boston Children's, and VA Boston West Roxbury, each labeled with who it serves, with drive time (and a forecast range where CMS publishes ED times)
+- **Your location is remembered** for the visit, so switching pages doesn't ask again
 - **All 7 Boston ERs**, sorted by closest (default) or fastest overall, each with:
   - typical ED visit (arrival to leaving) with a tested range, and how it compares with 25 similar U.S. hospitals
   - drive time, drive + typical visit, chance it's the fastest (4,000 simulated trips), and how often patients left before being seen (CMS OP-22, 2024)
@@ -124,7 +125,9 @@ streamlit run app.py
 
 ## Coming next
 
-- **Respiratory-surge forecast:** replace the fixed illness adjustment with a 1–2 week forecast of Massachusetts respiratory ED share, with tested accuracy.
+- **Respiratory-surge forecast:** a tested 1–2 week forecast of Massachusetts respiratory ED demand (today, weather and illness are shown as context only).
+- **Calibrate "chance fastest":** check that when it says 70%, that ER really is quickest about 70% of the time.
+- **Traffic-aware drive times:** today's routes exclude live traffic.
 - **More cities:** the national model already covers every U.S. hospital; the next step is the city layer.
 - **Live hospital data:** if hospitals publish current waits, ERNow's cards can switch from typical to live.
 

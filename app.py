@@ -1309,7 +1309,7 @@ def render_home():
             dist = f"{route['miles']:.1f} mi" if route else ""
             fc = fc_map.get(str(o.get("cms_provider_id") or "").split(".")[0].zfill(6), {})
             if fc:
-                visit_k, visit_v = "Typical ED visit, arrival to leaving · tested range", fmt_range(fc["lo80"], fc["hi80"])
+                visit_k, visit_v = "Typical ED visit · tested range", fmt_range(fc["lo80"], fc["hi80"])
             else:
                 visit_k, visit_v = "Typical ED visit", "No public ED-time data"
             url = ("https://www.google.com/maps/dir/?api=1"
@@ -1432,7 +1432,7 @@ def render_methodology():
         if "quick" in ds:
             share = (f" From {ch['closest_not_fastest_share']:.0%} of Boston locations, the closest isn't the fastest overall." if choice_path.exists() else "")
             cards.append(("ERNow vs the usual search", f'{e} vs {fmt_seconds(ds["quick"]["median_seconds"])}',
-                          f'"ER near me" finds only the closest ER. ERNow is faster and also shows the likely fastest one.{share}'))
+                          f'"ER near me" finds only the closest ER. ERNow is faster and also shows the usually quickest one.{share}'))
         if "full" in ds:
             cards.append(("Information ERNow assembles", f'{fmt_seconds(ds["full"]["median_seconds"])} by hand',
                           "Gathering each ER's ED time and drive time by hand takes minutes; ERNow shows them on one screen."))
@@ -1645,7 +1645,9 @@ def render_forecast_model():
             ], columns=["Result on the final test year", "Estimate", "95% confidence interval"])
             _table(ct)
             st.caption(f"Bootstrap with {cf['resamples']:,} resamples (hospitals for errors and coverage, counties for fastest-pick). "
-                       "The best challenger's edge is real but tiny, seconds on a 3–5 hour visit, and it missed the 2% bar on validation, so Persistence stays.")
+                       + ("The best challenger's edge is real but tiny, seconds on a 3–5 hour visit," if lo_g > 0 else
+                          "The best challenger's edge is not distinguishable from zero (its interval includes 0),")
+                       + " and it missed the 2% bar on validation, so Persistence stays.")
 
         bt = national.get("boston_backtest", {})
         if bt.get("hospitals"):
@@ -1700,7 +1702,7 @@ def render_forecast_model():
         if forecast is not None:
             forecast = forecast.sort_values("forecast_op18b").reset_index(drop=True)
             bf = pd.DataFrame({
-                "Hospital": forecast["hospital"],
+                "Hospital": forecast["hospital"].replace({"Mass Eye and Ear": "Mass Eye and Ear (eye & ENT only)"}),
                 "Latest ED visit": forecast["latest_op18b"].map(fmt_minutes),
                 "Forecast (80% range)": [f"{fmt_minutes(a)} ({fmt_minutes(l)}–{fmt_minutes(h)})" for a, l, h in
                                          zip(forecast["forecast_op18b"], forecast["lo80"], forecast["hi80"])],
@@ -1712,6 +1714,7 @@ def render_forecast_model():
             _table(bf)
             st.caption(f"Latest period ends {forecast['period_end'].iloc[0]}. Peers are the 25 most similar U.S. hospitals by ED volume, type, ownership, star rating, and case complexity.")
             base = pd.read_csv(HOSPITAL_DATA)
+            base = base[base["recent_ed_visits"].notna() | base["legacy_wait_to_provider_min"].notna()]
             ctx = pd.DataFrame({"Hospital": base["hospital"],
                                 "ED visits, HFY 2024": base["recent_ed_visits"].map(lambda v: "—" if pd.isna(v) else f"{int(v):,}"),
                                 "Inpatient occupancy, HFY 2024": base["recent_occupancy_pct"].map(lambda v: "—" if pd.isna(v) else f"{v:.1f}%"),

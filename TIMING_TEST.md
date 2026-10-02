@@ -2,7 +2,7 @@
 
 **Easiest way:** run `python timing_test.py`. It walks you through both runs with a built-in stopwatch, saves the times, and writes the result into the README. The steps below are the same protocol, if you'd rather time it by hand.
 
-Measures the headline claim: ERNow gives a better ER choice (closest **and** likely fastest) faster than the usual "ER near me" search.
+Measures the headline claim: ERNow gives a better ER choice (closest **and** usually quickest) faster than the usual "ER near me" search.
 
 ## Setup (once)
 - Pick one starting address and use it for every run (for example, your apartment).
