@@ -1,44 +1,43 @@
 # ERNow Boston — Model Card
 
 ## Purpose
-For urgent, non-life-threatening visits, help people find the Boston ER that usually gets them in and out fastest, not just the closest, in about 10 seconds, by forecasting each hospital's typical ED visit time for the next CMS period with a tested range. This works without live data because ED performance is highly persistent year to year (R² 0.93). Not a live queue and not medical advice.
+Compare estimated driving time plus forecasts of hospital-level median ED visits for Boston EDs. This is historical performance, not a live queue, clinical recommendation, time to first clinician, or an individual visit forecast.
 
-## Target
-Next-release CMS **OP-18b**: median minutes from ED arrival to departure for discharged patients, per hospital.
+## Target and data
+Next-release CMS OP-18b: median arrival-to-departure minutes for eligible discharged visits, excluding psychiatric/mental-health and transferred patients. Ten saved releases (Oct 2017–Aug 2026) contain 4,438 hospitals with 35,164 labeled release pairs. Coverage is eligible reporting hospitals, not every U.S. hospital.
 
-## Data
-Ten CMS Hospital Compare releases (2017-10 to 2026-08), every U.S. hospital: 4,438 hospitals and 35,164 labeled hospital-periods. Inputs come only from releases available before the period being predicted.
-
-## Features
-Last and prior OP-18b, most recent change, psychiatric-patient ED time (OP-18c), left without being seen (OP-22), ED volume category, CMS star rating, hospital type, ownership, state, gap to state average, gap to peer (volume × type) average. OP-18a and OP-18d appear only in the newest release and are excluded.
-
-## Models compared
-Persistence baseline · Ridge regression (on the change) · robust partial pooling (shrinkage toward state and peer averages, least-absolute-error fit) · gradient boosting (on the change).
+## Features and models
+Latest and preceding OP-18b, change, OP-18c, OP-22, ED-volume category, star rating, type, ownership, state, and gaps to state/peer means. Candidates: Persistence, Ridge on the change, robust partial pooling, and gradient boosting. Point forecasting currently uses Persistence.
 
 ## Validation
-Chronological: train on all earlier releases, select on the second-newest year, test once on the newest (4,017 hospitals), plus a rolling year-by-year backtest over 7 held-out years. Promotion rule: a learned model must beat Persistence MAE by 2% on validation.
+Train on earlier releases; choose on the penultimate saved transition; evaluate on the last. Promote a challenger only if validation MAE improves by at least 2%. Reporting windows can overlap and are published after the observed periods; this is a retrospective release-based evaluation. Two early panel transitions skip a release because the hospital lacks a row; neither occurs in the final test transition.
+
+## Intervals and simulation
+Regime-adaptive conformalized quantile regression targets 80% coverage of hospital medians. Empirical rolling coverage is 55–97%; adaptive scaling and temporal dependence do not provide a guarantee for each future release or hospital. Deployment refits on earlier labeled data and calibrates on the latest completed transition; coverage of the next release remains unknown.
+
+Simulation draws independent lognormal hospital-median scenarios centered on the point forecast, with spread approximated from the log ratio of the interval bounds. Asymmetric bounds are not matched exactly. Shares are uncalibrated and are not probabilities for individual visit lengths.
 
 ## Results
 
 Written automatically by `national_model.py`:
 
 <!-- MODEL_RESULTS:START -->
-Trained and tested on **every U.S. hospital** in 10 CMS Hospital Compare releases (2017–2026): **4,438 hospitals, 35,164 hospital-periods**, then applied to Boston's general emergency departments.
+Trained and tested on **eligible reporting U.S. hospitals** in 10 CMS Hospital Compare releases (2017–2026): **4,438 hospitals, 35,164 labeled release pairs**, then applied to Boston's general emergency departments. Targets are published hospital medians, not individual visit lengths.
 
-**Final test year** (4,017 held-out hospitals; chosen on the year before, scored once):
+**Final test release** (4,017 held-out hospitals; selected on the preceding release, scored once):
 
-| Model | Selection-year MAE | Test-year MAE | Test R² |
+| Model | Selection-release MAE | Test-release MAE | Test R² |
 |---|---|---|---|
 | Partial pooling (nudged toward similar hospitals) | 11.6 min | 9.4 min | 0.933 |
-| Persistence (last year's value) | 11.8 min | 9.4 min | 0.931 |
+| Persistence (latest reported value) | 11.8 min | 9.4 min | 0.931 |
 | Gradient boosting | 12.6 min | 10.3 min | 0.924 |
 | Ridge regression | 13.0 min | 10.7 min | 0.918 |
 
-The best challenger, Partial pooling (nudged toward similar hospitals), was 1.7% better in the selection year, short of the 2% bar, so ERNow uses **Persistence (last year's value)**. Ranges: **85%** of 80% ranges held the true value (95% CI 84%–86%), median width 34 min. Picked the actual fastest local ER **83%** of the time (95% CI 78%–87%) vs **24%** by chance across 293 local areas.
+The best challenger, Partial pooling (nudged toward similar hospitals), was 1.7% better in the selection year, short of the 2% bar, so ERNow uses **Persistence (latest reported value)**. Ranges: **85%** of target-80% ranges contained the observed hospital median (95% CI 84%–86%), median width 34 min. Selected the shortest observed hospital median **83%** of the time (95% CI 78%–87%) vs **24%** by chance across 293 counties with at least three eligible hospitals; drive time excluded.
 
 **Year by year (rolling backtest: each year trained only on earlier years):**
 
-| Held-out release | Persistence MAE | Best challenger MAE | ERNow's rule used | 80% range coverage | Fastest-pick |
+| Held-out release | Persistence MAE | Best challenger MAE | ERNow's rule used | Median range coverage | Persistence county pick |
 |---|---|---|---|---|---|
 | 2020-10 | 11.1 min | 10.8 min | — | 81% | 75% |
 | 2021-10 | 15.9 min | 15.4 min | Ridge regression | 66% | 71% |
@@ -52,10 +51,12 @@ Run year by year, ERNow's promotion rule averaged **12.8 min** error vs **12.9 m
 <!-- MODEL_RESULTS:END -->
 
 ## Intended use and limits
-- Describes typical ED performance for a period, published 9–12 months after it ends; it cannot see today's queue, triage, staffing, or boarding.
-- OP-18b covers discharged patients only; academic and trauma centers treat sicker patients and run longer for reasons that do not mean worse care.
-- Peer comparisons adjust for case complexity with public proxies (heart-attack and stroke patient volume, cardiac-surgery capability, inpatient volume), not each patient's severity.
-- The cards show CMS OP-22 (left before being seen, 2024) as a crowding signal. CMS OP-20 provider wait (2019 or earlier) appears only as context on the Forecast Model page. No hand-set adjustment changes any displayed number.
+- Observed 9.42-minute MAE and R² 0.931 describe hospital medians; they do not bound patient-level errors.
+- County selection accuracy excludes driving time, clinical suitability, and patient outcomes. Rolling county-pick figures evaluate Persistence rather than the separate deployment rule.
+- Proxy peers do not fully control clinical severity. Longer visits do not establish worse care.
+- OP-22 refers to 2024. CHIA HFY 2024 utilization and current context do not alter forecasts or ranking.
+- Route estimates use approximate coordinates, exclude traffic/parking, and omit missing routes from simulation comparisons.
+- Raw archive ZIPs are absent from this checkout. See CLAIMS_AUDIT.md for verification scope.
 
 ## Retraining
-Add a new CMS release archive to `data/cms_archives/` and run `python national_model.py`. The app reads the regenerated results.
+Add a new CMS archive and run `python national_model.py`. Updates are manual. Run `python scripts/verify_claims.py --refit` to audit saved metrics and Boston interval bounds.

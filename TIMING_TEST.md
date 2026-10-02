@@ -2,7 +2,7 @@
 
 **Easiest way:** run `python timing_test.py`. It walks you through both runs with a built-in stopwatch, saves the times, and writes the result into the README. The steps below are the same protocol, if you'd rather time it by hand.
 
-Measures the headline claim: ERNow gives a better ER choice (closest **and** usually quickest) faster than the usual "ER near me" search.
+Records how long participants take to choose an ER with ERNow, a nearest-ER search, or a full manual comparison. The saved convenience sample does not establish clinical benefit, a universally better choice, or a population-wide speed improvement.
 
 ## Setup (once)
 - Pick one starting address and use it for every run (for example, your apartment).
@@ -11,7 +11,7 @@ Measures the headline claim: ERNow gives a better ER choice (closest **and** usu
 
 ## Two kinds of manual run
 
-- **Quick search (the headline):** search "ER near me" and pick, the way most people do. ERNow is compared against this, because it's what people actually do.
+- **Quick search (the headline):** search "ER near me" and pick the closest ER, as specified by this protocol. This does not establish how most people search.
 - **Full comparison (supporting):** gather the same information ERNow shows, described below, to show what ERNow assembles.
 
 The script asks which one you're timing. If you already saved a quick search as a manual run, `python timing_test.py --mark-quick` relabels it.
@@ -27,7 +27,7 @@ While you're on each hospital's own website, note whether it posts a live ED wai
 Write the 7 ED times and 7 drive times down, decide where you'd go, then **stop the timer**.
 
 ## ERNow run
-Open https://ernowboston.streamlit.app/, start the timer, enter the same starting address, decide where you'd go, **stop the timer**.
+Open https://ernowboston.streamlit.app/, start the timer, use device location at the same starting point, or select the same supported Boston area, decide where you'd go, **stop the timer**.
 
 ## Record
 Add one line per run to `data/decision_time_results.csv`:
@@ -38,4 +38,4 @@ ishaan,manual,412,Tufts Medical Center
 ishaan,ernow,11,Tufts Medical Center
 ```
 
-Then run `python record_decision_time.py`. It writes the medians and the participant count into the README automatically. More participants make the number stronger; report the count honestly.
+Then run `python record_decision_time.py`. It writes the medians and the participant count into the README automatically. Report sample size, order effects, device/network differences, and participant selection. The current CSV does not store timestamps or starting addresses, so those aspects cannot be audited retrospectively.

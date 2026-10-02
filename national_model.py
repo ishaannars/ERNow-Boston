@@ -637,19 +637,19 @@ def _hm(m):
 def results_markdown(r):
     sp, iv, rk, cf, wf = r["split"], r["intervals"], r["ranking"]["selected"], r["confidence"], r["walk_forward"]
     m = {x["model"]: x for x in r["models"]}
-    plain = {"Persistence baseline": "Persistence (last year's value)", "Ridge regression": "Ridge regression",
+    plain = {"Persistence baseline": "Persistence (latest reported value)", "Ridge regression": "Ridge regression",
              "Partial pooling (shrink toward state & peer means)": "Partial pooling (nudged toward similar hospitals)",
              "Gradient boosting": "Gradient boosting"}
     base, best = m["Persistence baseline"], m[r["best_learned_model"]]
     gain = (base["validation_MAE"] - best["validation_MAE"]) / base["validation_MAE"]
     lines = [
-        f"Trained and tested on **every U.S. hospital** in {len(r['releases'])} CMS Hospital Compare releases "
-        f"({r['releases'][0][:4]}–{r['releases'][-1][:4]}): **{sp['hospitals']:,} hospitals, {sp['total_rows']:,} hospital-periods**, "
-        "then applied to Boston's general emergency departments.",
+        f"Trained and tested on **eligible reporting U.S. hospitals** in {len(r['releases'])} CMS Hospital Compare releases "
+        f"({r['releases'][0][:4]}–{r['releases'][-1][:4]}): **{sp['hospitals']:,} hospitals, {sp['total_rows']:,} labeled release pairs**, "
+        "then applied to Boston's general emergency departments. Targets are published hospital medians, not individual visit lengths.",
         "",
-        f"**Final test year** ({sp['test_rows']:,} held-out hospitals; chosen on the year before, scored once):",
+        f"**Final test release** ({sp['test_rows']:,} held-out hospitals; selected on the preceding release, scored once):",
         "",
-        "| Model | Selection-year MAE | Test-year MAE | Test R² |",
+        "| Model | Selection-release MAE | Test-release MAE | Test R² |",
         "|---|---|---|---|",
     ]
     for x in sorted(r["models"], key=lambda x: x["MAE"]):
@@ -657,15 +657,15 @@ def results_markdown(r):
     lines += ["",
               f"The best challenger, {plain.get(r['best_learned_model'], r['best_learned_model'])}, was {gain:.1%} better in the selection year, "
               f"{'clearing' if r['learned_model_promoted'] else 'short of'} the {r['promotion_margin']:.0%} bar, so ERNow uses "
-              f"**{plain.get(r['selected_model'], r['selected_model'])}**. Ranges: **{iv['test_coverage']:.0%}** of 80% ranges held the true value "
+              f"**{plain.get(r['selected_model'], r['selected_model'])}**. Ranges: **{iv['test_coverage']:.0%}** of target-80% ranges contained the observed hospital median "
               f"(95% CI {iv.get('test_coverage_ci95', [0, 0])[0]:.0%}–{iv.get('test_coverage_ci95', [0, 0])[1]:.0%}), "
-              f"median width {_hm(iv['median_width_min'])}. Picked the actual fastest local ER **{rk['fastest_pick_accuracy']:.0%}** of the time "
+              f"median width {_hm(iv['median_width_min'])}. Selected the shortest observed hospital median **{rk['fastest_pick_accuracy']:.0%}** of the time "
               f"(95% CI {cf['fastest_pick_ci95'][0]:.0%}–{cf['fastest_pick_ci95'][1]:.0%}) vs **{rk['fastest_pick_random_baseline']:.0%}** by chance "
-              f"across {rk['local_groups']} local areas.",
+              f"across {rk['local_groups']} counties with at least three eligible hospitals; drive time excluded.",
               "",
               "**Year by year (rolling backtest: each year trained only on earlier years):**",
               "",
-              "| Held-out release | Persistence MAE | Best challenger MAE | ERNow's rule used | 80% range coverage | Fastest-pick |",
+              "| Held-out release | Persistence MAE | Best challenger MAE | ERNow's rule used | Median range coverage | Persistence county pick |",
               "|---|---|---|---|---|---|"]
     for y in r["rolling"]:
         cov = f"{y['coverage']:.0%}" if y.get("coverage") is not None else "—"

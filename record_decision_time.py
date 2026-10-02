@@ -52,19 +52,13 @@ def readme_text(s):
     lines = []
     if "quick" in s:
         q, n = s["quick"]["median_seconds"], s["quick"]["participants"]
-        tail = ""
-        if CHOICE.exists():
-            ch = json.loads(CHOICE.read_text())
-            tail = (f" The quick search only finds the closest ER, which isn't the fastest overall from "
-                    f"{ch['closest_not_fastest_share']:.0%} of Boston locations (typically ~{hm(ch['median_minutes_saved_when_different'])} "
-                    f"longer in the ED for a non-emergency).")
         ne = s["ernow"]["participants"]
-        lines.append(f"- **ERNow vs the usual search** (\"ER near me\", pick the closest): **{fmt(e)} in ERNow "
-                     f"({ne} participant{'s' if ne != 1 else ''}) vs {fmt(q)} for the search ({n} participant{'s' if n != 1 else ''})**, "
-                     f"and ERNow also shows the usually quickest ER.{tail}")
+        lines.append(f"- **Recorded decision times** (\"ER near me\", pick the closest): **{fmt(e)} in ERNow "
+                     f"({ne} participant{'s' if ne != 1 else ''}) vs {fmt(q)} for the search ({n} participant{'s' if n != 1 else ''})**. "
+                     "Recorded medians from a small convenience sample; the search protocol chooses the nearest ER. This is not a controlled trial or a population-wide speed estimate.")
     if "full" in s:
         f, n = s["full"]["median_seconds"], s["full"]["participants"]
-        lines.append(f"- **Information ERNow assembles:** gathering the same facts by hand (each ER's ED time and drive time) took "
+        lines.append(f"- **Recorded manual comparison:** gathering the same facts by hand (each ER's ED time and drive time) took "
                      f"{fmt(f)} ({n} participant{'s' if n != 1 else ''}).")
     return "\n".join(lines) + "\n\nTimed with `python timing_test.py` (protocol in `TIMING_TEST.md`)."
 
