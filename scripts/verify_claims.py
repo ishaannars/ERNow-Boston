@@ -22,7 +22,7 @@ def close(actual, expected, name, tolerance=1e-6):
         raise AssertionError(f"{name}: recomputed {actual}, saved {expected}")
 
 
-def main(refit=False):
+def main(refit=False, rolling=False):
     results = json.loads((ROOT / 'data/national_results.json').read_text())
     panel = n.load_panel()
     df, snaps = n.make_transitions(panel)
@@ -95,7 +95,45 @@ def main(refit=False):
         print('Held-out interval coverage/width and all eight deployed forecast bounds: PASS', flush=True)
 
 
+    if rolling:
+        checked = []
+        for saved in results['rolling']:
+            k = next(k for k in range(2,last+1) if str(pd.Timestamp(snaps[k+1]).date()) == saved['target_release'])
+            earlier, heldout = labeled[labeled.t < k], labeled[labeled.t == k]
+            close(len(heldout),saved['hospitals'],'rolling hospital count')
+            maes = {}
+            for name, model in n.candidate_models().items():
+                model.fit(earlier)
+                maes[name] = mean_absolute_error(heldout.target,model.predict(heldout))
+                # Linear-solver reductions can differ slightly across BLAS platforms.
+                # Tolerance is well below the displayed 0.01-minute precision.
+                close(maes[name],saved['maes'][name],saved['target_release']+' '+name,tolerance=1e-4)
+            best = min((name for name in maes if name != 'Persistence baseline'),key=maes.get)
+            assert best == saved['best_challenger']
+            close(maes[best],saved['best_challenger_MAE'],'rolling challenger',tolerance=1e-4)
+            close(n.ranking_eval(heldout.assign(pred=heldout.lag1),'pred')['fastest_pick_accuracy'],saved['fastest_pick_accuracy'],'rolling county ranking')
+            if saved.get('coverage') is not None:
+                interval = n.CQR(n.FEATURE_GROUPS['+ geography & peers (full)']).fit(labeled[labeled.t<=k-2],labeled[labeled.t==k-1])
+                lower,upper = interval.predict(heldout)
+                y = heldout.target.to_numpy()
+                close(np.mean((y>=lower)&(y<=upper)),saved['coverage'],'rolling median coverage')
+            checked.append(saved)
+            print(saved['target_release']+' all four models, ranges and ranking: PASS',flush=True)
+        ruled = []
+        for prior,current in zip(checked,checked[1:]):
+            candidate = min((name for name in prior['maes'] if name != 'Persistence baseline'),key=prior['maes'].get)
+            chosen = candidate if prior['maes'][candidate] <= prior['persistence_MAE']*(1-results['promotion_margin']) else 'Persistence baseline'
+            assert chosen == current['rule_model']
+            close(current['maes'][chosen],current['rule_MAE'],'rolling selected error')
+            ruled.append(current)
+        close(np.mean([r['rule_MAE'] for r in ruled]),results['walk_forward']['rule_MAE'],'walk-forward MAE')
+        close(np.mean([r['persistence_MAE'] for r in ruled]),results['walk_forward']['always_persistence_MAE'],'walk-forward baseline MAE')
+        print('All seven historical folds and walk-forward selection: PASS',flush=True)
+
+
 if __name__ == '__main__':
     parser=argparse.ArgumentParser()
     parser.add_argument('--refit',action='store_true')
-    main(parser.parse_args().refit)
+    parser.add_argument('--rolling',action='store_true')
+    args = parser.parse_args()
+    main(args.refit,args.rolling)

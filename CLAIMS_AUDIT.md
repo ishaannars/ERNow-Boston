@@ -13,7 +13,7 @@ Checked October 2, 2026. This distinguishes primary-source checks from reproduct
 
 ## Reproduced from saved project data
 
-`python scripts/verify_claims.py --refit` reproduces panel counts, Persistence errors and R², county rankings, promotion choice, reporting lag, latest Boston medians/OP-22, interval containment, OP-18b/OP-22 correlation, and timing medians. It refits all four candidate models and the interval model, verifying final-test coverage/width, all three bootstrap confidence intervals, and all eight deployed interval bounds.
+`python scripts/verify_claims.py --refit --rolling` reproduces panel counts, Persistence errors and R², county rankings, promotion choice, reporting lag, latest Boston medians/OP-22, interval containment, OP-18b/OP-22 correlation, and timing medians. It refits all four candidate models and the interval model, verifying final-test coverage/width, all three bootstrap confidence intervals, all eight deployed interval bounds, all four models in each of seven rolling historical releases, rolling range coverage/county rankings, and the walk-forward selection rule.
 
 - **4,438 eligible hospitals; 35,164 labeled release pairs; 4,017 final-test hospitals.** The latest saved panel has 4,658 listed records and 4,081 available OP-18b values. These are reporting hospitals, not every U.S. hospital.
 - **Persistence:** MAE 9.4215 minutes, R² 0.93105; county shortest-median accuracy 82.94% across 293 counties versus 24.04% mean random baseline. Driving and patient outcomes are excluded.
@@ -24,7 +24,7 @@ Checked October 2, 2026. This distinguishes primary-source checks from reproduct
 
 ## Consumer integration
 
-`python scripts/verify_consumer_outputs.py` renders the home page with deterministic routes and checks that all eight saved forecast medians and ranges appear in their correct hospital cards, totals use the point forecast, peer differences match saved outputs, and the lowest-total badge follows the selected forecast. It also checks missing-route behavior. The check also verifies navigation preserves session location and preferences, only one navigation button is active, and changing systems leaves a valid sort option. The consumer summary reads the selected model and its held-out error from saved results, rather than hard-coding which model won. All candidate models are evaluated; only the selected point model is used for totals, alongside conformal ranges, peer matching, and simulation shares.
+`python scripts/verify_consumer_outputs.py` renders the home page with deterministic routes and checks that all eight saved forecast medians and ranges appear in their correct hospital cards, totals use the point forecast, peer differences match saved outputs, and the lowest-total badge follows the selected forecast. It also checks missing-route behavior. Methodology now displays every candidate’s final-test MAE/R² and rolling error range, plus a component-to-consumer-output table. The check verifies those metrics appear, and also verifies navigation preserves session location and preferences, only one navigation button is active, and changing systems leaves a valid sort option. The consumer summary reads the selected model and its held-out error from saved results, rather than hard-coding which model won. All candidate models are evaluated; only the selected point model is used for totals, alongside conformal ranges, peer matching, and simulation shares.
 
 ## Claims corrected or qualified
 
@@ -38,7 +38,7 @@ Checked October 2, 2026. This distinguishes primary-source checks from reproduct
 
 ## Remaining limits
 
-Original national CMS archive ZIPs are absent from this checkout. The whole panel, case-complexity proxies, original archive transforms, and every rolling fold have not been independently rebuilt from original archives. The final-model refits, final interval metrics, and all three displayed bootstrap confidence intervals were independently reproduced from the saved panel. Rolling tables remain saved model outputs rather than a fresh full rolling refit.
+Original national CMS archive ZIPs are absent from this checkout. The whole panel, case-complexity proxies, original archive transforms, and every rolling fold have not been independently rebuilt from original archives. The final-model refits, final interval metrics, and all three displayed bootstrap confidence intervals were independently reproduced from the saved panel. All seven rolling folds were freshly refitted from the saved panel and matched the saved results at displayed precision; tiny linear-solver differences across numerical platforms are tolerated below that precision.
 
 The older OP-20 values (2019 or earlier) have not been independently matched to source archives. They remain explicitly labeled historical and unverified, appear only as context, and do not affect ranking.
 
