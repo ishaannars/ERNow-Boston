@@ -14,6 +14,9 @@ import streamlit as st
 from streamlit_geolocation import streamlit_geolocation
 import json
 import numpy as np
+from concurrent.futures import ThreadPoolExecutor
+from threading import current_thread
+from streamlit.runtime.scriptrunner import add_script_run_ctx, get_script_run_ctx
 
 st.set_page_config(page_title="ERNow Boston", page_icon="✚", layout="wide")
 DATA_PATH = Path(__file__).parent / "data" / "boston_er_data.csv"
@@ -125,6 +128,19 @@ def secret_or_env(name):
     return os.getenv(name)
 
 
+def parallel_calls(calls, max_workers=8):
+    """Run independent I/O together, retaining Streamlit's per-session cache context."""
+    if not calls:
+        return []
+    ctx = get_script_run_ctx()
+    def initialize_worker():
+        if ctx is not None:
+            add_script_run_ctx(current_thread(), ctx)
+    with ThreadPoolExecutor(max_workers=min(max_workers, len(calls)), initializer=initialize_worker) as pool:
+        futures = [pool.submit(fn, *args) for fn, args in calls]
+        return [future.result() for future in futures]
+
+
 def safe_get(url, *, params=None, headers=None, timeout=8):
     try:
         r = requests.get(url, params=params, headers=headers or HEADERS, timeout=timeout)
@@ -150,8 +166,10 @@ def load_fallback_data():
 @st.cache_data(ttl=21600, show_spinner=False)
 def fetch_cms_metrics(provider_ids):
     rows = []
-    for provider_id in provider_ids:
-        r = safe_get(URLS["cms"], params={"size": 100, "offset": 0, "filter[Facility ID]": provider_id}, timeout=10)
+    def fetch_provider(provider_id):
+        return safe_get(URLS["cms"], params={"size": 100, "offset": 0, "filter[Facility ID]": provider_id}, timeout=5)
+    responses = parallel_calls([(fetch_provider, (pid,)) for pid in provider_ids])
+    for provider_id, r in zip(provider_ids, responses):
         if not r:
             continue
         try:
@@ -455,12 +473,18 @@ def fetch_ticketmaster_events(now_iso, end_iso, api_key):
 
 
 def major_event_titles(now_dt):
+    # Reuse cached news and Ticketmaster results within the same quarter-hour.
+    now_dt = now_dt.replace(minute=(now_dt.minute // 15) * 15, second=0, microsecond=0)
     day = now_dt.date().isoformat()
     events = []
-    events.extend(fetch_city_events(day))
-    events.extend(fetch_tdgarden_events(day))
-    events.extend(fetch_red_sox_home_games(day))
-    events.extend(fetch_boston_news_event_layer(now_dt.isoformat()))
+    sources = parallel_calls([
+        (fetch_city_events, (day,)),
+        (fetch_tdgarden_events, (day,)),
+        (fetch_red_sox_home_games, (day,)),
+        (fetch_boston_news_event_layer, (now_dt.isoformat(),)),
+    ], max_workers=4)
+    for source in sources:
+        events.extend(source)
     tm_key = secret_or_env("TICKETMASTER_API_KEY")
     if tm_key:
         events.extend(fetch_ticketmaster_events(
@@ -535,7 +559,7 @@ def current_condition_label(dynamic_factor):
     return "Typical"
 
 
-def build_model(df, origin_lat, origin_lon, now_dt, weather_obs, alerts, ari, major_events, historical_layer=None):
+def build_model(df, origin_lat, origin_lon, now_dt, weather_obs, alerts, ari, major_events, historical_layer=None, routes=None):
     wf = current_weather_factor(weather_obs, alerts)
     inf, illness_label = illness_factor(ari)
     dynamic_factor = max(0.86, min(1.24, wf * inf * temporal_factor(now_dt) * event_factor(major_events)))
@@ -552,7 +576,8 @@ def build_model(df, origin_lat, origin_lon, now_dt, weather_obs, alerts, ari, ma
 
     rows = []
     for _, row in df.iterrows():
-        route = route_estimate(origin_lat, origin_lon, row["latitude"], row["longitude"])
+        route = (routes.get((row["latitude"], row["longitude"])) if routes is not None
+                 else route_estimate(origin_lat, origin_lon, row["latitude"], row["longitude"]))
         drive_min, route_miles = (float("nan"), float("nan")) if route is None else (route["minutes"], route["miles"])
 
         historical_wait = float(row["legacy_wait_to_provider_min"])
@@ -698,8 +723,6 @@ def render_home():
     if origin_lat is None:
         st.stop()
 
-    loading_slot = st.empty()
-    loading_slot.markdown('<div class="ernow-loading-wrap"><div class="ernow-loading"></div></div>', unsafe_allow_html=True)
 
     now_dt = datetime.now(EASTERN)
     df_all = load_fallback_data()
@@ -726,7 +749,18 @@ def render_home():
     # Eye/ENT: Mass Eye and Ear has public ED-time data, so it joins the full comparison.
     df = (pd.concat([general, df_all[df_all["ed_type"] == "specialty"]]) if focus == "specialty" else general).reset_index(drop=True)
     others = df_all[(df_all["ed_type"] != "general") & (df_all["ed_type"] != focus)].reset_index(drop=True)
-    cms = fetch_cms_metrics(tuple(df["cms_provider_id"].dropna().tolist()))
+    destinations = list(dict.fromkeys(zip(df_all["latitude"], df_all["longitude"])))
+    def fetch_routes():
+        values = parallel_calls([(route_estimate, (origin_lat, origin_lon, lat, lon)) for lat, lon in destinations])
+        return dict(zip(destinations, values))
+    cms, weather_obs, alerts, ari, major_events, routes = parallel_calls([
+        (fetch_cms_metrics, (tuple(df["cms_provider_id"].dropna().tolist()),)),
+        (fetch_current_weather, (origin_lat, origin_lon)),
+        (fetch_nws_alerts, (origin_lat, origin_lon)),
+        (fetch_cdc_ari, ()),
+        (major_event_titles, (now_dt,)),
+        (fetch_routes, ()),
+    ], max_workers=6)
     cms_live = (not cms.empty) and ("cms_current_baseline" in cms) and cms["cms_current_baseline"].notna().any()
     if not cms.empty:
         df = df.merge(cms, on="cms_provider_id", how="left")
@@ -734,12 +768,7 @@ def render_home():
             mask = df["cms_current_baseline"].notna()
             df.loc[mask, "typical_ed_minutes"] = df.loc[mask, "cms_current_baseline"]
 
-    weather_obs = fetch_current_weather(origin_lat, origin_lon)
-    alerts = fetch_nws_alerts(origin_lat, origin_lon)
-    ari = fetch_cdc_ari()
-    major_events = major_event_titles(now_dt)
-    ranked, context = build_model(df, origin_lat, origin_lon, now_dt, weather_obs, alerts, ari, major_events)
-    loading_slot.empty()
+    ranked, context = build_model(df, origin_lat, origin_lon, now_dt, weather_obs, alerts, ari, major_events, routes=routes)
 
     weather_status = weather_obs.get("description", "Unavailable") if weather_obs else "Unavailable"
     event_status = "; ".join(major_events[:2]) if major_events else "None detected"
@@ -887,7 +916,7 @@ def render_home():
                    "it may be the right place to go." + ("" if focus else " For an eye, ear, nose, or throat emergency, change the type of emergency at the top."))
         ocards = []
         for _, o in others.iterrows():
-            route = route_estimate(origin_lat, origin_lon, o["latitude"], o["longitude"])
+            route = routes.get((o["latitude"], o["longitude"]))
             drive = f"~{fmt_minutes(route['minutes'])}" if route else "Unavailable"
             dist = f"{route['miles']:.1f} mi" if route else ""
             fc = fc_map.get(str(o.get("cms_provider_id") or "").split(".")[0].zfill(6), {})
@@ -1361,7 +1390,7 @@ st.markdown("""
 st.markdown('<div class="ernow-nav-rule"></div>', unsafe_allow_html=True)
 
 current_view = st.session_state["ernow_view"]
-nav1, nav2, nav3 = st.columns(3)
+nav1, nav2, nav3, _ = st.columns([1.10, 1.45, 1.45, 3.00])
 
 with nav1:
     st.button(
@@ -1396,9 +1425,15 @@ with nav3:
         args=("Forecast Model",),
     )
 
-if current_view == "Methodology":
-    render_methodology()
-elif current_view == "Forecast Model":
-    render_forecast_model()
-else:
-    render_home()
+loading_slot = st.empty()
+loading_slot.markdown('<div class="ernow-loading-wrap"><div class="ernow-loading"></div></div>', unsafe_allow_html=True)
+try:
+    if current_view == "Methodology":
+        render_methodology()
+    elif current_view == "Forecast Model":
+        render_forecast_model()
+    else:
+        render_home()
+finally:
+    # Clear the one loader after all cards, specialist routes, and the map render.
+    loading_slot.empty()
