@@ -47,7 +47,7 @@ Tesla's real achievement wasn't a faster car. It pulled a needed but slow-arrivi
 ## Decision time (measured)
 
 <!-- DECISION_TIME:START -->
-- **ERNow vs the usual search** ("ER near me", pick the closest): **15 s in ERNow (1 participant) vs 20 s for the search (5 participants)**, and ERNow also shows the usually quickest ER. The quick search only finds the closest ER, which isn't the fastest overall from 83% of Boston locations (typically ~1h 38m longer in the ED for a non-emergency).
+- **ERNow vs the usual search** ("ER near me", pick the closest): **9 s in ERNow (5 participants) vs 20 s for the search (5 participants)**, and ERNow also shows the usually quickest ER. The quick search only finds the closest ER, which isn't the fastest overall from 83% of Boston locations (typically ~1h 38m longer in the ED for a non-emergency).
 - **Information ERNow assembles:** gathering the same facts by hand (each ER's ED time and drive time) took 6 min 21 s (1 participant).
 
 Timed with `python timing_test.py` (protocol in `TIMING_TEST.md`).
