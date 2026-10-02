@@ -1,0 +1,5 @@
+{
+  "data/national_ed_panel.csv.gz": "c7d12356577868c667a4fd8c52411ca5602e7ddea5cc0e021c4e6fe55237000f",
+  "national_model.py": "455704ce96e242a18e23dd7b021224b733c2d6a77a446871d8501870641904e6",
+  "data/ensemble_oof_predictions.csv.gz": "5ab9caf568f6de49ec592c5edf3904912c896e20748afc9a12095e633739728f"
+}
