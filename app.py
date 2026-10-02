@@ -1071,9 +1071,12 @@ hr, [data-testid="stDivider"] {margin:.55rem 0 .35rem !important}
 def render_home():
     st.title("ERNow Boston")
     _nat, _ = load_national()
+    _ds = decision_summary()
+    # Tagline uses the measured median ERNow decision time, rounded to the nearest 5 seconds.
+    tagline_secs = max(5, int(5 * round(_ds["ernow"]["median_seconds"] / 5))) if "ernow" in _ds else 15
     n_hosp = f"{_nat['split']['hospitals']:,}" if _nat else "4,000+"
     st.markdown('<div class="brand-sub">For urgent, non-life-threatening visits: find the ER that gets you seen and home fastest, '
-                'not just the closest, in about 15 seconds.</div>'
+                f'not just the closest, in about {tagline_secs} seconds.</div>'
                 '<div class="brand-pitch">Live ER wait times could be years away. ERNow brings ER transparency to Boston now: '
                 f'models built on {n_hosp} U.S. hospitals predict which ER will usually get you in and out fastest, drive included.</div>', unsafe_allow_html=True)
 
