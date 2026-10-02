@@ -92,7 +92,7 @@ Peer comparisons use 25 nearest reporting hospitals, matched with ED volume, typ
 - **Comparison at a glance:** lowest estimated drive + hospital median, with its difference from the closest routed ED. This is not a clinical recommendation or a personal discharge-time prediction.
 - **Type of emergency:** General or Eye, ear, nose, or throat. The latter brings Mass Eye and Ear into the comparison and identifies its specialist role; services and suitability vary.
 - **Other services:** specialist, pediatric, and veterans’ EDs listed with their service population. VA eligibility rules and hospital age policies vary.
-- **Each card:** median forecast range, peer difference, drive/distance, drive + forecast median, simulation share, and CMS OP-22 left-before-seen rate with the national median (2024).
+- **Each card:** explicit forecast median used for drive + median totals, target-80% forecast range, peer difference, drive/distance, drive + forecast median, simulation share, and CMS OP-22 left-before-seen rate with the national median (2024).
 - **Fastest in simulation:** fraction of 4,000 independent lognormal hospital-median scenarios won by an ER. The spread is approximated from forecast bounds. These percentages are uncalibrated, exclude unavailable routes, and are not probabilities for an individual visit.
 - **Directions:** published ER street address; route estimates use approximate address coordinates without live traffic, parking, or ambulance conditions. Some original campus coordinates remain approximate.
 - **Context:** weather, latest weekly respiratory illness, and detected events. Context never changes median forecasts or ranking. Missing weather/illness feeds display as unavailable; event checks may fail or miss events.
@@ -116,6 +116,7 @@ Medicare-participating ERs must provide screening for an emergency condition and
 ```sh
 pip install -r requirements.txt
 python scripts/verify_claims.py --refit  # verify saved-panel metrics and forecast bounds
+python scripts/verify_consumer_outputs.py  # verify displayed forecasts, totals, and ranking
 python boston_choice_analysis.py       # recompute sampled-grid comparison
 # Add original CMS zip archives as described in HISTORICAL_DATA_SETUP.md before rebuilding:
 python national_model.py
