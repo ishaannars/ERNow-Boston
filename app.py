@@ -111,112 +111,7 @@ MAJOR_TICKETMASTER_VENUES = {
 }
 
 st.markdown(
-    """
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap');
-:root{--ivory:#F8F4E6;--shell:#FFFDF5;--ink:#1C1B19;--soft-ink:#403A32;--tea:#B9AD91;--moss:#48513C;--beni:#8C2F2F;--kakishibu:#A85B45;--kakishibu-wash:rgba(168,91,69,.10)}
-html,body,[class*="css"],.stApp{font-family:'Instrument Sans','Helvetica Neue',Arial,sans-serif}
-.stApp{background:var(--ivory);color:var(--ink)}
-.block-container{padding-top:5.4rem!important;padding-bottom:2rem;max-width:960px}
-[data-testid="stSidebar"],
-[data-testid="collapsedControl"],
-[data-testid="stSidebarCollapsedControl"],
-button[kind="header"] {
-    display: none !important;
-}
-.safety-banner{display:block;width:100%;box-sizing:border-box;overflow:visible;background:var(--beni);color:#fff!important;border-radius:16px;padding:16px 19px;font-size:1rem;line-height:1.5;font-weight:650;margin:0 0 .9rem 0}
-.safety-banner,.safety-banner *{color:#fff!important;opacity:1!important}
-.nav-wrap{border-bottom:1px solid var(--tea);padding-bottom:.55rem;margin-bottom:1.15rem}
-[data-testid="stPageLink-NavLink"]{background:var(--shell)!important;border:1px solid var(--tea)!important;border-radius:10px!important;color:var(--ink)!important;font-weight:650!important;white-space:nowrap!important;overflow:visible!important;min-width:max-content!important}
-[data-testid="stPageLink-NavLink"] *{color:var(--ink)!important;white-space:nowrap!important;overflow:visible!important}
-[data-testid="stPageLink-NavLink"]:hover{border-color:var(--kakishibu)!important;background:var(--kakishibu-wash)!important}
-[data-testid="stPageLink-NavLink"] .material-symbols-rounded{color:var(--beni)!important}
-.location-confirm{background:var(--kakishibu-wash);border-bottom:2px solid var(--kakishibu);border-radius:10px 10px 4px 4px;padding:.72rem .9rem;margin:.35rem 0 .75rem 0;color:var(--ink);font-weight:600}
-.location-confirm .sub{color:var(--soft-ink);font-size:.84rem;font-weight:500;margin-left:.35rem}
-.brand-sub{color:var(--soft-ink);margin-top:-.35rem;margin-bottom:1.1rem;font-size:.98rem}
-.model-bar{background:var(--shell);border:1px solid var(--tea);border-left:4px solid var(--moss);border-radius:14px;padding:.82rem 1rem;margin:.35rem 0 1.05rem 0}
-.model-line-1{display:flex;align-items:center;gap:.5rem;color:var(--ink);font-size:.96rem;font-weight:700}
-.model-line-2{color:var(--soft-ink);font-size:.86rem;font-weight:600;margin-top:.28rem;line-height:1.4}
-.model-meta{display:flex;flex-wrap:wrap;gap:.42rem .55rem;margin-top:.55rem}
-.model-chip{font-size:.73rem;color:var(--soft-ink);background:var(--ivory);border:1px solid rgba(185,173,145,.72);border-radius:999px;padding:.24rem .5rem;font-weight:600}
-.model-dot{width:9px;height:9px;border-radius:50%;background:var(--moss);display:inline-block;box-shadow:0 0 0 rgba(72,81,60,.45);animation:modelPulse 1.65s infinite}
-@keyframes modelPulse{0%{box-shadow:0 0 0 0 rgba(72,81,60,.45);opacity:1}70%{box-shadow:0 0 0 7px rgba(72,81,60,0);opacity:.72}100%{box-shadow:0 0 0 0 rgba(72,81,60,0);opacity:1}}
-.er-card{background:var(--shell);border:1px solid var(--tea);border-radius:16px;padding:1.05rem 1.1rem;margin-bottom:.8rem}
-.er-best{border:2px solid var(--moss)}
-.best-label{color:var(--moss);font-size:.76rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.25rem}
-.er-title{font-size:1.15rem;font-weight:650;color:var(--ink)}
-.er-rank{font-size:1.12rem;font-weight:700;margin-right:.4rem;color:var(--moss)}
-.er-wait-label{font-size:.82rem;color:var(--soft-ink);margin-top:.6rem}
-.er-wait{font-size:1.65rem;font-weight:700;letter-spacing:-.02em;margin:.08rem 0 .45rem 0;color:var(--ink)}
-.er-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.38rem 1.1rem;margin-top:.15rem}
-.er-metric{font-size:.93rem;color:var(--soft-ink)}
-.er-metric b{color:var(--ink);font-weight:600}
-.er-reason{font-size:.82rem;color:var(--moss);font-weight:600;margin-top:.5rem}
-.er-flag{display:inline-block;margin-left:.55rem;vertical-align:middle;font-size:.68rem;font-weight:650;color:var(--kakishibu);border:1px solid var(--kakishibu);border-radius:999px;padding:.08rem .45rem}
-.evidence-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem;margin:.45rem 0 1rem}
-.evidence-card{background:var(--shell);border:1px solid var(--tea);border-radius:12px;padding:.8rem .9rem}
-.evidence-value{font-size:1.25rem;font-weight:700;letter-spacing:-.01em;color:var(--ink);line-height:1.2}
-.evidence-copy{font-size:.84rem;color:var(--soft-ink);line-height:1.45;margin-top:.25rem}
-.evidence-source{font-size:.7rem;color:var(--soft-ink);opacity:.8;margin-top:.4rem;text-transform:uppercase;letter-spacing:.04em;font-weight:600}
-.stMarkdown table{width:100%;border-collapse:collapse;font-size:.86rem;margin:.35rem 0 .9rem}
-.stMarkdown th{text-align:left;font-weight:650;color:var(--ink);border-bottom:1px solid var(--tea);padding:.42rem .6rem}
-.stMarkdown td{color:var(--soft-ink);border-bottom:1px solid rgba(185,173,145,.45);padding:.4rem .6rem;vertical-align:top}
-[data-testid="stTable"]{margin:.45rem 0 .9rem !important}
-[data-testid="stTable"] table{font-size:.86rem}
-[data-testid="stTable"] th,[data-testid="stTable"] td{padding:.42rem .6rem !important;vertical-align:top}
-@media(max-width:720px){.evidence-grid{grid-template-columns:1fr}}
-@media(max-width:650px){.block-container{padding-top:4.8rem!important}.er-grid{grid-template-columns:1fr}.er-wait{font-size:1.5rem}.model-line-2{font-size:.8rem}.model-chip{font-size:.69rem}}
-
-[data-testid="stAppViewContainer"], [data-testid="stAppViewBlockContainer"], section.main, .stApp, html, body {background:var(--ivory) !important;}
-[data-testid="stStatusWidget"], .stDeployButton {display:none !important;}
-[data-testid="stSpinner"] [role="status"] {display:none !important;}
-.ernow-loading-wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:9999;pointer-events:none;background:rgba(248,244,230,.55);}
-.ernow-loading{width:30px;height:30px;border:3px solid #DDD4BE;border-top-color:var(--moss);border-radius:50%;animation:ernow-spin .8s linear infinite;}
-@keyframes ernow-spin{to{transform:rotate(360deg)}}
-
-
-.er-card{padding:.92rem 1.05rem!important;margin-bottom:.7rem!important}
-.er-grid{gap:.26rem 1.05rem!important;margin-top:.1rem!important}
-.er-wait{margin:.04rem 0 .35rem 0!important}
-.er-reason{font-size:.72rem!important;line-height:1.42!important;margin-top:.38rem!important;font-weight:550!important}
-.er-actions{margin-top:.5rem}
-.er-directions{
-  display:inline-block;
-  text-decoration:none!important;
-  background:var(--moss);
-  border:1px solid var(--moss);
-  border-radius:9px;
-  padding:.42rem .68rem;
-  color:#fff!important;
-  font-size:.78rem;
-  font-weight:650;
-}
-.er-directions:hover{
-  background:#3E4735;
-  border-color:#3E4735;
-  color:#fff!important;
-}
-
-
-/* Final spacing pass */
-.model-bar{padding:.82rem 1rem!important;margin:.35rem 0 1.15rem!important}
-.model-meta{gap:.38rem .46rem!important;margin-top:.48rem!important}
-.model-chip{padding:.22rem .48rem!important;font-size:.72rem!important;font-weight:600!important}
-.er-card{padding:1.02rem 1.08rem .92rem!important;margin-bottom:.82rem!important}
-.er-best{padding-top:1.05rem!important}
-.best-label{margin-bottom:.32rem!important}
-.er-title{line-height:1.25!important}
-.er-wait-label{margin-top:.62rem!important;margin-bottom:.02rem!important}
-.er-wait{margin:.04rem 0 .5rem!important}
-.er-grid{gap:.34rem 1.25rem!important;margin-top:.08rem!important;margin-bottom:.12rem!important}
-.er-metric{line-height:1.45!important}
-.er-metric b{font-weight:600!important}
-.er-reason{font-size:.69rem!important;line-height:1.42!important;font-weight:400!important;margin-top:.42rem!important;color:var(--soft-ink)!important}
-.er-actions{margin-top:.42rem!important}
-.er-directions{padding:.31rem .54rem!important;font-size:.70rem!important;line-height:1.2!important;border-radius:7px!important;font-weight:600!important}
-
-</style>
-""",
+    "<style>" + (Path(__file__).parent / "styles.css").read_text() + "</style>",
     unsafe_allow_html=True,
 )
 
@@ -715,358 +610,6 @@ def build_model(df, origin_lat, origin_lon, now_dt, weather_obs, alerts, ari, ma
     }
 
 
-st.markdown("""
-<style>
-/* Same typography and spacing system across ERNow, Methodology, and Forecast Model. */
-html, body, [class*="css"], .stApp,
-.stMarkdown, .stMarkdown p, .stMarkdown li,
-[data-testid="stCaptionContainer"], .stAlert p,
-[data-testid="stButton"] button {
-  font-family:'Instrument Sans','Helvetica Neue',Arial,sans-serif !important;
-}
-
-[data-testid="stAppViewContainer"],
-[data-testid="stAppViewBlockContainer"],
-section.main, .stApp, html, body {
-  background:var(--ivory) !important;
-}
-
-.ernow-nav-rule {
-  border-top:1px solid var(--tea);
-  margin:.15rem 0 .55rem 0;
-}
-
-[data-testid="stButton"] > button {
-  background:var(--shell);
-  border:1px solid var(--tea);
-  border-radius:10px;
-  color:var(--ink);
-  min-height:2.2rem;
-  font-weight:600;
-  white-space:nowrap;
-}
-
-[data-testid="stButton"] > button:hover {
-  border-color:var(--kakishibu);
-  color:var(--ink);
-  background:var(--kakishibu-wash);
-}
-
-.ds-card {
-  background:var(--shell);
-  border:1px solid var(--tea);
-  border-left:4px solid var(--moss);
-  border-radius:14px;
-  padding:.92rem 1rem;
-  margin:.55rem 0 1.1rem;
-}
-.ds-title {font-weight:700;margin-bottom:.28rem}
-.ds-sub {color:var(--soft-ink);font-size:.90rem;line-height:1.5}
-.ds-tags {display:flex;flex-wrap:wrap;gap:.38rem .44rem;margin-top:.5rem}
-.ds-tag {
-  font-size:.71rem;
-  border:1px solid var(--tea);
-  background:var(--ivory);
-  border-radius:999px;
-  padding:.22rem .46rem;
-  font-weight:600;
-  color:var(--soft-ink);
-}
-
-.status-card {
-  background:var(--shell);
-  border:1px solid var(--tea);
-  border-left:4px solid var(--moss);
-  border-radius:14px;
-  padding:.9rem 1rem;
-  margin:.5rem 0 .95rem;
-}
-.status-title {font-weight:700;font-size:.98rem}
-.status-copy {color:var(--soft-ink);font-size:.88rem;margin-top:.25rem;line-height:1.48}
-.mini-grid {
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:.5rem;
-  margin:.45rem 0 1rem;
-}
-.mini-card {
-  background:var(--shell);
-  border:1px solid var(--tea);
-  border-radius:12px;
-  padding:.68rem .75rem;
-}
-.mini-label {
-  font-size:.7rem;
-  color:var(--soft-ink);
-  text-transform:uppercase;
-  letter-spacing:.04em;
-  font-weight:600;
-}
-.mini-value {
-  font-size:.95rem;
-  font-weight:600;
-  margin-top:.18rem;
-  color:var(--ink);
-  word-break:break-word;
-}
-.feature-grid {
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:.5rem;
-  margin:.4rem 0 .8rem;
-}
-.feature-card {
-  background:var(--shell);
-  border:1px solid var(--tea);
-  border-radius:12px;
-  padding:.72rem .78rem;
-}
-.feature-title {font-weight:600;font-size:.86rem;margin-bottom:.18rem}
-.feature-copy {font-size:.78rem;color:var(--soft-ink);line-height:1.42}
-.callout {
-  background:var(--kakishibu-wash);
-  border-left:3px solid var(--kakishibu);
-  border-radius:10px;
-  padding:.78rem .85rem;
-  color:var(--soft-ink);
-  font-size:.84rem;
-  line-height:1.48;
-  margin:.52rem 0 .82rem;
-}
-.note {
-  background:var(--shell);
-  border:1px solid var(--tea);
-  border-radius:12px;
-  padding:.78rem .85rem;
-  color:var(--soft-ink);
-  font-size:.84rem;
-  line-height:1.5;
-  margin:.52rem 0 .82rem;
-}
-
-h1 {margin-bottom:.3rem !important}
-h2 {margin-top:1.55rem !important;margin-bottom:.42rem !important}
-h3 {margin-top:1.15rem !important;margin-bottom:.35rem !important}
-.stMarkdown p {margin:.15rem 0 .72rem !important}
-.stMarkdown ul,.stMarkdown ol {margin-top:.18rem !important;margin-bottom:.85rem !important}
-.stMarkdown li {margin-bottom:.22rem !important}
-[data-testid="stDataFrame"] {margin:.45rem 0 .85rem !important}
-
-@media(max-width:720px) {
-  .mini-grid,.feature-grid {grid-template-columns:1fr}
-}
-
-/* ===== V3.1 typography + compact layout ===== */
-/* Body stays Instrument Sans; headings and key numbers use Instrument Serif. */
-.stApp h1, .stApp h2, .stApp h3,
-.stApp [data-testid="stHeading"] h1, .stApp [data-testid="stHeading"] h2, .stApp [data-testid="stHeading"] h3 {
-  font-family:'Instrument Serif',Georgia,'Times New Roman',serif !important;
-  font-weight:400 !important; letter-spacing:-.01em !important; color:var(--ink) !important;
-}
-.stApp h1 {font-size:2.55rem !important; line-height:1.05 !important; margin:.2rem 0 .25rem !important; padding:0 !important}
-.stApp h2 {font-size:1.75rem !important; margin:1.2rem 0 .3rem !important; padding:0 !important}
-.stApp h3 {font-size:1.45rem !important; line-height:1.15 !important; margin:1.05rem 0 .3rem !important; padding:0 !important}
-.er-wait, .evidence-value, .mini-value, .model-value {
-  font-family:'Instrument Serif',Georgia,serif !important; font-weight:400 !important;
-  font-variant-numeric:tabular-nums; letter-spacing:0 !important;
-}
-.block-container {padding-top:3rem !important; padding-bottom:1.5rem !important; max-width:980px !important}
-.safety-banner {font-size:.86rem !important; padding:.62rem .9rem !important; border-radius:12px !important; margin:0 0 .6rem !important; font-weight:600 !important}
-.ernow-nav-rule {margin:.05rem 0 .45rem !important}
-[data-testid="stButton"] > button {min-height:1.95rem !important; padding:.2rem .7rem !important; font-size:.84rem !important}
-.brand-sub {font-size:.9rem !important; line-height:1.45 !important; margin:0 0 .75rem !important; max-width:760px}
-.model-bar {padding:.62rem .85rem !important; margin:.2rem 0 .6rem !important; border-radius:12px !important}
-.model-line-1 {font-size:.88rem !important}
-.model-line-2 {font-size:.79rem !important; margin-top:.18rem !important; font-weight:500 !important}
-.model-meta {margin-top:.4rem !important}
-.model-chip {font-size:.68rem !important; padding:.16rem .44rem !important}
-.location-confirm {padding:.5rem .75rem !important; margin:.2rem 0 .45rem !important; font-size:.88rem !important}
-[data-testid="stCaptionContainer"] {font-size:.78rem !important; line-height:1.45 !important}
-hr, [data-testid="stDivider"] {margin:.55rem 0 .35rem !important}
-.stMarkdown p {margin:.1rem 0 .55rem !important}
-/* ER cards: two per row on desktop, one on phones */
-.er-list {display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.65rem; margin:.35rem 0 .7rem}
-.er-card {margin:0 !important; padding:.8rem .9rem .75rem !important; border-radius:14px !important; display:flex; flex-direction:column}
-.er-best {border-width:2px !important}
-.er-head {display:flex; align-items:baseline; flex-wrap:wrap; gap:.15rem .45rem}
-.er-rank {font-family:'Instrument Serif',Georgia,serif !important; font-size:1.25rem !important; font-weight:400 !important; margin:0 !important; color:var(--moss)}
-.er-title {font-size:.98rem !important; font-weight:650 !important; line-height:1.25 !important}
-.best-label {font-size:.62rem !important; margin:0 !important; padding:.08rem .42rem; border-radius:999px; background:var(--moss); color:#fff !important; letter-spacing:.05em}
-.er-flag {margin-left:0 !important; font-size:.62rem !important}
-.er-wait-label {font-size:.72rem !important; margin-top:.45rem !important; letter-spacing:.01em}
-.er-wait {font-size:1.7rem !important; line-height:1.1 !important; margin:.05rem 0 .5rem !important}
-.er-stats {display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.45rem .8rem; padding-top:.5rem; border-top:1px solid rgba(185,173,145,.45)}
-.er-stat-k {font-size:.64rem; text-transform:uppercase; letter-spacing:.05em; font-weight:600; color:var(--soft-ink); opacity:.85}
-.er-stat-v {font-size:.88rem; font-weight:600; color:var(--ink); font-variant-numeric:tabular-nums}
-.er-stat-v span {font-weight:500; color:var(--soft-ink); font-size:.78rem}
-.er-actions {margin-top:.6rem !important}
-.er-directions {font-size:.7rem !important; padding:.28rem .55rem !important}
-/* Methodology + Forecast Model */
-.ds-card {padding:.75rem .9rem !important; margin:.35rem 0 .8rem !important}
-.ds-title {font-family:'Instrument Serif',Georgia,serif; font-weight:400 !important; font-size:1.25rem; margin-bottom:.2rem !important}
-.ds-sub {font-size:.86rem !important}
-.evidence-grid {grid-template-columns:repeat(4,minmax(0,1fr)) !important; gap:.5rem !important; margin:.35rem 0 .7rem !important}
-.evidence-card {padding:.65rem .75rem !important}
-.evidence-value {font-size:1.55rem !important; line-height:1.1 !important}
-.evidence-copy {font-size:.76rem !important; line-height:1.4 !important}
-.evidence-source {font-size:.6rem !important}
-.model-grid {display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.5rem; margin:.35rem 0 .6rem}
-.model-card {background:var(--shell); border:1px solid var(--tea); border-radius:12px; padding:.65rem .75rem}
-.model-k {font-size:.64rem; text-transform:uppercase; letter-spacing:.05em; font-weight:600; color:var(--soft-ink)}
-.model-value {font-size:1.45rem; line-height:1.15; color:var(--ink); margin:.1rem 0 .15rem}
-.model-copy {font-size:.76rem; color:var(--soft-ink); line-height:1.4}
-.status-card {padding:.65rem .85rem !important; margin:.3rem 0 .6rem !important}
-.mini-grid {grid-template-columns:repeat(6,minmax(0,1fr)) !important; gap:.4rem !important; margin:.3rem 0 .7rem !important}
-.mini-card {padding:.5rem .6rem !important}
-.mini-label {font-size:.58rem !important}
-.mini-value {font-size:1.35rem !important; margin-top:.05rem !important}
-.callout, .note {font-size:.8rem !important; padding:.6rem .75rem !important; margin:.35rem 0 .6rem !important}
-.stMarkdown table {font-size:.8rem !important; margin:.25rem 0 .6rem !important}
-.stMarkdown th, .stMarkdown td {padding:.3rem .5rem !important}
-.stMarkdown ul, .stMarkdown ol {margin:.1rem 0 .6rem !important}
-.stMarkdown li {margin-bottom:.12rem !important; font-size:.9rem}
-[data-testid="stTabs"] button p {font-size:.86rem !important; font-weight:600 !important}
-[data-testid="stTabs"] [data-baseweb="tab-list"] {gap:.9rem}
-@media(max-width:900px){.evidence-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important}.mini-grid{grid-template-columns:repeat(3,minmax(0,1fr)) !important}.model-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:650px){
-  .block-container{padding-top:3.2rem !important}
-  .stApp h1{font-size:2.1rem !important}
-  .er-list,.evidence-grid,.model-grid{grid-template-columns:1fr !important}
-  .mini-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important}
-}
-
-/* closest vs fastest answer */
-.answer-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem;margin:.3rem 0 .35rem}
-.answer-card,.answer-one{background:var(--shell);border:1px solid var(--tea);border-radius:14px;padding:.75rem .9rem}
-.answer-one{margin:.3rem 0 .35rem;border:2px solid var(--moss)}
-.answer-fast{border:2px solid var(--moss)}
-.answer-k{font-size:.64rem;text-transform:uppercase;letter-spacing:.05em;font-weight:650;color:var(--soft-ink)}
-.answer-v{font-family:'Instrument Serif',Georgia,serif;font-size:1.55rem;line-height:1.15;color:var(--ink);margin:.1rem 0 .15rem}
-.answer-sub{font-size:.82rem;color:var(--soft-ink);font-variant-numeric:tabular-nums}
-.closest-label{font-size:.62rem;padding:.08rem .42rem;border-radius:999px;border:1px solid var(--moss);color:var(--moss);font-weight:650;letter-spacing:.05em;text-transform:uppercase}
-[data-testid="stRadio"] label p{font-size:.84rem !important;font-weight:600 !important}
-.choice-callout{background:var(--shell);border:1px solid var(--tea);border-left:4px solid var(--kakishibu);border-radius:12px;padding:.7rem .85rem;margin:.2rem 0 .7rem}
-.choice-callout .v{font-family:'Instrument Serif',Georgia,serif;font-size:1.45rem;line-height:1.15;color:var(--ink)}
-.choice-callout .c{font-size:.8rem;color:var(--soft-ink);line-height:1.45;margin-top:.2rem}
-@media(max-width:650px){.answer-grid{grid-template-columns:1fr}}
-
-/* live model stack in the model bar; heading link icons hidden */
-.live-head{display:flex;align-items:center;flex-wrap:wrap;gap:.3rem .55rem}
-.live-title{font-size:.64rem;text-transform:uppercase;letter-spacing:.05em;font-weight:650;color:var(--soft-ink)}
-.live-meta{font-size:.74rem;color:var(--soft-ink)}
-.live-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.45rem;margin-top:.5rem}
-.live-tile{background:var(--ivory);border:1px solid rgba(185,173,145,.6);border-radius:10px;padding:.45rem .6rem}
-.live-k{font-size:.6rem;text-transform:uppercase;letter-spacing:.05em;font-weight:650;color:var(--soft-ink)}
-.live-v{font-family:'Instrument Serif',Georgia,serif;font-size:1.2rem;line-height:1.15;color:var(--ink);margin:.05rem 0 .1rem}
-.live-c{font-size:.7rem;line-height:1.35;color:var(--soft-ink)}
-[data-testid="stHeaderActionElements"],.stApp h1 a,.stApp h2 a,.stApp h3 a{display:none !important}
-@media(max-width:900px){.live-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.live-measured{font-size:.68rem;font-weight:650;color:var(--moss);border:1px solid var(--moss);border-radius:999px;padding:.08rem .45rem}
-.brand-pitch{font-size:.82rem;line-height:1.45;color:var(--soft-ink);margin:-.45rem 0 .75rem;max-width:760px;opacity:.9}
-
-/* model bar v2: tidy spacing, technique footnote, even tiles */
-.model-bar{padding:.75rem .9rem .8rem !important}
-.live-head{gap:.35rem .6rem !important;margin-bottom:.15rem}
-.live-meta{display:block;font-size:.76rem;line-height:1.45;color:var(--soft-ink);margin:.25rem 0 .1rem}
-.live-grid{gap:.5rem !important;margin-top:.55rem !important;align-items:stretch}
-.live-tile{display:flex;flex-direction:column;padding:.55rem .65rem .5rem !important}
-.live-c{flex:1}
-.live-t{font-size:.6rem;letter-spacing:.04em;text-transform:uppercase;font-weight:600;color:var(--moss);margin-top:.35rem;opacity:.85}
-.live-measured{white-space:normal}
-.brand-pitch{margin:-.35rem 0 .7rem !important}
-.answer-sub b{color:var(--ink);font-weight:650}
-.live-proof{font-size:.82rem;line-height:1.45;color:var(--soft-ink);background:var(--kakishibu-wash);border-left:3px solid var(--moss);border-radius:8px;padding:.45rem .65rem;margin:.4rem 0 .3rem}
-.live-proof b{color:var(--ink);font-weight:650}
-
-/* ===== V3.3: one loader, centered button text, option cards ===== */
-[data-testid="stStatusWidget"],[data-testid="stSpinner"],[data-testid="stDecoration"],.stSpinner,
-[data-testid="stToolbar"] [data-testid="stStatusWidget"]{display:none !important}
-[data-testid="stButton"] > button, .er-directions{display:inline-flex !important;align-items:center !important;justify-content:center !important;text-align:center !important}
-[data-testid="stButton"] > button p{margin:0 !important;text-align:center !important}
-.er-directions{min-width:8.2rem}
-[data-testid="stRadio"] > label p{font-size:.68rem !important;text-transform:uppercase;letter-spacing:.05em;font-weight:650 !important;color:var(--soft-ink) !important}
-[data-testid="stRadio"]{margin:.1rem 0 -.2rem}
-.opt-rows{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.4rem .7rem;margin:.45rem 0 .1rem;padding-top:.45rem;border-top:1px solid rgba(185,173,145,.45)}
-.opt-rows div{display:flex;flex-direction:column}
-.opt-rows span{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;font-weight:600;color:var(--soft-ink)}
-.opt-rows b{font-size:.92rem;font-weight:650;color:var(--ink);font-variant-numeric:tabular-nums}
-.answer-note{font-size:.8rem;color:var(--soft-ink);margin-top:.45rem;line-height:1.4}
-.answer-note b{color:var(--ink)}
-.answer-card,.answer-one{display:flex;flex-direction:column}
-.er-peer{font-size:.76rem;color:var(--soft-ink);margin:-.35rem 0 .45rem}
-.er-head .best-label,.er-head .closest-label{margin-left:.1rem}
-@media(max-width:650px){.opt-rows{grid-template-columns:1fr 1fr}}
-
-/* consistent fonts for Streamlit's own widgets */
-[data-testid="stAlert"]{background:var(--shell) !important;border:1px solid var(--tea) !important;border-radius:12px !important;color:var(--ink) !important}
-[data-testid="stAlert"] p, [data-testid="stAlert"] [data-testid="stMarkdownContainer"] *{font-family:'Instrument Sans','Helvetica Neue',Arial,sans-serif !important;color:var(--ink) !important;font-size:.9rem !important}
-[data-testid="stExpander"] summary p, [data-testid="stExpander"] summary [data-testid="stMarkdownContainer"] *{font-family:'Instrument Sans','Helvetica Neue',Arial,sans-serif !important;font-size:.88rem !important;font-weight:600 !important;color:var(--ink) !important}
-[data-testid="stExpander"]{border-radius:12px !important}
-[data-testid="stRadio"] [role="radiogroup"] label p{font-size:.88rem !important;text-transform:none !important;letter-spacing:0 !important;color:var(--ink) !important;font-weight:600 !important}
-
-/* location fallback: same type, colors, and labels as the rest of the app */
-[data-testid="stSelectbox"] label p{font-size:.64rem !important;text-transform:uppercase;letter-spacing:.05em;font-weight:650 !important;color:var(--soft-ink) !important;font-family:'Instrument Sans','Helvetica Neue',Arial,sans-serif !important}
-[data-testid="stSelectbox"] [data-baseweb="select"] > div{background:var(--shell) !important;border:1px solid var(--tea) !important;border-radius:10px !important;min-height:2.4rem !important}
-[data-testid="stSelectbox"] [data-baseweb="select"] *{font-family:'Instrument Sans','Helvetica Neue',Arial,sans-serif !important;font-size:.9rem !important;color:var(--ink) !important}
-[data-baseweb="popover"] li, [data-baseweb="popover"] li *{font-family:'Instrument Sans','Helvetica Neue',Arial,sans-serif !important;font-size:.9rem !important}
-[data-testid="stExpander"] [data-testid="stButton"] > button{background:var(--moss) !important;border-color:var(--moss) !important;color:#fff !important}
-[data-testid="stExpander"] [data-testid="stButton"] > button p{color:#fff !important}
-[data-testid="stExpanderDetails"]{padding:.6rem .9rem .8rem !important}
-
-/* Forecast Model + Methodology: one text size for body copy, matching captions and tables */
-.stApp .stMarkdown p, .stApp .stMarkdown li {font-size:.9rem !important; line-height:1.55 !important}
-.stApp [data-testid="stCaptionContainer"] p {font-size:.78rem !important}
-[data-testid="stTabs"] [data-baseweb="tab-list"]{border-bottom:1px solid var(--tea) !important;margin-bottom:.4rem}
-[data-testid="stTabs"] button[aria-selected="true"] p{color:var(--ink) !important}
-[data-testid="stTabs"] button p{color:var(--soft-ink) !important}
-[data-testid="stTabs"] [data-baseweb="tab-highlight"]{background-color:var(--moss) !important}
-.er-tags{display:flex;flex-wrap:wrap;gap:.3rem;min-height:1.05rem;margin-bottom:.2rem;align-items:center}
-.er-tags .best-label,.er-tags .closest-label,.er-tags .er-flag{margin:0 !important}
-
-.er-list-3{grid-template-columns:repeat(3,minmax(0,1fr)) !important}
-.er-other{background:var(--ivory) !important}
-.er-wait-sm{font-size:1.35rem !important}
-@media(max-width:900px){.er-list-3{grid-template-columns:repeat(2,minmax(0,1fr)) !important}}
-@media(max-width:650px){.er-list-3{grid-template-columns:1fr !important}}
-.er-other .er-actions{margin-top:auto !important;padding-top:.6rem}
-
-[data-testid="stRadio"]:has(input[name*="who"]) {margin-top:.15rem}
-[data-testid="stToggle"] label p{font-size:.84rem !important;font-weight:600 !important;color:var(--ink) !important;font-family:'Instrument Sans','Helvetica Neue',Arial,sans-serif !important}
-[data-testid="stToggle"]{margin:.15rem 0 .1rem}
-
-/* compact, readable live-model tiles; 3-column ER grid */
-.live-tile .live-v{font-size:1.25rem !important}
-.live-tile .live-c{font-size:.78rem !important;line-height:1.4 !important;color:var(--ink) !important;opacity:.82}
-.live-tile .live-t{margin-top:.3rem !important}
-.er-list{grid-template-columns:repeat(3,minmax(0,1fr)) !important;gap:.55rem !important}
-.er-card{padding:.7rem .8rem .65rem !important}
-.er-wait{font-size:1.45rem !important;margin-bottom:.35rem !important}
-.er-stats{gap:.35rem .6rem !important}
-.er-stat-v{font-size:.84rem !important}
-.answer-one{padding:.75rem .9rem !important}
-@media(max-width:1000px){.er-list{grid-template-columns:repeat(2,minmax(0,1fr)) !important}}
-@media(max-width:650px){.er-list{grid-template-columns:1fr !important}}
-.er-head{flex-wrap:nowrap !important;align-items:flex-start !important;min-height:2.6em}
-.er-head .er-rank{flex:0 0 auto}
-.er-head .er-title{flex:1 1 auto;min-width:0}
-
-/* even card headers: rank chip + tags on one row, name below, same on every card */
-.rank-chip{font-size:.62rem;font-weight:700;letter-spacing:.04em;padding:.08rem .42rem;border-radius:999px;background:var(--ink);color:var(--ivory)}
-.er-head{min-height:2.5em !important}
-.er-head .er-title{font-size:.98rem !important}
-/* one rhythm for section headings on the home page */
-.stApp h3{margin-top:.9rem !important}
-.location-confirm{margin:0 !important}
-.live-tile{display:flex !important;flex-direction:column !important}
-.live-tile .live-c{flex:1 1 auto}
-.live-tile .live-t{margin-top:auto !important;padding-top:.35rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-
-.er-system{font-size:.72rem;color:var(--soft-ink);margin:-.25rem 0 .35rem}
-.er-head{min-height:2.3em !important}
-[data-testid="stSelectbox"]:has(input[aria-label*="hospital system"]){margin-top:.1rem}
-</style>
-""", unsafe_allow_html=True)
-
 
 def render_home():
     st.title("ERNow Boston")
@@ -1120,16 +663,18 @@ def render_home():
     location_label = None
     if saved:
         origin_lat, origin_lon, location_label = saved
-        st.subheader("Your location")
-        loc_l, loc_r = st.columns([5, 1.2], vertical_alignment="center")
-        with loc_l:
-            st.markdown(f'<div class="location-confirm">Location: {html.escape(str(location_label))}'
-                        f'<span class="sub">Results are for this spot.</span></div>', unsafe_allow_html=True)
-        with loc_r:
-            if st.button("Change location", key="change_location", use_container_width=True):
-                st.session_state.pop("origin", None)
-                st.session_state.pop("fallback_origin", None)
-                st.rerun()
+        st.subheader("Your visit")
+        with st.container(border=True):
+            loc_l, loc_r = st.columns([3, 1.4], vertical_alignment="center")
+            with loc_l:
+                st.markdown(f'<div class="location-confirm">Location: {html.escape(str(location_label))}'
+                            f'<span class="sub">Results are for this spot.</span></div>', unsafe_allow_html=True)
+            with loc_r:
+                if st.button("Change location", key="change_location", use_container_width=True):
+                    st.session_state.pop("origin", None)
+                    st.session_state.pop("fallback_origin", None)
+                    st.rerun()
+            st.caption("Change location to use your device location again or choose a different Boston area. Saved for this visit only.")
     else:
         st.subheader("Get your location")
         location = streamlit_geolocation()
@@ -1163,15 +708,18 @@ def render_home():
     df_all["ed_type"] = df_all["ed_type"].fillna("general")
     # General EDs are compared and ranked; specialty, pediatric, and VA EDs serve specific patients
     # and are shown separately so no one is sent to an ED that can't treat them.
-    status_slot = st.empty()
-    sel_l, sel_r = st.columns([1, 1])
-    with sel_l:
-        em_type = st.radio("Type of emergency", ["General", "Eye, ear, nose, or throat"], index=0, horizontal=True,
-                           key="emergency_type", help="Eye, ear, nose, or throat brings in Mass Eye and Ear, the specialist ED.")
     SYSTEMS = ["Any", "Mass General Brigham", "Beth Israel Lahey Health", "Boston Medical Center Health System", "Tufts Medicine"]
-    with sel_r:
-        my_system = st.selectbox("Your doctors' hospital system (optional)", SYSTEMS, index=0, key="my_system",
-                                 help="Your records follow you within a system. ERNow still ranks by time, and shows the quickest ER in your system.")
+    with st.container(border=True):
+        sel_l, sel_r = st.columns([1, 1.35])
+        with sel_l:
+            em_type = st.radio("Type of emergency", ["General", "Eye, ear, nose, or throat"], index=0, horizontal=True,
+                               key="emergency_type", help="Eye, ear, nose, or throat brings in Mass Eye and Ear, the specialist ED.")
+            st.caption("Choose General unless this is an eye, ear, nose, or throat problem.")
+        with sel_r:
+            my_system = st.selectbox("Your doctors' hospital system (optional)", SYSTEMS, index=0, key="my_system",
+                                     help="Your records follow you within a system. ERNow still ranks by time, and shows the quickest ER in your system.")
+            st.caption("Choose your doctors’ system to highlight its ERs and see its quickest option. Any compares all systems; ranking stays time-based.")
+    status_slot = st.empty()
     focus = "specialty" if em_type != "General" else None
     sys_map = dict(zip(df_all["hospital"], df_all.get("health_system", pd.Series([""] * len(df_all)))))
     general = df_all[df_all["ed_type"] == "general"]
@@ -1277,7 +825,7 @@ def render_home():
 
     cards = []
     for pos, (_, row) in enumerate(ranked.iterrows(), start=1):
-        top = " er-best" if pos == 1 else ""
+        top = " er-best" if row["hospital"] == best["hospital"] else ""
         tags = ""
         if row["hospital"] == closest_name:
             tags += '<span class="closest-label">Closest</span>'
@@ -1345,19 +893,21 @@ def render_home():
             fc = fc_map.get(str(o.get("cms_provider_id") or "").split(".")[0].zfill(6), {})
             if fc:
                 visit_k, visit_v = "Typical ED visit · tested range", fmt_range(fc["lo80"], fc["hi80"])
+                visit_class = "er-wait er-wait-sm"
             else:
                 visit_k, visit_v = "Typical ED visit", "No public ED-time data"
+                visit_class = "er-no-data"
             url = ("https://www.google.com/maps/dir/?api=1"
                    f"&origin={origin_lat},{origin_lon}&destination={o['latitude']},{o['longitude']}&travelmode=driving")
             ocards.append(f"""<div class="er-card er-other">
       <div class="er-tags"><span class="closest-label">{html.escape(tag_names.get(o['ed_type'], 'Restricted'))}</span></div>
       <div class="er-head"><span class="er-title">{html.escape(str(o['hospital']))}</span></div>
       <div class="er-system">{html.escape(str(o.get('health_system') or ''))}</div>
-      <div class="er-peer" style="margin:.1rem 0 .35rem">{html.escape(str(o.get('who_for') or ''))}</div>
-      <div class="er-wait-label">{visit_k}</div><div class="er-wait er-wait-sm">{visit_v}</div>
+      <div class="er-peer er-audience">{html.escape(str(o.get('who_for') or ''))}</div>
+      <div class="er-wait-label">{visit_k}</div><div class="{visit_class}">{visit_v}</div>
       <div class="er-stats">
         <div class="er-stat"><div class="er-stat-k">Drive</div><div class="er-stat-v">{drive} <span>{dist}</span></div></div>
-        <div class="er-stat"><div class="er-stat-k">Address</div><div class="er-stat-v" style="font-weight:500;font-size:.8rem">{html.escape(str(o['address']))}</div></div>
+        <div class="er-stat"><div class="er-stat-k">Address</div><div class="er-stat-v er-address">{html.escape(str(o['address']))}</div></div>
       </div>
       <div class="er-actions"><a class="er-directions" href="{url}" target="_blank" rel="noopener noreferrer">Open Directions</a></div>
     </div>""")
@@ -1381,13 +931,17 @@ def render_home():
 
 
 def _table(df):
-    """Static markdown table: text wraps (never truncated) and there is no index column."""
-    def cell(v):
-        return str(v).replace("|", "\\|").replace("\n", " ")
-    cols = list(df.columns)
-    lines = ["| " + " | ".join(cell(c) for c in cols) + " |", "|" + "|".join("---" for _ in cols) + "|"]
-    lines += ["| " + " | ".join(cell(v) for v in row) + " |" for row in df.itertuples(index=False)]
-    st.markdown("\n".join(lines))
+    """Readable, escaped tables with keyboard-accessible horizontal scrolling."""
+    headers = "".join(f'<th scope="col">{html.escape(str(c))}</th>' for c in df.columns)
+    rows = "".join(
+        "<tr>" + "".join(f"<td>{html.escape(str(v))}</td>" for v in row) + "</tr>"
+        for row in df.itertuples(index=False)
+    )
+    st.markdown(
+        '<div class="table-scroll" role="region" aria-label="Results table" tabindex="0">'
+        f"<table><thead><tr>{headers}</tr></thead><tbody>{rows}</tbody></table></div>",
+        unsafe_allow_html=True,
+    )
 
 
 def _pct(v):
@@ -1537,7 +1091,7 @@ def render_methodology():
         ["Case complexity (peers)", "CMS Complications & Deaths (patient volumes)", "Latest release", "Heart-attack/stroke volume, cardiac surgery, inpatient volume"],
         ["Hospital utilization", "CHIA Hospital Profiles", "HFY 2024", "Annual ED visits and inpatient occupancy (context)"],
         ["Left before being seen", "CMS Hospital Compare OP-22", "2024", "Shown on each ER card"],
-        ["Hospital system", "Each health system's public hospital list", "Current", "Shown on each card; optional 'your system' filter"],
+        ["Hospital system", "Each health system's public hospital list", "Current", "Shown on each card; optional hospital-system preference"],
         ["Provider wait", "CMS Hospital Compare OP-20 (no longer published)", "2019 or earlier", "Context table on the Forecast Model page only"],
         ["Weather", "National Weather Service", "Current observation + alerts", "Boston-wide context"],
         ["Respiratory illness", "CDC Massachusetts ARI", "Latest reporting week", "Statewide context"],
@@ -1807,7 +1361,7 @@ st.markdown("""
 st.markdown('<div class="ernow-nav-rule"></div>', unsafe_allow_html=True)
 
 current_view = st.session_state["ernow_view"]
-nav1, nav2, nav3, _ = st.columns([1.10, 1.45, 1.45, 3.00])
+nav1, nav2, nav3 = st.columns(3)
 
 with nav1:
     st.button(

@@ -1,5 +1,7 @@
 # ERNow Boston
 
+**Version 27** · Home-page layout and control styling update.
+
 **For urgent, non-life-threatening visits: find the ER that gets you seen and home fastest, not just the closest, in about 10 seconds.**
 
 Live ER wait times could be years away. ERNow brings ER transparency to Boston now: models built on 4,438 U.S. hospitals predict which ER will usually get you in and out fastest.
@@ -107,6 +109,13 @@ Run year by year, ERNow's promotion rule averaged **12.8 min** error vs **12.9 m
   - drive time, drive + typical visit, chance it's the fastest (4,000 simulated trips), and how often patients left before being seen (CMS OP-22, 2024)
 - One-tap directions; Boston context (weather, respiratory illness, events) shown but never used to adjust a number
 - Methodology and Forecast Model views with every result, in plain language first
+
+## Version 27: home-page controls and layout
+
+The home page keeps its dense overview with consistent spacing, aligned ER cards, and the same Instrument Sans typography for buttons, field labels, and selections. Serif headings and key time estimates preserve the existing visual hierarchy. Cards and controls stack on smaller screens, and model footnotes wrap instead of being cut off. Navigation visibly marks the current view, card actions align, and wide result tables scroll horizontally on small screens. Missing ED-time data uses body text rather than a large time estimate. The recommendation border follows the recommended hospital when the sort order changes. Shared styling lives in `styles.css`.
+
+- **Change location:** beside the saved location in **Your visit**. Clears the location for this session so you can use your device location again or choose a Boston area under “Location blocked? Choose a Boston area.” The location is remembered while switching views during the visit.
+- **Your doctors' hospital system (optional):** grouped with **Type of emergency**, with a visible explanation below each control. Choose a system to highlight its ERs, see its quickest available option, and optionally sort that system first. **Any** compares all systems. The quickest overall recommendation remains based on drive plus typical ED visit time; this is a continuity-of-care preference, not an insurance-network filter.
 
 ## What would make this live
 
