@@ -1,6 +1,6 @@
 # ERNow Boston
 
-**For urgent, non-life-threatening visits: find the ER that gets you seen and home fastest, not just the closest, in about 15 seconds.**
+**For urgent, non-life-threatening visits: find the ER that gets you seen and home fastest, not just the closest, in about 10 seconds.**
 
 Live ER wait times could be years away. ERNow brings ER transparency to Boston now: models built on 4,438 U.S. hospitals predict which ER will usually get you in and out fastest.
 
