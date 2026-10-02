@@ -2,6 +2,10 @@
 
 **Version 27** · Compact cards, consistent controls, and a source/claims audit (October 2, 2026).
 
+**Project goal:** “Find the ER that gets you seen and home fastest, not just the closest, lowering the decision time between needing one and finding a good one you can use.”
+
+This is the updated product objective; current evidence supports comparisons of hospital-level median performance. [ACCURACY_ROADMAP.md](ACCURACY_ROADMAP.md) defines the work needed to validate the full objective. [PROJECT_MEMORY.md](PROJECT_MEMORY.md) records the persistent project context.
+
 **Compare ERs in about 10 seconds. Find the shortest estimated total visit, not just the closest.**
 
 The 10-second headline rounds the recorded nine-second median from five ERNow participants. It describes decision time, not treatment or discharge time; speed varies. ERNow combines road travel with forecasts of hospital arrival-to-departure medians to compare total time through a visit.
