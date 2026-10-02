@@ -491,3 +491,35 @@ hr, [data-testid="stDivider"] {margin:.55rem 0 .35rem !important}
 }
 @media(prefers-reduced-motion:reduce) {.model-dot,.ernow-loading {animation:none !important}}
 
+
+/* Compact cards: keep all metrics, remove reserved header space. */
+.er-card {padding:.65rem .8rem !important}
+.er-head {min-height:0 !important;margin:.08rem 0 .15rem;line-height:1.25}
+.er-system {min-height:0;margin:.1rem 0 .3rem;font-size:.74rem;line-height:1.35}
+.er-wait-label {margin-top:.3rem !important;font-size:.74rem !important;line-height:1.35}
+.er-wait {margin:.05rem 0 .3rem !important;font-size:1.4rem !important;line-height:1.12 !important}
+.er-peer {margin:0 0 .35rem;font-size:.76rem;line-height:1.35}
+.er-card .er-stats {margin-top:.1rem;padding-top:.35rem;gap:.3rem .6rem !important}
+.er-stat-k {line-height:1.35;font-size:.65rem}
+.er-stat-v {line-height:1.4}
+.er-card .er-actions {padding-top:.45rem;margin-top:auto !important}
+.er-directions {min-height:1.9rem;box-sizing:border-box;line-height:1.3 !important;font-size:.76rem !important;padding:.3rem .6rem !important}
+.er-tags {min-height:1.1rem;gap:.25rem .35rem;margin-bottom:.15rem}
+.er-tags > span {line-height:1.35}
+[data-testid="stButton"] button p,
+[data-testid="stWidgetLabel"] p,
+[data-testid="stSelectbox"] [data-baseweb="select"] span,
+[data-testid="stSelectbox"] [data-baseweb="select"] input,
+[data-testid="stRadio"] label p {
+  font-family:'Instrument Sans','Helvetica Neue',Arial,sans-serif !important;
+}
+[data-testid="stButton"] button p {font-size:.86rem !important;font-weight:600 !important}
+[data-testid="stWidgetLabel"] p,[data-testid="stSelectbox"] label p,[data-testid="stRadio"] > label p {
+  font-size:.78rem !important;font-weight:600 !important;line-height:1.4 !important;
+  text-transform:none !important;letter-spacing:0 !important;
+}
+@media(max-width:650px) {.er-directions {min-height:2.5rem}}
+
+/* Keep controls and supporting labels in normal flow. */
+[data-testid="stRadio"] {margin:.1rem 0 .2rem}
+.brand-pitch {margin:.15rem 0 .65rem !important}

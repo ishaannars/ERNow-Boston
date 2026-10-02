@@ -1,12 +1,13 @@
 {
-  "locations": 1997,
-  "closest_not_fastest_share": 0.8307461191787682,
-  "median_minutes_saved_when_different": 97.5078572118828,
-  "median_extra_drive_min_when_different": 13.95852935510484,
+  "locations": 2001,
+  "geographic_scope": "45 x 45 latitude/longitude grid near Boston EDs; not clipped to city boundaries",
+  "closest_not_fastest_share": 0.8340829585207397,
+  "median_minutes_saved_when_different": 98.33578453125054,
+  "median_extra_drive_min_when_different": 13.391513232844936,
   "method": "Straight-line distance x1.35 at 18 mph +3 min; typical ED visit = national-model forecast (OP-18b).",
   "sensitivity": {
     "assumptions": "road circuity 1.2-1.5x, average speed 5-30 mph (5 mph = gridlock)",
-    "share_min": 0.7436154231347021,
-    "share_max": 0.8307461191787682
+    "share_min": 0.7536231884057971,
+    "share_max": 0.8340829585207397
   }
 }

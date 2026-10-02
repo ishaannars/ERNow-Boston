@@ -8,11 +8,11 @@ The target used here is:
 
 **CMS OP-18b — Median Time from Emergency Department Arrival to Departure for Discharged Emergency Department Patients.**
 
-This is a real hospital-level historical outcome measure and is updated quarterly by CMS. It is **throughput duration**, not a live wait-to-provider measurement.
+This is a real hospital-level historical outcome measure and is updated quarterly by CMS. It is **throughput duration**, not a live wait-to-provider measurement. OP-18b excludes psychiatric/mental-health and transferred visits.
 
 NBER also republishes historical Hospital Compare snapshots and lists `Timely_and_Effective_Care-Hospital` files for years back to 2016.
 
-## Fastest setup
+## Legacy pipeline setup
 
 1. Download several Hospital archive ZIPs from:
    - CMS Hospitals archive: https://data.cms.gov/provider-data/archived-data/hospitals
@@ -27,7 +27,7 @@ NBER also republishes historical Hospital Compare snapshots and lists `Timely_an
 4. It creates:
    `data/cms_op18b_history.csv`
 
-5. Relaunch Streamlit. Model Lab automatically detects the historical dataset and switches to real chronological validation.
+5. This builds the legacy historical dataset; it does not update the current app forecasts. Run the national pipeline below to update current outputs.
 
 ## What the model does
 
@@ -54,7 +54,7 @@ This is intentionally different from claiming live ER wait prediction.
 
 ## National model (current)
 
-The app's forecast now comes from `national_model.py`, which reads every hospital in the archives (not only Boston's six). After adding archives to `data/cms_archives/`, run:
+The app's forecast now comes from `national_model.py`, which reads every hospital in the archives (rather than only Boston). After adding archives to `data/cms_archives/`, run:
 
 ```
 python national_model.py

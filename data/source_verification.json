@@ -1,0 +1,200 @@
+{
+  "checked_on": "2026-10-02",
+  "profiles_source": "https://www.chiamass.gov/wp-content/uploads/docs/r/hospital-profiles/2024/FY24-Massachusetts-Hospital-Profiles-Databook.xlsx",
+  "profiles_sha256": "63858f5bfb623c080a7e6ad99be570939682b97790c9a5a65011c5a6563fb5bb",
+  "hospital_context": [
+    {
+      "hospital": "Tufts Medical Center",
+      "ed_visits": 45652,
+      "inpatient_occupancy_pct": 84.2,
+      "ed_visits_cell": "Appendix G!AC63",
+      "occupancy_cell": "Appendix B!H63"
+    },
+    {
+      "hospital": "Boston Medical Center",
+      "ed_visits": 113480,
+      "inpatient_occupancy_pct": 91.6,
+      "ed_visits_cell": "Appendix G!AC17",
+      "occupancy_cell": "Appendix B!H17"
+    },
+    {
+      "hospital": "Brigham and Women's Faulkner Hospital",
+      "ed_visits": 46750,
+      "inpatient_occupancy_pct": 85.0,
+      "ed_visits_cell": "Appendix G!AC18",
+      "occupancy_cell": "Appendix B!H18"
+    },
+    {
+      "hospital": "Massachusetts General Hospital",
+      "ed_visits": 118067,
+      "inpatient_occupancy_pct": 93.4,
+      "ed_visits_cell": "Appendix G!AC37",
+      "occupancy_cell": "Appendix B!H37"
+    },
+    {
+      "hospital": "Brigham and Women's Hospital",
+      "ed_visits": 59141,
+      "inpatient_occupancy_pct": 94.2,
+      "ed_visits_cell": "Appendix G!AC19",
+      "occupancy_cell": "Appendix B!H19"
+    },
+    {
+      "hospital": "Beth Israel Deaconess Medical Center",
+      "ed_visits": 35201,
+      "inpatient_occupancy_pct": 80.7,
+      "ed_visits_cell": "Appendix G!AC15",
+      "occupancy_cell": "Appendix B!H15"
+    }
+  ],
+  "edd_source": "https://www.chiamass.gov/wp-content/uploads/cmsr-edd-quarterly-databook-10-01-2019-to-3-31-2026.xlsx",
+  "edd_sha256": "cd27de7d566326a160452c73b1b16a0caf7e47b33d344deb8e7facca94d54709",
+  "edd_sheet": "VI-1",
+  "over_4h": [
+    {
+      "quarter": "2019-Q4",
+      "over_4h_visits": 366726,
+      "visits": 1113098,
+      "fraction": 0.3294642520245297
+    },
+    {
+      "quarter": "2025-Q3",
+      "over_4h_visits": 505988,
+      "visits": 1148382,
+      "fraction": 0.4406094836038879
+    }
+  ],
+  "geocoding_source": "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress",
+  "address_geocodes": [
+    {
+      "requested": "860 Washington St, Boston, MA 02111",
+      "matches": [
+        {
+          "address": "860 WASHINGTON ST, BOSTON, MA, 02111",
+          "coordinates": {
+            "x": -71.06389905456,
+            "y": 42.349010179243
+          }
+        }
+      ]
+    },
+    {
+      "requested": "725 Albany St, Boston, MA 02118",
+      "matches": [
+        {
+          "address": "725 ALBANY ST, BOSTON, MA, 02118",
+          "coordinates": {
+            "x": -71.070779503027,
+            "y": 42.335524014133
+          }
+        }
+      ]
+    },
+    {
+      "requested": "1 Deaconess Rd, Boston, MA 02215",
+      "matches": [
+        {
+          "address": "1 DEACONESS RD, BOSTON, MA, 02215",
+          "coordinates": {
+            "x": -71.108425378669,
+            "y": 42.337978052572
+          }
+        }
+      ]
+    },
+    {
+      "requested": "255 Washington St, Brighton, MA 02135",
+      "matches": [
+        {
+          "address": "255 WASHINGTON ST, BRIGHTON, MA, 02135",
+          "coordinates": {
+            "x": -71.147218882161,
+            "y": 42.346607248994
+          }
+        }
+      ]
+    }
+  ],
+  "cms_api_source": "https://data.cms.gov/provider-data/api/1/datastore/query/yv7e-xc69/0",
+  "cms_measures": [
+    {
+      "hospital": "Tufts Medical Center",
+      "facility_id": "220116",
+      "OP_18b": "208",
+      "OP_18b_period_start": "10/01/2024",
+      "OP_18b_period_end": "09/30/2025",
+      "OP_22": "4",
+      "OP_22_period_start": "01/01/2024",
+      "OP_22_period_end": "12/31/2024"
+    },
+    {
+      "hospital": "Boston Medical Center",
+      "facility_id": "220031",
+      "OP_18b": "227",
+      "OP_18b_period_start": "10/01/2024",
+      "OP_18b_period_end": "09/30/2025",
+      "OP_22": "7",
+      "OP_22_period_start": "01/01/2024",
+      "OP_22_period_end": "12/31/2024"
+    },
+    {
+      "hospital": "Brigham and Women's Faulkner Hospital",
+      "facility_id": "220119",
+      "OP_18b": "256",
+      "OP_18b_period_start": "10/01/2024",
+      "OP_18b_period_end": "09/30/2025",
+      "OP_22": "3",
+      "OP_22_period_start": "01/01/2024",
+      "OP_22_period_end": "12/31/2024"
+    },
+    {
+      "hospital": "Massachusetts General Hospital",
+      "facility_id": "220071",
+      "OP_18b": "288",
+      "OP_18b_period_start": "10/01/2024",
+      "OP_18b_period_end": "09/30/2025",
+      "OP_22": "4",
+      "OP_22_period_start": "01/01/2024",
+      "OP_22_period_end": "12/31/2024"
+    },
+    {
+      "hospital": "Brigham and Women's Hospital",
+      "facility_id": "220110",
+      "OP_18b": "300",
+      "OP_18b_period_start": "10/01/2024",
+      "OP_18b_period_end": "09/30/2025",
+      "OP_22": "5",
+      "OP_22_period_start": "01/01/2024",
+      "OP_22_period_end": "12/31/2024"
+    },
+    {
+      "hospital": "Beth Israel Deaconess Medical Center",
+      "facility_id": "220086",
+      "OP_18b": "336",
+      "OP_18b_period_start": "10/01/2024",
+      "OP_18b_period_end": "09/30/2025",
+      "OP_22": "2",
+      "OP_22_period_start": "01/01/2024",
+      "OP_22_period_end": "12/31/2024"
+    },
+    {
+      "hospital": "Boston Medical Center\u2013Brighton",
+      "facility_id": "220036",
+      "OP_18b": "146",
+      "OP_18b_period_start": "10/01/2024",
+      "OP_18b_period_end": "09/30/2025",
+      "OP_22": "1",
+      "OP_22_period_start": "01/01/2024",
+      "OP_22_period_end": "12/31/2024"
+    },
+    {
+      "hospital": "Mass Eye and Ear",
+      "facility_id": "220075",
+      "OP_18b": "174",
+      "OP_18b_period_start": "10/01/2024",
+      "OP_18b_period_end": "09/30/2025",
+      "OP_22": "3",
+      "OP_22_period_start": "01/01/2024",
+      "OP_22_period_end": "12/31/2024"
+    }
+  ]
+}

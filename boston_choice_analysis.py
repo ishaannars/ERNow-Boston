@@ -47,7 +47,7 @@ def main():
         for b in np.linspace(-71.16, -71.02, 45):
             d = 2 * R * np.arcsin(np.sqrt(np.sin(np.radians(h.latitude - a) / 2) ** 2 + np.cos(np.radians(a))
                                           * np.cos(np.radians(h.latitude)) * np.sin(np.radians(h.longitude - b) / 2) ** 2))
-            if d.min() > 4:          # keep points within 4 miles of an ER (Boston proper)
+            if d.min() > 4:          # Sample near these EDs; this is not clipped to Boston city boundaries.
                 continue
             drive = d * 1.35 / 18 * 60 + 3
             total = drive + h.forecast_op18b
@@ -56,6 +56,7 @@ def main():
     r = np.array(rows)
     diff = r[r[:, 0] == 1]
     out = {"locations": int(len(r)),
+           "geographic_scope": "45 x 45 latitude/longitude grid near Boston EDs; not clipped to city boundaries",
            "closest_not_fastest_share": float(r[:, 0].mean()),
            "median_minutes_saved_when_different": float(np.median(diff[:, 1])) if len(diff) else 0.0,
            "median_extra_drive_min_when_different": float(np.median(diff[:, 2])) if len(diff) else 0.0,

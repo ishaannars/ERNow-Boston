@@ -1,63 +1,27 @@
-# ERNow Boston — Data Sources
+# ERNow Boston — sources and periods (Version 27)
 
-## Current / dynamic
+See [CLAIMS_AUDIT.md](CLAIMS_AUDIT.md) for verification scope and `data/source_verification.json` for exact primary-source values, workbook hashes, and cell references.
 
-### Zero-cost estimated travel time
+| Data | Source and period | Use and limits |
+|---|---|---|
+| Median ED visit | [CMS hospital dataset](https://data.cms.gov/provider-data/topics/hospitals), OP-18b; saved Aug 2026 release, Oct 2024–Sep 2025 reporting period | Eight available hospital medians verified against CMS API; forecast hospital medians, not patient stays, first-provider waits, or live queues. Excludes psychiatric/mental-health and transfers. |
+| National model | Ten saved CMS snapshots, Oct 2017–Aug 2026 | 4,438 eligible reporting hospitals and 35,164 labeled release pairs. Release chronology is retrospective; periods can overlap. Raw ZIPs absent; final metrics refitted from saved panel. |
+| Left before seen | CMS OP-22, calendar 2024 | All eight displayed rates checked against CMS; national median from eligible saved reporting records. Not a personal-risk estimate. |
+| Peer matching | CMS hospital characteristics and Complications & Deaths denominators, latest saved release | 25 similar reporting hospitals matched on structural and case-complexity proxies. Does not fully adjust severity or evaluate quality. Raw proxy archives not independently rebuilt in this audit. |
+| Utilization | [CHIA HFY 2024 Hospital Profiles](https://www.chiamass.gov/insights-analysis/health-care-settings-providers/hospital-profiles/massachusetts-acute-hospital-profiles/) | All six populated ED-volume and inpatient-occupancy pairs checked against original workbook. Occupancy is inpatient, not ED crowding. Context only. |
+| Stays over four hours | [CHIA ED databook](https://www.chiamass.gov/insights-analysis/health-care-settings-providers/emergency-department-database-edd-reporting/), preliminary Sep 2026 publication | Treat-and-release aggregate: 32.95% Oct–Dec 2019 vs 44.06% Jul–Sep 2025; sheet VI-1. Context only. |
+| Historical provider wait | CMS OP-20, 2019 or earlier | Legacy CSV values not independently verified against original archive. Explicitly labeled unverified historical context; never used for ranking. |
+| ER addresses and services | Official hospital/VA pages; checked Oct 2, 2026 | Ten departments, including specialist, pediatric, and veterans' services. Four corrected ER addresses have approximate Census-geocoded coordinates; other campus coordinates remain approximate. See audit for sources. |
+| Hospital affiliation | Official hospital/system pages, CHIA profiles | Optional continuity preference and sorting. Not an insurance-network filter; record sharing varies. |
+| Drive time/distance | OpenStreetMap through public OSRM routing server | Cached up to five minutes. No live traffic, parking, ambulance routing, or guaranteed availability. Missing routes are not fabricated and cannot win the comparison. |
+| Weather/alerts | National Weather Service observation and point-alert APIs | Latest available observation, which may be delayed. Context only. |
+| Respiratory illness | CDC Massachusetts acute respiratory illness category | Latest available published weekly category; not live or hospital-specific. Context only. |
+| Events | City of Boston, TD Garden, MLB home schedule, Boston.com RSS, optional Ticketmaster | Detection cached 15 minutes; not exhaustive. Missing sources and no detections are distinct. Context only. |
+| Geographic comparison | `boston_choice_analysis.py` | 2,001 sampled points near Boston ERs, including areas outside city boundaries; assumed distance-based driving. Not observed patient trips. |
+| Decision times | `data/decision_time_results.csv`, [protocol](TIMING_TEST.md) | Small recorded convenience sample: five ERNow, five nearest-search, one full comparison. Not a controlled trial. |
 
-ERNow estimates road-route travel time and distance from the user's location using OpenStreetMap road data through OSRM. The route is recalculated at search time. The estimate does **not** include live traffic, accidents, parking time, or ambulance transport conditions. If routing is unavailable, ERNow does not fabricate a route estimate.
+## Current behavior
 
-### National Weather Service API
-Uses the user's coordinates to discover nearby observation stations, retrieves the latest available station observation, and checks active alerts for the point. NWS notes observation delivery can be delayed by upstream QC processing.
+Only saved CMS forecasts and road-route estimates determine the estimated time ranking. CHIA, weather, respiratory illness, events, and historical OP-20 are context only. The app does not refresh CMS forecast values automatically; rebuild with `national_model.py` after supplying archives. It has no verified live hospital wait feed.
 
-### Boston local time and holiday calendar
-Computed at request time from `America/New_York`, including major U.S. holidays and Massachusetts Patriots' Day.
-
-### CDC Acute Respiratory Illness (ARI), Massachusetts
-Uses the latest published state-level ARI category. CDC updates this dataset weekly, so ERNow labels it as latest weekly rather than live.
-
-### Current events
-
-ERNow checks multiple sources for Boston events that may affect traffic or emergency-department demand, including:
-
-- City of Boston event data
-- TD Garden's official event schedule
-- MLB's official schedule for Red Sox home games
-- recent Boston.com local and traffic RSS coverage
-- optional Ticketmaster data when an API key is configured
-
-Event data is used as a contextual demand signal, not as a live measure of hospital activity.
-
-## Historical hospital baselines
-
-### CMS OP-18b
-Latest available public median emergency-department arrival-to-departure duration for eligible discharged patients. This is throughput, not wait-to-provider.
-
-### CMS-derived OP-20 archive
-Legacy median minutes from ED arrival until evaluation by a qualified healthcare professional. Used only as a historical wait benchmark and documented as a 2019 historical benchmark.
-
-## Model limitation
-
-No public source reliably provides all seven Boston ERs' live queue, triage mix, staffing, room availability, boarding load, or incoming ambulance volume. ERNow therefore produces a forecast range rather than a confirmed live wait time.
-
-## Added sources
-
-### CMS Hospital Compare archives (national model)
-Ten releases (2017-10 to 2026-08) of `Timely_and_Effective_Care-Hospital` and `Hospital_General_Information` for every U.S. hospital: OP-18b, OP-18c, OP-22, ED volume category, hospital type, ownership, and star rating. Used to train and test the national ED performance model (`national_model.py`). Each release is published 9–12 months after its reporting period ends.
-
-### CHIA Hospital Profiles, HFY 2024
-Massachusetts Center for Health Information and Analysis hospital profiles: annual ED visits and **inpatient** occupancy (from CHIA Hospital Cost Reports). Inpatient occupancy is not ED crowding; a full hospital tends to back up its ED because admitted patients wait there for a bed. Shown as annual context.
-
-### CMS Complications & Deaths (case complexity for peers)
-Patient-volume denominators from the newest release: heart-attack and stroke volume, whether a hospital performs CABG (cardiac) surgery, and inpatient volume. Used only to match each Boston hospital with similar-complexity U.S. peers.
-
-### Note on CHIA and weather/illness/events
-CHIA utilization and Boston context (weather, respiratory illness, events) are displayed for context and are not used to adjust any number.
-
-### CMS OP-22 (left before being seen)
-Share of ED patients who left before being seen, calendar year 2024 (latest release). Shown on each ER card next to the U.S. median.
-
-### Restricted emergency departments
-Mass Eye and Ear (eye and ENT emergencies; CMS OP-18b available, so it gets a forecast range), Boston Children's Hospital (pediatric; no CMS ED-time data), and VA Boston's West Roxbury ED (enrolled veterans; not in CMS Hospital Compare, location from VA Boston). Shown separately and never ranked against general EDs.
-
-### Hospital systems
-Each ED's parent system (Mass General Brigham, Beth Israel Lahey Health, Boston Medical Center Health System, Tufts Medicine, Boston Children's, VA Boston), from each system's public list of hospitals. Used only for the optional "your doctors' system" tag; it never changes the ranking.
+Hospital-median ranges target 80% empirical coverage, not a guarantee or individual-patient interval. Simulation shares are uncalibrated comparisons of uncertain hospital medians. Data freshness, clinical appropriateness, and personal outcomes remain separate limitations.
