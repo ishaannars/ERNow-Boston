@@ -1071,7 +1071,7 @@ def render_home():
     st.markdown('<div class="brand-sub">For urgent, non-life-threatening visits: find the ER that gets you seen and home fastest, '
                 'not just the closest, in about 15 seconds.</div>'
                 '<div class="brand-pitch">Live ER wait times could be years away. ERNow brings ER transparency to Boston now: '
-                f'models tested on {n_hosp} U.S. hospitals predict which ER will likely get you seen fastest.</div>', unsafe_allow_html=True)
+                f'models built on {n_hosp} U.S. hospitals predict which ER will usually get you in and out fastest, drive included.</div>', unsafe_allow_html=True)
 
     national, _fc = load_national()
     if national:
@@ -1081,7 +1081,7 @@ def render_home():
         live = [
             ("Expected ED visit", "Last year's figure", "ED times persist; in the latest test no learned model beat it by 2%."),
             ("The range on each card", f"{iv['test_coverage']:.0%} held true", "In a year the model never saw (target 80%)."),
-            ("Vs similar hospitals", "25 look-alikes", "Matched on size, type, and case mix."),
+            ("Vs similar hospitals", "25 look-alikes", "Matched on ED size, type, ownership, rating, and case mix."),
             ("Chance fastest", "4,000 trips", "Your drive, replayed over each ER's range."),
         ]
         techniques = ["Method: persistence", "Method: conformal ranges", "Method: nearest neighbors", "Method: trip simulation"]
@@ -1100,7 +1100,7 @@ def render_home():
       <div class="live-head"><span class="model-dot"></span><span class="live-title">4 models running live</span></div>
       {measured}
       <div class="live-meta">{sp['hospitals']:,} U.S. hospitals · {sp['total_rows']:,} hospital-periods · CMS {html.escape(national['releases'][0][:4])}–{html.escape(national['releases'][-1][:4])} ·
-      picked the fastest local ER {rk['fastest_pick_accuracy']:.0%} of the time vs {rk['fastest_pick_random_baseline']:.0%} by chance</div>
+      in a held-out year, picked the local ER with the shortest visit {rk['fastest_pick_accuracy']:.0%} of the time vs {rk['fastest_pick_random_baseline']:.0%} by chance</div>
       <div class="live-grid">{tiles}</div>
     </div>""",
             unsafe_allow_html=True,
@@ -1366,8 +1366,8 @@ def render_methodology():
 
     st.markdown("""
     <div class="ds-card">
-      <div class="ds-title">The mission: the ER that gets you seen fastest, not just the closest</div>
-      <div class="ds-sub"><strong>Live ER wait times could be years away. ERNow brings ER transparency to Boston now: models tested on thousands of U.S. hospitals predict which ER will likely get you seen fastest.</strong> Today people search "ER near me" and go to the closest one, with no information about the ED itself. Hospitals don't publish live waits, and ERNow doesn't need them: the differences come from staffing, size, boarding, and case mix, which change slowly. ERNow assembles the data from CMS, CHIA, the CDC, the Weather Service, and road routing into one screen, labels every number by source and period, and is built so live hospital data can plug in the day it exists.</div>
+      <div class="ds-title">The mission: the ER that usually gets you in and out fastest, not just the closest</div>
+      <div class="ds-sub"><strong>Live ER wait times could be years away. ERNow brings ER transparency to Boston now: models built on 4,400+ U.S. hospitals predict which ER will usually get you in and out fastest, drive included.</strong> Today people search "ER near me" and go to the closest one, with no information about the ED itself. Hospitals don't publish live waits, and ERNow doesn't need them: the differences come from staffing, size, boarding, and case mix, which change slowly. ERNow assembles the data from CMS, CHIA, the CDC, the Weather Service, and road routing into one screen, labels every number by source and period, and is built so live hospital data can plug in the day it exists.</div>
     </div>
     """, unsafe_allow_html=True)
 
