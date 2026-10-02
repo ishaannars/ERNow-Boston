@@ -928,12 +928,54 @@ def render_methodology():
             ("Peer comparison", "25 nearest peers",
              "Nearest-neighbor matching on ED volume, hospital type, ownership, star rating, and case complexity (heart-attack and stroke volume, cardiac surgery, inpatient volume)."),
             ("Drivers & ablation", "Honest by design",
-             "Permutation importance shows what moves ED time; ablation shows extra features did not beat Persistence, so ERNow keeps the simpler model."),
+             "Permutation importance measures predictive inputs, not causes of ED time; ablation shows extra features did not beat Persistence, so ERNow keeps the simpler model."),
         ]
         st.markdown('<div class="model-grid">' + "".join(
             f'<div class="model-card"><div class="model-k">{html.escape(k)}</div><div class="model-value">{html.escape(v)}</div>'
             f'<div class="model-copy">{html.escape(c)}</div></div>' for k, v, c in tiles) + '</div>', unsafe_allow_html=True)
         st.caption("Full results, tables, and validation details are on the Forecast Model page.")
+
+        st.subheader("Historical accuracy of every candidate")
+        names = {"Persistence baseline": "Persistence (latest published median)",
+                 "Partial pooling (shrink toward state & peer means)": "Partial pooling",
+                 "Ridge regression": "Ridge regression", "Gradient boosting": "Gradient boosting"}
+        historical = []
+        for result in national["models"]:
+            errors = [fold["maes"][result["model"]] for fold in national.get("rolling", [])]
+            historical.append({
+                "Candidate": names.get(result["model"], result["model"]),
+                "Selection-release MAE": f"{result['validation_MAE']:.2f} min",
+                "Final-test MAE": f"{result['MAE']:.2f} min",
+                "Final-test R²": f"{result['R2']:.3f}",
+                "Rolling MAE, min–max": f"{min(errors):.2f}–{max(errors):.2f} min" if errors else "—",
+            })
+        _table(pd.DataFrame(historical))
+        st.caption(f"MAE is average absolute error predicting a published hospital median, not an individual stay. "
+                   f"Final test: {sp['test_rows']:,} hospitals; model selected on the preceding release. "
+                   f"Rolling results span {len(national.get('rolling', []))} held-out releases, training each candidate only on earlier releases. "
+                   "Rolling fits use all earlier labeled pairs; the final selection test reserves a separate validation release, so their training windows differ.")
+        bt = national.get("boston_backtest", {})
+        if bt.get("hospitals"):
+            st.caption(f"Boston's {bt['hospitals']} general EDs: {bt['MAE_selected']:.1f}-minute hospital-median error and "
+                       f"rank correlation {bt['spearman_selected']:.2f} in one held-out release. This is a small local test. "
+                       "Release chronology is retrospective; reporting windows can overlap.")
+
+        st.subheader("How the pieces combine on your screen")
+        st.write("The four point forecasters compete; their predictions are not averaged together. The model selected on validation supplies "
+                 "each card's forecast median. A separate conformal model supplies the range. Estimated road travel is added to that median "
+                 "to rank ERs by lowest estimated total time. Peer matching and simulation add context without changing that ranking.")
+        _table(pd.DataFrame([
+            ["Selected point forecaster", "Forecast median; added to drive for total", "Yes"],
+            ["Conformal range model", "Target-80% median range; spread for simulation", "No"],
+            ["OSRM road routing", "Drive minutes and distance", "Yes"],
+            ["Nearest-neighbor peers", "Median difference versus similar hospitals", "No"],
+            ["4,000-scenario simulation", "Fastest in simulation percentage", "No"],
+            ["CMS OP-22 and external context", "Left-before-seen rate and contextual information", "No"],
+        ], columns=["Component", "Consumer output", "Changes time ranking?"]))
+        st.caption(f"The combined consumer calculation is verified against the saved forecasts. "
+                   f"Range coverage was {iv['test_coverage']:.1%} in the final test, but varied by historical release. "
+                   "Routing has not been validated against observed trip times, simulation shares remain uncalibrated, and the full comparison "
+                   "has not been tested against individual treatment or discharge outcomes. The nine-second result measures decision time.")
 
     st.subheader("Reading an ER card")
     st.markdown("""

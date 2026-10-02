@@ -89,6 +89,8 @@ Adding feature groups to gradient boosting did not beat Persistence on the final
 
 Peer comparisons use 25 nearest reporting hospitals, matched with ED volume, type, ownership, rating, and case-complexity proxies. They compare the latest reported median with peers’ medians; proxy matching does not fully adjust for clinical severity or measure quality of care.
 
+The candidate point models compete rather than form an ensemble. The selected model supplies the median; conformal prediction supplies its range; OSRM supplies road travel. The median plus drive determines ranking. Peer matching and simulation provide additional information without altering the estimated-time order. Methodology reports every candidate’s historical error and explains this integration.
+
 ## What the app shows
 
 - **Comparison at a glance:** lowest estimated drive + hospital median, with its difference from the closest routed ED. This is not a clinical recommendation or a personal discharge-time prediction.
@@ -117,7 +119,7 @@ Medicare-participating ERs must provide screening for an emergency condition and
 
 ```sh
 pip install -r requirements.txt
-python scripts/verify_claims.py --refit  # verify saved-panel metrics and forecast bounds
+python scripts/verify_claims.py --refit --rolling  # refit all candidates, bounds, and seven historical folds
 python scripts/verify_consumer_outputs.py  # verify displayed forecasts, totals, and ranking
 python boston_choice_analysis.py       # recompute sampled-grid comparison
 # Add original CMS zip archives as described in HISTORICAL_DATA_SETUP.md before rebuilding:

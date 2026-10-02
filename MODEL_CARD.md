@@ -59,4 +59,4 @@ Run year by year, ERNow's promotion rule averaged **12.8 min** error vs **12.9 m
 - Raw archive ZIPs are absent from this checkout. See CLAIMS_AUDIT.md for verification scope.
 
 ## Retraining
-Add a new CMS archive and run `python national_model.py`. Updates are manual. Run `python scripts/verify_claims.py --refit` to audit saved metrics and Boston interval bounds.
+Add a new CMS archive and run `python national_model.py`. Updates are manual. Run `python scripts/verify_claims.py --refit --rolling` to refit final-test and seven rolling historical folds, audit saved metrics, and verify Boston interval bounds.
