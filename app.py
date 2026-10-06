@@ -20,6 +20,11 @@ from threading import current_thread
 from streamlit.runtime.scriptrunner import add_script_run_ctx, get_script_run_ctx
 
 st.set_page_config(page_title="ERNow Boston", page_icon="✚", layout="wide")
+# Send the shared theme before any view content or data loading.
+st.markdown(
+    "<style>" + (Path(__file__).parent / "styles.css").read_text() + "</style>",
+    unsafe_allow_html=True,
+)
 DATA_PATH = Path(__file__).parent / "data" / "boston_er_data.csv"
 HOSPITAL_DATA = DATA_PATH
 NATIONAL_RESULTS = Path(__file__).resolve().parent / "data" / "national_results.json"
@@ -115,11 +120,6 @@ MAJOR_TICKETMASTER_VENUES = {
     "td garden", "fenway park", "mgm music hall at fenway", "leader bank pavilion",
     "aggannis arena", "agganis arena", "house of blues boston",
 }
-
-st.markdown(
-    "<style>" + (Path(__file__).parent / "styles.css").read_text() + "</style>",
-    unsafe_allow_html=True,
-)
 
 
 def secret_or_env(name):
@@ -481,10 +481,16 @@ def render_home():
         vals_lm = {m["model"]: m["validation_MAE"] for m in national["models"]}
         best_gain = (vals_lm["Persistence baseline"] - vals_lm[national["best_learned_model"]]) / vals_lm["Persistence baseline"]
         live = [
-            ("Hospital median visit", "Latest reported median" if national["selected_model"] == "Persistence baseline" else "Selected model forecast", f"Selected: {national['selected_model']}. Challenger validation gain {best_gain:.1%}; promotion threshold {national['promotion_margin']:.0%}."),
-            ("The range on each card", f"{iv['test_coverage']:.0%} median coverage", "Held-out hospital medians, not individual visits (target 80%)."),
-            ("Vs similar hospitals", "25 look-alikes", "Matched on ED size, type, ownership, rating, and case mix."),
-            ("Fastest in simulation", "4,000 scenarios", "Drive + uncertain hospital medians; percentages not yet calibrated."),
+            (("Typical ER visit", "Last year's figure",
+              "ER times change slowly, so each hospital's latest public number is the forecast. "
+              "Bigger models were tested; none beat it by enough in the latest test.")
+             if national["selected_model"] == "Persistence baseline" else
+             ("Typical ER visit", "Tested forecast",
+              "A model that beat last year's figure in testing forecasts each hospital's typical time.")),
+            ("The range on each card", f"{iv['test_coverage']:.0%} held true",
+             "In a year the model never saw, the hospital's typical time landed inside its range (target 80%)."),
+            ("Vs similar hospitals", "25 look-alikes", "Matched on ER size, type, ownership, rating, and patient mix."),
+            ("Chance it's fastest", "4,000 what-if trips", "Your drive, replayed over each ER's range. A guide, not a guarantee."),
         ]
         techniques = [f"Method: {national['selected_model']}", "Method: conformal ranges", "Method: nearest neighbors", "Method: trip simulation"]
         ds = decision_summary()
@@ -1313,7 +1319,9 @@ with nav3:
         args=("Forecast Model",),
     )
 
-with st.container(key="ernow_view_" + current_view.lower().replace(" ", "_")):
+# Replace the entire previous view together, including any leftover widgets.
+view_slot = st.empty()
+with view_slot.container():
     loading_slot = st.empty()
     loading_slot.markdown('<div class="ernow-loading-wrap"><div class="ernow-loading"></div></div>', unsafe_allow_html=True)
     try:

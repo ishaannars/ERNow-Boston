@@ -55,7 +55,7 @@ button[kind="header"] {
 [data-testid="stAppViewContainer"], [data-testid="stAppViewBlockContainer"], section.main, .stApp, html, body {background:var(--ivory) !important;}
 [data-testid="stStatusWidget"], .stDeployButton {display:none !important;}
 [data-testid="stSpinner"] [role="status"] {display:none !important;}
-.ernow-loading-wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:9999;pointer-events:none;background:rgba(248,244,230,.55);}
+.ernow-loading-wrap{display:flex;align-items:center;justify-content:center;height:38px;pointer-events:none;background:transparent;}
 .ernow-loading{width:30px;height:30px;border:3px solid #DDD4BE;border-top-color:var(--moss);border-radius:50%;animation:ernow-spin .8s linear infinite;}
 @keyframes ernow-spin{to{transform:rotate(360deg)}}
 
@@ -535,3 +535,7 @@ hr, [data-testid="stDivider"] {margin:.55rem 0 .35rem !important}
 
 /* The model indicator is static; only the loading spinner animates. */
 .model-dot {animation:none !important;box-shadow:none !important}
+
+/* Keep Streamlit loading placeholders in the approved palette on reload. */
+[data-testid="stSkeleton"],
+[data-testid="stAppSkeleton"] > div {background:var(--shell,#FFFDF5) !important;}
