@@ -7,9 +7,9 @@ app execution and is still controlled by Streamlit Community Cloud.
 
 from pathlib import Path
 from threading import Lock
+import logging
 
 from streamlit import file_util
-from streamlit.web.server.routes import StaticFileHandler
 
 _lock = Lock()
 _installed = False
@@ -28,10 +28,20 @@ def install_startup_theme():
     with _lock:
         if _installed:
             return
+        # Newer Streamlit releases replaced Tornado with another server.
+        # An optional appearance fix must never prevent the app from starting.
+        try:
+            from streamlit.web.server.routes import StaticFileHandler
+        except ImportError:
+            logging.getLogger(__name__).warning(
+                "Startup styling unavailable: install the pinned Streamlit version."
+            )
+            return
         index_path = str(Path(file_util.get_static_dir()) / "index.html")
         original = Path(index_path).read_bytes()
         if b"<head>" not in original:
-            raise RuntimeError("Streamlit's HTML shell has changed; review startup_theme.py")
+            logging.getLogger(__name__).warning("Unrecognized Streamlit HTML shell")
+            return
         themed = original.replace(b"<head>", b"<head>" + _PREPAINT, 1)
         original_content = StaticFileHandler.get_content
         original_size = StaticFileHandler.get_content_size
