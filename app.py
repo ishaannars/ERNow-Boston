@@ -682,7 +682,7 @@ def render_home():
                          f"about {fmt_minutes(max(diff, 0))} longer in estimated drive + median visit.")
         st.markdown(f'<div class="answer-one"><div class="answer-k">{label}</div>'
                     f'<div class="answer-v">{html.escape(str(best["hospital"]))}</div>{opt_rows(best)}'
-                    f'<div class="answer-note">{note}</div></div>', unsafe_allow_html=True)
+                    f'<div class="answer-note">{note}</div><div class="er-actions"><a class="er-directions" target="_blank" rel="noopener noreferrer" href="https://www.google.com/maps/dir/?api=1&origin={origin_lat},{origin_lon}&destination={quote(str(best["address"]))}&travelmode=driving">Open Directions</a></div></div>', unsafe_allow_html=True)
         st.caption("Ranges forecast hospital medians, not your personal visit length. OP-18b excludes psychiatric/mental-health and transfer visits. Emergency or getting worse? "
                    "Go to the nearest appropriate ER or call 911.")
         st.markdown('<div class="note"><strong>Emergency care:</strong> Medicare-participating ERs must screen for an emergency condition '

@@ -539,3 +539,8 @@ hr, [data-testid="stDivider"] {margin:.55rem 0 .35rem !important}
 /* Keep Streamlit loading placeholders in the approved palette on reload. */
 [data-testid="stSkeleton"],
 [data-testid="stAppSkeleton"] > div {background:var(--shell,#FFFDF5) !important;}
+
+/* One consistent loader: hide Streamlit's built-in loading UI (ERNow's own spinner stays). */
+[data-testid="stStatusWidget"], [data-testid="stDecoration"], [data-testid="stSpinner"],
+[data-testid="stSkeleton"], .stSkeleton, .stSpinner, [data-testid="stAppRunningIndicator"]{display:none !important;}
+[data-testid="stAppViewBlockContainer"] [data-stale="true"], .element-container[data-stale="true"]{opacity:1 !important;transition:none !important;}
