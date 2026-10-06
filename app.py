@@ -12,6 +12,10 @@ import xml.etree.ElementTree as ET
 import pandas as pd
 import requests
 import streamlit as st
+from startup_theme import install_startup_theme
+
+install_startup_theme()
+
 from streamlit_geolocation import streamlit_geolocation
 import json
 import numpy as np
