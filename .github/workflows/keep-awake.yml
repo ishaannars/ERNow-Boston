@@ -1,0 +1,53 @@
+# Keeps the Streamlit apps awake: opens each app in a real (headless) browser every 4 hours.
+# If an app shows Streamlit's sleep screen, it clicks the wake-up button.
+name: Keep Streamlit apps awake
+
+on:
+  schedule:
+    - cron: "17 */4 * * *"   # every 4 hours (UTC), at :17 past the hour
+  workflow_dispatch:          # lets you run it by hand from the Actions tab
+
+jobs:
+  wake:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install headless browser
+        run: |
+          pip install playwright==1.47.0
+          python -m playwright install --with-deps chromium
+      - name: Open each app
+        run: |
+          cat > wake.py <<'PY'
+          import sys
+          from playwright.sync_api import sync_playwright
+
+          APPS = ["https://ernowboston.streamlit.app/", "https://icinema.streamlit.app/"]
+          failed = []
+          with sync_playwright() as p:
+              browser = p.chromium.launch()
+              for url in APPS:
+                  page = browser.new_page()
+                  try:
+                      page.goto(url, wait_until="domcontentloaded", timeout=90_000)
+                      page.wait_for_timeout(8_000)
+                      wake = page.get_by_role("button", name="Yes, get this app back up!")
+                      if wake.count() > 0:
+                          print(f"{url}: asleep, waking it up")
+                          wake.first.click()
+                          page.wait_for_timeout(60_000)   # give the app time to boot
+                      else:
+                          print(f"{url}: awake")
+                      page.wait_for_timeout(15_000)       # stay long enough to count as a visit
+                  except Exception as e:
+                      print(f"{url}: could not load ({e})")
+                      failed.append(url)
+                  finally:
+                      page.close()
+              browser.close()
+          sys.exit(1 if failed else 0)
+          PY
+          python wake.py
