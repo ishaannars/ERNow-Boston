@@ -519,7 +519,7 @@ def render_home():
             ("The range on each card", f"{iv['test_coverage']:.0%} held true",
              "In a year the model never saw, the hospital's typical time landed inside its range (target 80%)."),
             ("Vs similar hospitals", "25 look-alikes", "Matched on ER size, type, ownership, rating, and patient mix."),
-            ("Chance it's fastest", "4,000 what-if trips", calibration_line()),
+            ("Likely quickest", "4,000 what-if trips", calibration_line()),
         ]
         techniques = [f"Method: {national['selected_model']}", "Method: conformal ranges", "Method: nearest neighbors", "Method: simulation + calibration"]
         ds = decision_summary()
@@ -527,9 +527,8 @@ def render_home():
         if "ernow" in ds and "quick" in ds:
             secs = lambda v: f"{int(round(v))} seconds" if v < 60 else fmt_seconds(v)
             measured = (f'<div class="live-proof" title="Median times, measured with timing_test.py">'
-                        f'<b>A comparison in {secs(ds["ernow"]["median_seconds"])}.</b> Recorded median versus '
-                        f'{secs(ds["quick"]["median_seconds"])} for a nearest-ER search '
-                        f'({ds["ernow"]["participants"]} ERNow / {ds["quick"]["participants"]} search participants).</div>')
+                        f'<b>Timed test: ERNow picked an ER in {secs(ds["ernow"]["median_seconds"])}.</b> '
+                        f'A Google “ER near me” search took {secs(ds["quick"]["median_seconds"])} and only found the closest one.</div>')
         tiles = "".join(f'<div class="live-tile"><div class="live-k">{html.escape(k)}</div><div class="live-v">{html.escape(v)}</div>'
                         f'<div class="live-c">{html.escape(c)}</div><div class="live-t">{html.escape(t)}</div></div>'
                         for (k, v, c), t in zip(live, techniques))
@@ -537,8 +536,8 @@ def render_home():
             f"""<div class="model-bar">
       <div class="live-head"><span class="model-dot"></span><span class="live-title">4 models behind every comparison</span></div>
       {measured}
-      <div class="live-meta">{sp['hospitals']:,} U.S. hospitals · {sp['total_rows']:,} labeled release pairs · CMS {html.escape(national['releases'][0][:4])}–{html.escape(national['releases'][-1][:4])} ·
-      hospital-median error {next(m['MAE'] for m in national['models'] if m['model'] == national['selected_model']):.1f} min · on a held-out release, selected the shortest observed median in {rk['local_groups']} counties {rk['fastest_pick_accuracy']:.0%} of the time vs {rk['fastest_pick_random_baseline']:.0%} by chance</div>
+      <div class="live-meta">{sp['hospitals']:,} U.S. hospitals · {sp['total_rows']:,} hospital-years of data · CMS {html.escape(national['releases'][0][:4])}–{html.escape(national['releases'][-1][:4])} ·
+      typical-visit forecasts off by {next(m['MAE'] for m in national['models'] if m['model'] == national['selected_model']):.1f} min on average · in a year it never saw, it picked the fastest local ER {rk['fastest_pick_accuracy']:.0%} of the time vs {rk['fastest_pick_random_baseline']:.0%} by chance</div>
       <div class="live-grid">{tiles}</div>
     </div>""",
             unsafe_allow_html=True,
@@ -548,10 +547,10 @@ def render_home():
 
     if national and "ernow" in ds and "quick" in ds:
         with st.expander("About the 10-second comparison"):
-            st.caption("The headline rounds the recorded nine-second ERNow median. These are decision times, not hospital waits. "
-                       "Five participants used each method in a small convenience sample, not a controlled trial. "
-                       "Results vary with connection, location permission, and the decision. The search protocol selected the nearest ER; "
-                       "the study does not establish faster treatment or discharge. Full protocol: TIMING_TEST.md.")
+            st.caption("Five people picked an ER with ERNow (typical time: 9 seconds, rounded to \"about 10\" in the headline) and five used a "
+                       "Google \"ER near me\" search (20 seconds), which only finds the closest ER. It's a small informal test that measures "
+                       "how long choosing takes, not ER waits or faster care. Times vary with your connection and location settings. "
+                       "Full protocol: TIMING_TEST.md.")
 
     # Widget state is normally discarded by Streamlit when another view omits it.
     # Restore visit preferences from durable session state before rendering widgets.
@@ -580,7 +579,7 @@ def render_home():
                     st.session_state.pop("fallback_origin", None)
                     loading_slot.empty()
                     st.rerun()
-            st.caption("Change location to use your device location again or choose a different Boston area. Saved for this visit only.")
+            st.caption("Tap Change location to use your current location again or pick another Boston area. Saved only for this visit.")
     else:
         st.subheader("Get your location")
         # ERNow's own button (same style as every other button); location is requested only after it's tapped.
@@ -644,8 +643,8 @@ def render_home():
             st.caption("Choose General unless this is an eye, ear, nose, or throat problem.")
         with sel_r:
             my_system = st.selectbox("Your doctors' hospital system (optional)", SYSTEMS, index=0, key="my_system",
-                                     help="Your system may help with care continuity; record sharing varies. ERNow still ranks by estimated time and names its lowest-total ER.")
-            st.caption("Choose your doctors’ system to highlight its ERs and see its lowest estimated total. Any compares all systems; ranking stays time-based.")
+                                     help="Going to your own system can make follow-up easier, though record sharing varies. ERNow still ranks every ER by time.")
+            st.caption("Pick your doctors’ system to highlight its ERs and see its quickest option. ERNow still ranks every ER by time.")
     status_slot = st.empty()
     focus = "specialty" if em_type != "General" else None
     sys_map = dict(zip(df_all["hospital"], df_all.get("health_system", pd.Series([""] * len(df_all)))))
@@ -670,7 +669,7 @@ def render_home():
     event_status = "; ".join(major_events[:2]) if major_events else "None detected"
     status_slot.caption(
         f"Updated **{now_dt.strftime('%-I:%M %p')}** · {location_label} · "
-        f"CMS release: **{pd.Timestamp(national['releases'][-1]).strftime('%b %Y') if national else 'unavailable'} (saved)** · "
+        f"Hospital data: **CMS, {pd.Timestamp(national['releases'][-1]).strftime('%b %Y') if national else 'unavailable'}** · "
         f"Weather: **{weather_status}** · Respiratory illness: **{context['illness_label']}** · Major events: **{event_status}**"
     )
 
@@ -679,13 +678,13 @@ def render_home():
     closest = routed.loc[routed["route_time_min"].idxmin()] if len(routed) else None
     fastest = routed.iloc[0] if len(routed) else None
     if fastest is None:
-        st.info("Drive-inclusive comparison is unavailable. Hospital-median forecasts are shown below; no lowest-total ER is identified.")
+        st.info("Drive times aren't available right now, so ERNow can't pick the quickest ER. Each ER's typical visit time is still shown below.")
 
     def opt_rows(r):
         tot = (r["route_time_min"] + r["visit_mid"]) if pd.notna(r["route_time_min"]) and pd.notna(r["visit_mid"]) else None
         return (f'<div class="opt-rows">'
                 f'<div><span>Drive</span><b>~{fmt_minutes(r["route_time_min"])}</b></div>'
-                f'<div><span>Hospital median visit</span><b>{fmt_range(r["visit_lo"], r["visit_hi"])}</b></div>'
+                f'<div><span>Typical visit</span><b>{fmt_range(r["visit_lo"], r["visit_hi"])}</b></div>'
                 f'<div><span>Drive + typical visit</span><b>{"~" + fmt_minutes(tot) if tot else "—"}</b></div></div>')
 
     if focus == "specialty":
@@ -707,12 +706,12 @@ def render_home():
                 note += (f" {html.escape(str(fastest['hospital']))} has a lower estimated total "
                          f"(~{fmt_minutes(fastest['route_time_min'] + fastest['visit_mid'])}), but it's a general ED.")
         elif same:
-            label, note = "Closest and lowest estimated total", "The closest ER also has the lowest estimated drive + hospital median visit time."
+            label, note = "Closest and usually quickest", "The closest ER also has the shortest drive + typical visit."
         else:
             extra = best["route_time_min"] - closest["route_time_min"]
             net = (closest["route_time_min"] + closest["visit_mid"]) - (best["route_time_min"] + best["visit_mid"])
-            label = "Lowest estimated total"
-            note = (f"Estimated drive + median visit is <b>{fmt_minutes(net)} shorter</b> than at the closest ER, "
+            label = "Usually quickest"
+            note = (f"Drive + typical visit is <b>{fmt_minutes(net)} shorter</b> than at the closest ER, "
                     f"{html.escape(str(closest['hospital']))} (~{fmt_minutes(closest['route_time_min'])} away), "
                     f"even after {fmt_minutes(max(extra, 0))} more driving." if net > 0 else
                     f"About the same total time as the closest ER, {html.escape(str(closest['hospital']))}.")
@@ -724,12 +723,12 @@ def render_home():
             elif len(in_sys):
                 q = in_sys.iloc[0]
                 diff = (q["route_time_min"] + q["visit_mid"]) - (best["route_time_min"] + best["visit_mid"])
-                note += (f" Lowest estimated total in your system ({html.escape(my_system)}): <b>{html.escape(str(q['hospital']))}</b>, "
-                         f"about {fmt_minutes(max(diff, 0))} longer in estimated drive + median visit.")
+                note += (f" Quickest in your system ({html.escape(my_system)}): <b>{html.escape(str(q['hospital']))}</b>, "
+                         f"about {fmt_minutes(max(diff, 0))} longer in drive + typical visit.")
         st.markdown(f'<div class="answer-one"><div class="answer-k">{label}</div>'
                     f'<div class="answer-v">{html.escape(str(best["hospital"]))}</div>{opt_rows(best)}'
                     f'<div class="answer-note">{note}</div><div class="er-actions"><a class="er-directions" target="_blank" rel="noopener noreferrer" href="https://www.google.com/maps/dir/?api=1&origin={origin_lat},{origin_lon}&destination={quote(str(best["address"]))}&travelmode=driving">Open Directions</a></div></div>', unsafe_allow_html=True)
-        st.caption("Ranges forecast hospital medians, not your personal visit length. OP-18b excludes psychiatric/mental-health and transfer visits. Emergency or getting worse? "
+        st.caption("These are typical hospital times, not a prediction of your own visit, and they don't include mental-health visits or transfers. Emergency or getting worse? "
                    "Go to the nearest appropriate ER or call 911.")
         st.markdown('<div class="note"><strong>Emergency care:</strong> Medicare-participating ERs must screen for an emergency condition '
                     'and stabilize it or arrange an appropriate transfer, regardless of ability to pay. '
@@ -751,7 +750,7 @@ def render_home():
     if specialist is not None:   # the eye/ENT specialist leads when that's the emergency
         ranked = pd.concat([ranked[ranked["hospital"] == specialist["hospital"]],
                             ranked[ranked["hospital"] != specialist["hospital"]]]).reset_index(drop=True)
-    st.caption("CMS hospital medians, not live waits or personal visit predictions. Drives exclude live traffic. Chance it's quickest is calibrated on past years and excludes ERs without routes.")
+    st.caption("Typical times from public hospital reports, not live waits. Drive times don't include live traffic. \"Likely quickest\" is checked against past years; ERs without a route are left out.")
     closest_name = None if closest is None else closest["hospital"]
 
     cards = []
@@ -763,7 +762,7 @@ def render_home():
         if specialist is not None and row["hospital"] == specialist["hospital"]:
             tags += '<span class="best-label">Eye &amp; ENT specialist</span>'
         if fastest is not None and row["hospital"] == fastest["hospital"]:
-            tags += '<span class="best-label">Lowest estimated total</span>'
+            tags += '<span class="best-label">Usually quickest</span>'
         if my_system != "Any" and sys_map.get(row["hospital"]) == my_system:
             tags += '<span class="closest-label">Your system</span>'
         has_fc = pd.notna(row.get("visit_mid"))
@@ -796,25 +795,25 @@ def render_home():
       <div class="er-tags"><span class="rank-chip">#{pos}</span>{tags}{flag}</div>
       <div class="er-head"><span class="er-title">{html.escape(str(row['hospital']))}</span></div>
       <div class="er-system">{html.escape(str(sys_map.get(row['hospital'], '')))}</div>
-      <div class="er-wait-label" title="Forecast range for a hospital median, not an individual visit. Latest CMS reporting period ends {row['visit_period_end']}.">Forecast median {fmt_minutes(row["visit_mid"])} · target-80% range</div><div class="er-wait">{visit_range}</div>{peer}
+      <div class="er-wait-label" title="Likely range for this hospital's typical visit, not your individual visit. Latest public data ends {row['visit_period_end']}.">Typical visit {fmt_minutes(row["visit_mid"])} · likely range</div><div class="er-wait">{visit_range}</div>{peer}
       <div class="er-stats">
         <div class="er-stat"><div class="er-stat-k">Drive</div><div class="er-stat-v">{drive} <span>{drive_sub}</span></div></div>
         <div class="er-stat"><div class="er-stat-k">Drive + typical visit</div><div class="er-stat-v">{total}</div></div>
-        <div class="er-stat"><div class="er-stat-k">Chance it's quickest</div><div class="er-stat-v">{chance}</div></div>
+        <div class="er-stat"><div class="er-stat-k">Likely quickest</div><div class="er-stat-v">{chance}</div></div>
         <div class="er-stat"><div class="er-stat-k">Left before seen</div><div class="er-stat-v">{lwbs} <span>{lwbs_sub}</span></div></div>
       </div>
       <div class="er-actions"><a class="er-directions" href="{directions_url}" target="_blank" rel="noopener noreferrer">Open Directions</a></div>
     </div>""")
     st.markdown('<div class="er-list">' + "".join(cards) + '</div>', unsafe_allow_html=True)
-    st.caption("Seven general EDs included in this Boston comparison. Carney Hospital's ED closed in 2024. "
-               "EDs outside Boston, such as Cambridge's, aren't included yet.")
+    st.caption("The 7 general ERs in Boston are compared here (Carney Hospital's ER closed in 2024). "
+               "ERs outside Boston, such as Cambridge's, aren't included yet.")
 
     if len(others):
         _, fc_other = load_national()
         fc_map = {} if fc_other is None else fc_other.set_index("cms_provider_id").to_dict("index")
         tag_names = {"specialty": "Eye & ENT", "pediatric": "Pediatric ED", "veterans": "Veterans’ ED"}
         st.subheader("Other Boston emergency departments")
-        st.caption("Specialist, pediatric, and veterans’ services are listed separately. Eligibility and services vary; this app does not determine clinical suitability." + ("" if focus else " For an eye, ear, nose, or throat emergency, change the type of emergency at the top."))
+        st.caption("Specialist, children’s, and veterans’ ERs are listed separately. Who they serve varies, and ERNow doesn’t decide which care you need." + ("" if focus else " For an eye, ear, nose, or throat emergency, change the type of emergency at the top."))
         ocards = []
         for _, o in others.iterrows():
             route = routes.get((o["latitude"], o["longitude"]))
@@ -822,7 +821,7 @@ def render_home():
             dist = f"{route['miles']:.1f} mi" if route else ""
             fc = fc_map.get(str(o.get("cms_provider_id") or "").split(".")[0].zfill(6), {})
             if fc:
-                visit_k, visit_v = f"Forecast median {fmt_minutes(fc['forecast_op18b'])} · target-80% range", fmt_range(fc["lo80"], fc["hi80"])
+                visit_k, visit_v = f"Typical visit {fmt_minutes(fc['forecast_op18b'])} · likely range", fmt_range(fc["lo80"], fc["hi80"])
                 visit_class = "er-wait er-wait-sm"
             else:
                 visit_k, visit_v = "Typical ED visit", "No public ED-time data"
@@ -851,8 +850,8 @@ def render_home():
         if major_events:
             st.caption("Major event sources detected: " + "; ".join(major_events[:4]))
         else:
-            st.caption("No qualifying major event was detected. Feeds may be unavailable or incomplete; this does not guarantee that no event is occurring.")
-        st.caption("ER cards combine public hospital data, held-out-tested median forecasts, road estimates, and a calibrated chance each ER is quickest.")
+            st.caption("No major event found today. Event sources can be incomplete, so this isn't a guarantee.")
+        st.caption("ER cards combine public hospital data, tested forecasts of typical visit times, drive estimates, and a calibrated chance each ER is quickest.")
 
     st.subheader("Map")
     map_df = pd.concat([ranked[["hospital", "latitude", "longitude"]], others[["hospital", "latitude", "longitude"]]], ignore_index=True)
