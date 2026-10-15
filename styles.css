@@ -544,3 +544,8 @@ hr, [data-testid="stDivider"] {margin:.55rem 0 .35rem !important}
 [data-testid="stStatusWidget"], [data-testid="stDecoration"], [data-testid="stSpinner"],
 [data-testid="stSkeleton"], .stSkeleton, .stSpinner, [data-testid="stAppRunningIndicator"]{display:none !important;}
 [data-testid="stAppViewBlockContainer"] [data-stale="true"], .element-container[data-stale="true"]{opacity:1 !important;transition:none !important;}
+
+/* Mobile fix: no light band at the top; nothing covers the page while scrolling */
+[data-testid="stHeader"]{display:none !important;height:0 !important}
+[data-testid="stAppViewContainer"] > .main, .stApp [data-testid="stMain"]{padding-top:0 !important}
+iframe[title="ernow_geo"]{width:100% !important}

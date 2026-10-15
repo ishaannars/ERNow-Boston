@@ -12,6 +12,8 @@ import xml.etree.ElementTree as ET
 import pandas as pd
 import requests
 import streamlit as st
+import streamlit.components.v1 as _components
+_ernow_geo = _components.declare_component("ernow_geo", path=str(__import__("pathlib").Path(__file__).parent / "ernow_geo"))
 from startup_theme import install_startup_theme
 
 install_startup_theme()
@@ -558,12 +560,18 @@ def render_home():
             st.caption("Change location to use your device location again or choose a different Boston area. Saved for this visit only.")
     else:
         st.subheader("Get your location")
-        location = streamlit_geolocation()
+        location = _ernow_geo(key="ernow_geo", default=None)
+        geo_error = location.get("error") if isinstance(location, dict) else None
         if isinstance(location, dict) and location.get("latitude") is not None and location.get("longitude") is not None:
             origin_lat, origin_lon = float(location["latitude"]), float(location["longitude"])
             location_label = fetch_location_name(origin_lat, origin_lon)
         else:
-            with st.expander("Location blocked? Choose a Boston area"):
+            if geo_error == "denied":
+                st.info("Location is turned off for this site. To use it: open your phone's Settings → your browser → "
+                        "Location → While Using, then reload. Or choose your Boston area below.")
+            elif geo_error in ("timeout", "unavailable", "unsupported"):
+                st.info("Couldn't get your location quickly. Choose your Boston area below to compare ERs now.")
+            with st.expander("Location blocked? Choose a Boston area", expanded=bool(geo_error)):
                 fallback = st.selectbox("Boston area", list(FALLBACK_ORIGINS.keys()))
                 if st.button("Use this area", use_container_width=True):
                     st.session_state["fallback_origin"] = fallback
