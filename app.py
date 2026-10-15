@@ -832,8 +832,10 @@ def render_home():
         st.markdown('<div class="er-list er-list-3">' + "".join(ocards) + '</div>', unsafe_allow_html=True)
 
     with st.expander("About today's Boston conditions"):
-        st.write("Weather, respiratory illness, and major events are shown for context only. They do not change any number on this page, "
-                 "because no public data exists to test such an adjustment. A learned respiratory-surge forecast is next on the roadmap.")
+        st.write("Today's weather, respiratory illness, and major events are shown so you can judge for yourself. They don't change "
+                 "the times on this page yet: the forecasts are built from each hospital's yearly public reports, which can't measure "
+                 "day-to-day effects. We're testing whether hospital crowding and respiratory-illness season make the forecast more "
+                 "accurate, and anything that passes will be added.")
         if major_events:
             st.caption("Major event sources detected: " + "; ".join(major_events[:4]))
         else:
