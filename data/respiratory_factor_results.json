@@ -1,0 +1,145 @@
+{
+ "test": "Respiratory-illness season (CDC ILINet, every state, weekly 2010-2026) added to ERNow's forecast contest",
+ "features_deployable": [
+  "state flu-like-illness rate over the hospital's latest reporting year",
+  "change vs the year before",
+  "rate over the 12 months before each release",
+  "recent vs reporting-year difference"
+ ],
+ "oracle_check": "Also tested with perfect knowledge of the coming season's illness (not usable in practice) as an upper bound",
+ "single_split": {
+  "baseline features": {
+   "Persistence baseline": [
+    11.804638265691958,
+    9.421458800099577
+   ],
+   "Ridge regression": [
+    13.034766211447533,
+    10.725353485737166
+   ],
+   "Partial pooling (shrink toward state & peer means)": [
+    11.603624375955716,
+    9.387127085141405
+   ],
+   "Gradient boosting": [
+    12.60643801492187,
+    10.287480663565976
+   ]
+  },
+  "+ respiratory (deployable)": {
+   "Persistence baseline": [
+    11.804638265691958,
+    9.421458800099577
+   ],
+   "Ridge regression": [
+    13.887082734677973,
+    10.947620217110277
+   ],
+   "Partial pooling (shrink toward state & peer means)": [
+    11.603624375955716,
+    9.387127085141405
+   ],
+   "Gradient boosting": [
+    12.777268247533346,
+    9.931329681743268
+   ]
+  },
+  "+ respiratory ORACLE (perfect future knowledge)": {
+   "Persistence baseline": [
+    11.804638265691958,
+    9.421458800099577
+   ],
+   "Ridge regression": [
+    13.738766448260677,
+    10.657171750138135
+   ],
+   "Partial pooling (shrink toward state & peer means)": [
+    11.603624375955716,
+    9.387127085141405
+   ],
+   "Gradient boosting": [
+    12.63641403524456,
+    9.661908997446705
+   ]
+  }
+ },
+ "rolling": [
+  {
+   "k": 2,
+   "release": "2020-10-01",
+   "persistence": 11.074101984426024,
+   "Ridge_base": 10.754503199758982,
+   "Gradi_base": 11.253021521709336,
+   "Ridge_resp": 10.818329904020182,
+   "Gradi_resp": 11.336767604356538
+  },
+  {
+   "k": 3,
+   "release": "2021-10-01",
+   "persistence": 15.888002059732235,
+   "Ridge_base": 15.388705189160563,
+   "Gradi_base": 15.390871522312183,
+   "Ridge_resp": 15.500138201444027,
+   "Gradi_resp": 15.38341394493582
+  },
+  {
+   "k": 4,
+   "release": "2022-07-01",
+   "persistence": 12.006629270780214,
+   "Ridge_base": 11.965926843855957,
+   "Gradi_base": 11.673587045180849,
+   "Ridge_resp": 12.34875324401578,
+   "Gradi_resp": 12.062711141826732
+  },
+  {
+   "k": 5,
+   "release": "2023-10-01",
+   "persistence": 14.487792725460887,
+   "Ridge_base": 14.281987724467431,
+   "Gradi_base": 13.76414127951077,
+   "Ridge_resp": 14.740442053945555,
+   "Gradi_resp": 13.966984111865886
+  },
+  {
+   "k": 6,
+   "release": "2024-10-01",
+   "persistence": 13.56710393541877,
+   "Ridge_base": 15.018348302673273,
+   "Gradi_base": 14.49285622841296,
+   "Ridge_resp": 14.097832538884715,
+   "Gradi_resp": 13.842133656720158
+  },
+  {
+   "k": 7,
+   "release": "2025-11-01",
+   "persistence": 11.804638265691958,
+   "Ridge_base": 13.034766211447533,
+   "Gradi_base": 12.60643801492187,
+   "Ridge_resp": 13.887082734677973,
+   "Gradi_resp": 12.777268247533346
+  },
+  {
+   "k": 8,
+   "release": "2026-08-01",
+   "persistence": 9.421458800099577,
+   "Ridge_base": 10.02322867496925,
+   "Gradi_base": 9.780900529844843,
+   "Ridge_resp": 9.932418666246573,
+   "Gradi_resp": 9.59799698875943
+  }
+ ],
+ "rolling_avg_MAE": {
+  "persistence": 12.61,
+  "gradient_boosting": 12.71,
+  "gradient_boosting_plus_respiratory": 12.71,
+  "ridge": 12.92,
+  "ridge_plus_respiratory": 13.05
+ },
+ "respiratory_better_years": {
+  "gradient_boosting": 3,
+  "ridge": 2,
+  "of": 7
+ },
+ "promoted": false,
+ "conclusion": "Not promoted. Respiratory season did not improve forecasts of hospital-level yearly ED visit medians, even with perfect future knowledge; Persistence stays."
+}
