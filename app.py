@@ -567,10 +567,13 @@ def render_home():
             location_label = fetch_location_name(origin_lat, origin_lon)
         else:
             if geo_error == "denied":
-                st.info("Location is turned off for this site. To use it: open your phone's Settings → your browser → "
-                        "Location → While Using, then reload. Or choose your Boston area below.")
+                st.markdown('<div class="geo-note">Your browser didn\'t share your location. This happens if you tapped '
+                            '"Don\'t Allow," location is off for your browser, or you\'re browsing privately. You can turn it on in '
+                            'your phone\'s Settings under your browser\'s Location, or just pick your Boston area below.</div>',
+                            unsafe_allow_html=True)
             elif geo_error in ("timeout", "unavailable", "unsupported"):
-                st.info("Couldn't get your location quickly. Choose your Boston area below to compare ERs now.")
+                st.markdown('<div class="geo-note">Your location took too long to come through. Pick your Boston '
+                            'area below to compare ERs now, or try the button again.</div>', unsafe_allow_html=True)
             with st.expander("Location blocked? Choose a Boston area", expanded=bool(geo_error)):
                 fallback = st.selectbox("Boston area", list(FALLBACK_ORIGINS.keys()))
                 if st.button("Use this area", use_container_width=True):
