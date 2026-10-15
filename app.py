@@ -583,7 +583,19 @@ def render_home():
             st.caption("Change location to use your device location again or choose a different Boston area. Saved for this visit only.")
     else:
         st.subheader("Get your location")
-        location = _ernow_geo(key="ernow_geo", default=None)
+        # ERNow's own button (same style as every other button); location is requested only after it's tapped.
+        if st.button("Use my location", key="use_my_location", use_container_width=True, icon=":material/location_on:"):
+            st.session_state["geo_try"] = st.session_state.get("geo_try", 0) + 1
+            st.session_state.pop("geo_result", None)
+        st.caption("Used once to find nearby ERs. Never stored.")
+        location = st.session_state.get("geo_result")
+        if st.session_state.get("geo_try") and location is None:
+            got = _ernow_geo(key=f"ernow_geo_{st.session_state['geo_try']}", default=None)
+            if got is None:
+                st.caption("Finding your location…")
+            else:
+                st.session_state["geo_result"] = got
+                location = got
         geo_error = location.get("error") if isinstance(location, dict) else None
         if isinstance(location, dict) and location.get("latitude") is not None and location.get("longitude") is not None:
             origin_lat, origin_lon = float(location["latitude"]), float(location["longitude"])
