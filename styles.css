@@ -549,3 +549,7 @@ hr, [data-testid="stDivider"] {margin:.55rem 0 .35rem !important}
 [data-testid="stHeader"]{display:none !important;height:0 !important}
 [data-testid="stAppViewContainer"] > .main, .stApp [data-testid="stMain"]{padding-top:0 !important}
 iframe[title="ernow_geo"]{width:100% !important}
+
+/* Location note: matches the page instead of a blue alert box */
+.geo-note{background:#fbf8f0;border:1px solid #e2dccb;border-radius:12px;padding:.75rem .95rem;margin:.35rem 0 .8rem;
+  color:#4a463d;font-size:.97rem;line-height:1.45}

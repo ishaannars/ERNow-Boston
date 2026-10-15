@@ -1,25 +1,28 @@
 <!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
 <style>
-html,body{margin:0;background:transparent;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
-button{width:100%;min-height:48px;border:1px solid #3f4a3c;border-radius:12px;background:#2f3a2c;color:#f7f3e8;
-  font-size:16px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent}
-button:active{transform:scale(.99)} button[disabled]{opacity:.75;cursor:default}
-.why{margin:.45rem .1rem 0;color:#6b6b62;font-size:13px;line-height:1.35}
+html,body{margin:0;background:transparent;font-family:"Source Sans 3","Source Sans Pro",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+button{width:100%;min-height:46px;display:flex;align-items:center;justify-content:center;gap:.5rem;
+  border:1px solid #cfc6b0;border-radius:12px;background:#fffdf8;color:#2b2a25;font:600 16px/1.2 inherit;
+  font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color .15s,background .15s}
+button:hover{border-color:#8f8670;background:#fbf7ee} button[disabled]{opacity:.8;cursor:default}
+svg{width:17px;height:17px;flex:0 0 auto}
+.why{margin:.45rem .1rem 0;color:#7a756a;font-size:14px;line-height:1.35}
 </style></head><body>
-<button id="b">📍 Use my location</button>
+<button id="b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 1 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></svg><span id="t">Use my location</span></button>
 <div class="why">Used once to find nearby ERs. Never stored.</div>
 <script>
 const send=(type,extra)=>window.parent.postMessage(Object.assign({isStreamlitMessage:true,type},extra||{}),"*");
 const height=()=>send("streamlit:setFrameHeight",{height:document.body.scrollHeight+4});
 send("streamlit:componentReady",{apiVersion:1}); height();
-const b=document.getElementById("b");
+const b=document.getElementById("b"), t=document.getElementById("t");
 const done=v=>send("streamlit:setComponentValue",{value:v,dataType:"json"});
 b.onclick=()=>{
-  if(!navigator.geolocation){done({error:"unsupported"});return;}
-  b.disabled=true; b.textContent="Finding your location…";
+  if(!navigator.geolocation){done({error:"unsupported",t:Date.now()});return;}
+  b.disabled=true; t.textContent="Finding your location…";
   navigator.geolocation.getCurrentPosition(
-    p=>{b.textContent="Location found ✓";done({latitude:p.coords.latitude,longitude:p.coords.longitude,accuracy:p.coords.accuracy,t:Date.now()});},
-    e=>{b.disabled=false;b.textContent="📍 Use my location";done({error:e.code===1?"denied":(e.code===3?"timeout":"unavailable"),t:Date.now()});},
+    p=>{t.textContent="Location found";done({latitude:p.coords.latitude,longitude:p.coords.longitude,accuracy:p.coords.accuracy,t:Date.now()});},
+    e=>{b.disabled=false;t.textContent="Use my location";done({error:e.code===1?"denied":(e.code===3?"timeout":"unavailable"),t:Date.now()});},
     {enableHighAccuracy:false,maximumAge:600000,timeout:8000});
 };
 window.addEventListener("resize",height);
