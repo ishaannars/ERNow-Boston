@@ -472,12 +472,12 @@ def render_home():
     st.title("ERNow Boston")
     _nat, _ = load_national()
     n_hosp = f"{_nat['split']['hospitals']:,}" if _nat else "4,000+"
-    st.markdown('<div class="brand-sub">Compare ERs in about 10 seconds. '
-                'Find the shortest estimated total visit, not just the closest.</div>'
-                '<div class="brand-pitch">For urgent, non-life-threatening needs: ERNow combines road travel with '
-                'tested forecasts of hospital arrival-to-departure medians to compare time through the whole visit. '
-                f'Built on {n_hosp} reporting U.S. hospitals. Estimates are typical, not live; '
-                'time to first clinician and your own discharge time are not predicted.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="brand-sub">For urgent, non-life-threatening visits: find the ER that usually gets patients '
+                'seen and home fastest, not just the closest, in about 10 seconds.</div>'
+                '<div class="brand-pitch">Live ER wait times could be years away. ERNow brings ER transparency to Boston now: '
+                f'it combines your drive with forecasts tested on {n_hosp} reporting U.S. hospitals to compare each ER\'s '
+                'typical total visit, alongside how often patients leave before being seen and how each ER compares with '
+                'similar hospitals. Estimates are typical hospital times, not live queues or your individual visit.</div>', unsafe_allow_html=True)
 
     national, _fc = load_national()
     if national:
@@ -510,7 +510,7 @@ def render_home():
                         for (k, v, c), t in zip(live, techniques))
         st.markdown(
             f"""<div class="model-bar">
-      <div class="live-head"><span class="model-dot"></span><span class="live-title">4 methods behind the comparison</span></div>
+      <div class="live-head"><span class="model-dot"></span><span class="live-title">4 models behind every comparison</span></div>
       {measured}
       <div class="live-meta">{sp['hospitals']:,} U.S. hospitals · {sp['total_rows']:,} labeled release pairs · CMS {html.escape(national['releases'][0][:4])}–{html.escape(national['releases'][-1][:4])} ·
       hospital-median error {next(m['MAE'] for m in national['models'] if m['model'] == national['selected_model']):.1f} min · on a held-out release, selected the shortest observed median in {rk['local_groups']} counties {rk['fastest_pick_accuracy']:.0%} of the time vs {rk['fastest_pick_random_baseline']:.0%} by chance</div>

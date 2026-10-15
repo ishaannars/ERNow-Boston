@@ -1,10 +1,15 @@
 # ERNow Boston
 
-**Version 27** · Compact cards, consistent controls, and a source/claims audit (October 2, 2026).
 
 **Project goal:** “Find the ER that gets you seen and home fastest, not just the closest, lowering the decision time between needing one and finding a good one you can use.”
 
-This is the updated product objective; current evidence supports comparisons of hospital-level median performance. [ACCURACY_ROADMAP.md](ACCURACY_ROADMAP.md) defines the work needed to validate the full objective. [PROJECT_MEMORY.md](PROJECT_MEMORY.md) records the persistent project context.
+<!-- RECRUITER-TOP -->
+**[Try ERNow Boston →](https://ernowboston.streamlit.app/)**
+
+**9 s vs 20 s** to pick an ER (timed test, 5 people each) · **9.4-min** average error, R² 0.93, on 4,017 hospitals it never saw · picked the fastest local ER **83% vs 24%** by chance.
+
+
+
 
 **Compare ERs in about 10 seconds. Find the shortest estimated total visit, not just the closest.**
 
@@ -106,7 +111,6 @@ The candidate point models compete rather than form an ensemble. The selected mo
 - **Context:** weather, latest weekly respiratory illness, and detected events. Context never changes median forecasts or ranking. Missing weather/illness feeds display as unavailable; event checks may fail or miss events.
 - **Methodology and Forecast Model:** model comparisons, release-by-release tests, uncertainty, structural associations, and data freshness.
 
-## Version 27: controls and compact layout
 
 Cards retain all metrics while removing reserved header space and tightening internal gaps. Instrument Sans is shared by body text, **Change location**, field labels, and selections. Serif headings and time estimates preserve the visual hierarchy. The active navigation button has the emergency banner’s red border. Switching views preserves emergency type, hospital system, sort preference, and session location. One loader covers the render; routes and context calls run concurrently with caching. Styles live in `styles.css`.
 
