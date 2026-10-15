@@ -553,3 +553,7 @@ iframe[title="ernow_geo"]{width:100% !important}
 /* Location note: matches the page instead of a blue alert box */
 .geo-note{background:#fbf8f0;border:1px solid #e2dccb;border-radius:12px;padding:.75rem .95rem;margin:.35rem 0 .8rem;
   color:#4a463d;font-size:.97rem;line-height:1.45}
+
+/* One status indicator only: hide Streamlit's "RUNNING…" status and the Stop / Fork / GitHub toolbar */
+[data-testid="stToolbar"],[data-testid="stStatusWidget"],[data-testid="stAppDeployButton"],[data-testid="stMainMenu"],
+[data-testid="stDecoration"],[data-testid="stToolbarActions"],.stAppToolbar,header[data-testid="stHeader"]{display:none !important;visibility:hidden !important}
