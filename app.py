@@ -65,7 +65,7 @@ def fmt_seconds(sec):
 
 
 def chance_fastest(drive, mid, lo, hi, n=4000, seed=11):
-    """Uncalibrated share of simulated drive + hospital-median scenarios won.
+    """Share of simulated drive + hospital-median scenarios won, then calibrated on held-out years.
 
     Lognormal spread is approximated from interval bounds; patient-level visit
     variability is not measured. Missing routes or valid bounds are excluded.
@@ -83,7 +83,20 @@ def chance_fastest(drive, mid, lo, hi, n=4000, seed=11):
     draws = d + np.exp(np.log(np.maximum(m, 1)) + sigma * rng.standard_normal((n, len(m))))
     wins = np.bincount(draws.argmin(axis=1), minlength=len(m)) / n
     probs[np.where(ok)[0]] = wins
-    return probs
+    return calibrate_chance(probs)
+
+
+def calibrate_chance(probs):
+    """Map simulated shares to tested probabilities (isotonic fit on held-out years, data/chance_calibration.json)."""
+    try:
+        cal = json.loads((Path(__file__).parent / "data" / "chance_calibration.json").read_text())
+        x, y = np.asarray(cal["x"], float), np.asarray(cal["y"], float)
+    except Exception:
+        return probs
+    out = np.asarray(probs, float).copy()
+    ok = np.isfinite(out)
+    out[ok] = np.interp(out[ok], x, y)
+    return out
 EASTERN = ZoneInfo("America/New_York")
 
 FALLBACK_ORIGINS = {
@@ -127,6 +140,16 @@ MAJOR_TICKETMASTER_VENUES = {
     "aggannis arena", "agganis arena", "house of blues boston",
 }
 
+
+
+def calibration_line():
+    """Plain-English calibration result, read from data/chance_calibration.json."""
+    try:
+        cal = json.loads((Path(__file__).parent / "data" / "chance_calibration.json").read_text())
+        return (f"Checked on {cal['hospital_years']:,} hospital-years: when it said {cal['example_predicted_090']:.0%}, "
+                f"that ER really was quickest {cal['example_actual_090']:.0%} of the time.")
+    except Exception:
+        return "Your drive, replayed over each ER's range."
 
 def secret_or_env(name):
     try:
@@ -496,9 +519,9 @@ def render_home():
             ("The range on each card", f"{iv['test_coverage']:.0%} held true",
              "In a year the model never saw, the hospital's typical time landed inside its range (target 80%)."),
             ("Vs similar hospitals", "25 look-alikes", "Matched on ER size, type, ownership, rating, and patient mix."),
-            ("Chance it's fastest", "4,000 what-if trips", "Your drive, replayed over each ER's range. A guide, not a guarantee."),
+            ("Chance it's fastest", "4,000 what-if trips", calibration_line()),
         ]
-        techniques = [f"Method: {national['selected_model']}", "Method: conformal ranges", "Method: nearest neighbors", "Method: trip simulation"]
+        techniques = [f"Method: {national['selected_model']}", "Method: conformal ranges", "Method: nearest neighbors", "Method: simulation + calibration"]
         ds = decision_summary()
         measured = ""
         if "ernow" in ds and "quick" in ds:
@@ -716,7 +739,7 @@ def render_home():
     if specialist is not None:   # the eye/ENT specialist leads when that's the emergency
         ranked = pd.concat([ranked[ranked["hospital"] == specialist["hospital"]],
                             ranked[ranked["hospital"] != specialist["hospital"]]]).reset_index(drop=True)
-    st.caption("CMS hospital medians, not live waits or personal visit predictions. Drives exclude live traffic. Simulation percentages are uncalibrated and exclude ERs without routes.")
+    st.caption("CMS hospital medians, not live waits or personal visit predictions. Drives exclude live traffic. Chance it's quickest is calibrated on past years and excludes ERs without routes.")
     closest_name = None if closest is None else closest["hospital"]
 
     cards = []
@@ -746,7 +769,7 @@ def render_home():
         else:
             drive, drive_sub, total = "Unavailable", "", "—"
         cf = row.get("chance_fastest")
-        chance = "—" if pd.isna(cf) else ("&lt;1%" if cf < 0.005 else (">99%" if cf > 0.995 else f"{cf:.0%}"))
+        chance = "—" if pd.isna(cf) else ("&lt;1%" if cf < 0.005 else ("99%" if cf > 0.99 else f"{cf:.0%}"))
         lw, lw_us = row.get("lwbs_pct"), row.get("lwbs_us_median")
         lwbs = "—" if pd.isna(lw) else f"{lw:.0f}%"
         lwbs_sub = "2024" if pd.isna(lw_us) else f"U.S. {lw_us:.0f}% · 2024"
@@ -765,7 +788,7 @@ def render_home():
       <div class="er-stats">
         <div class="er-stat"><div class="er-stat-k">Drive</div><div class="er-stat-v">{drive} <span>{drive_sub}</span></div></div>
         <div class="er-stat"><div class="er-stat-k">Drive + typical visit</div><div class="er-stat-v">{total}</div></div>
-        <div class="er-stat"><div class="er-stat-k">Fastest in simulation</div><div class="er-stat-v">{chance}</div></div>
+        <div class="er-stat"><div class="er-stat-k">Chance it's quickest</div><div class="er-stat-v">{chance}</div></div>
         <div class="er-stat"><div class="er-stat-k">Left before seen</div><div class="er-stat-v">{lwbs} <span>{lwbs_sub}</span></div></div>
       </div>
       <div class="er-actions"><a class="er-directions" href="{directions_url}" target="_blank" rel="noopener noreferrer">Open Directions</a></div>
@@ -815,7 +838,7 @@ def render_home():
             st.caption("Major event sources detected: " + "; ".join(major_events[:4]))
         else:
             st.caption("No qualifying major event was detected. Feeds may be unavailable or incomplete; this does not guarantee that no event is occurring.")
-        st.caption("ER cards combine public hospital data, held-out-tested median forecasts, road estimates, and uncalibrated simulation shares.")
+        st.caption("ER cards combine public hospital data, held-out-tested median forecasts, road estimates, and a calibrated chance each ER is quickest.")
 
     st.subheader("Map")
     map_df = pd.concat([ranked[["hospital", "latitude", "longitude"]], others[["hospital", "latitude", "longitude"]]], ignore_index=True)
@@ -944,8 +967,8 @@ def render_methodology():
                 if any(r.get('coverage') is not None for r in (national.get('rolling') or [])) else "")),
             ("Ranking test", f"{rk['fastest_pick_accuracy']:.0%} vs {rk['fastest_pick_random_baseline']:.0%}",
              f"Picked the shortest observed hospital median in {rk['local_groups']} local areas {rk['fastest_pick_accuracy']:.0%} of the time, versus {rk['fastest_pick_random_baseline']:.0%} by chance."),
-            ("Fastest in simulation", "4,000 scenarios",
-             "A trip simulation (Monte Carlo) replays your drive with each hospital's tested range 4,000 times, summarizing simulated hospital-median scenarios. These percentages are not calibrated probabilities for your visit."),
+            ("Chance it's quickest", "4,000 scenarios, calibrated",
+             "A trip simulation (Monte Carlo) replays your drive with each hospital's tested range 4,000 times, summarizing simulated hospital-median scenarios. They are then calibrated against 6 held-out years (9,861 hospital-years): when it said 88%, that ER really had the shortest typical time 89% of the time. It describes typical hospital times, not your individual visit."),
             ("Peer comparison", "25 nearest peers",
              "Nearest-neighbor matching on ED volume, hospital type, ownership, star rating, and case complexity (heart-attack and stroke volume, cardiac surgery, inpatient volume)."),
             ("Drivers & ablation", "Honest by design",
@@ -990,12 +1013,12 @@ def render_methodology():
             ["Conformal range model", "Target-80% median range; spread for simulation", "No"],
             ["OSRM road routing", "Drive minutes and distance", "Yes"],
             ["Nearest-neighbor peers", "Median difference versus similar hospitals", "No"],
-            ["4,000-scenario simulation", "Fastest in simulation percentage", "No"],
+            ["4,000-scenario simulation", "Calibrated chance it's quickest", "No"],
             ["CMS OP-22 and external context", "Left-before-seen rate and contextual information", "No"],
         ], columns=["Component", "Consumer output", "Changes time ranking?"]))
         st.caption(f"The combined consumer calculation is verified against the saved forecasts. "
                    f"Range coverage was {iv['test_coverage']:.1%} in the final test, but varied by historical release. "
-                   "Routing has not been validated against observed trip times, simulation shares remain uncalibrated, and the full comparison "
+                   "Routing has not been validated against observed trip times, the chance-quickest calibration covers typical hospital times (not individual visits), and the full comparison "
                    "has not been tested against individual treatment or discharge outcomes. The nine-second result measures decision time.")
 
     st.subheader("Reading an ER card")
@@ -1004,7 +1027,7 @@ def render_methodology():
     - **Similar U.S. hospitals:** that time vs 25 look-alike hospitals nationwide (k-nearest neighbors on ED volume, type, ownership, star rating, and case-complexity proxies).
     - **Drive:** real road route from where you are (OpenStreetMap/OSRM), without live traffic.
     - **Drive + typical visit:** the two added together, which is how ERNow ranks "usually quickest" (drive plus a predicted median, not a personal expected duration).
-    - **Fastest in simulation:** the fraction of 4,000 independent hospital-median scenarios where this ER has the lowest drive + median. It is not calibrated to individual visits; missing routes are excluded.
+    - **Chance it's quickest:** the fraction of 4,000 independent hospital-median scenarios where this ER has the lowest drive + median. It is calibrated on 9,861 held-out hospital-years and describes typical hospital times, not individual visits; missing routes are excluded.
     - **Left before seen (2024):** the share of patients who left before being seen (CMS OP-22). This is an association with ED conditions, not a direct wait-time measurement.
     - **Hospital system:** the network each ER belongs to. If you pick your doctors' system, ERNow tags its ERs and names the quickest one in it, to support care continuity; record sharing varies. Ranking stays time-based.
     - **Insurance:** not a ranking factor. Medicare-participating ERs must screen and stabilize emergency conditions or appropriately transfer patients (EMTALA). Most private plans have protections for covered out-of-network emergency services; exceptions apply.
@@ -1271,7 +1294,7 @@ def render_forecast_model():
 
         **Ranking:** Spearman rank correlation and fastest-pick accuracy within counties that have 3 or more hospitals.
 
-        **Fastest in simulation:** 4,000 independent lognormal draws centered on the predicted hospital median, with spread approximated from the log ratio of the forecast bounds, plus drive time. Bounds can be asymmetric, so these are not exact fitted quantiles. This is uncalibrated hospital-median uncertainty, not a personal-visit probability.
+        **Chance it's quickest:** 4,000 independent lognormal draws centered on the predicted hospital median, with spread approximated from the log ratio of the forecast bounds, plus drive time. Bounds can be asymmetric, so these are not exact fitted quantiles. The shares are then mapped through an isotonic calibration fit on 6 rolling held-out releases (9,861 hospital-years; data/chance_calibration.json). They describe hospital-median uncertainty, not a personal-visit probability.
 
         **What the 83% measures:** choosing the shortest observed hospital median in counties with at least three eligible hospitals. It excludes drive time and individual patient outcomes.
 
