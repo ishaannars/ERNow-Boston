@@ -65,7 +65,7 @@ def fmt_seconds(sec):
 
 
 def chance_fastest(drive, mid, lo, hi, n=4000, seed=11):
-    """Share of simulated drive + hospital-median scenarios won, then calibrated on held-out years.
+    """Share of simulated drive + hospital-median scenarios won (checked against held-out years).
 
     Lognormal spread is approximated from interval bounds; patient-level visit
     variability is not measured. Missing routes or valid bounds are excluded.
@@ -93,6 +93,8 @@ def calibrate_chance(probs):
         x, y = np.asarray(cal["x"], float), np.asarray(cal["y"], float)
     except Exception:
         return probs
+    if not cal.get("calibration_helps_held_out", False):
+        return probs  # held-out years showed the raw simulation is already as accurate; don't adjust it
     out = np.asarray(probs, float).copy()
     ok = np.isfinite(out)
     out[ok] = np.interp(out[ok], x, y)
@@ -1086,6 +1088,50 @@ def render_methodology():
                 unsafe_allow_html=True)
 
 
+
+def _extra_json(name):
+    try:
+        return json.loads((Path(__file__).parent / "data" / name).read_text())
+    except Exception:
+        return None
+
+
+def render_extra_tests():
+    """Updates 36-39: held-out calibration, national impact, model switching, equity. All read from data/."""
+    cal, imp = _extra_json("chance_calibration.json"), _extra_json("national_impact.json")
+    sw, eq = _extra_json("regime_switch_results.json"), _extra_json("equity_audit.json")
+    if not any((cal, imp, sw, eq)):
+        return
+    st.subheader("More tests, every rule set before running")
+    rows = []
+    if imp:
+        lo, hi = imp["mean_minutes_saved_ci95_county_bootstrap"]
+        rows.append(["Across the U.S.: picking by forecast vs any ER in the same county",
+                     f"{imp['mean_minutes_saved_vs_random']:.0f} min shorter typical visit ({lo:.0f}–{hi:.0f}); "
+                     f"better in {imp['share_better_than_random']:.0%} of {imp['county_years']:,} county-years",
+                     "Hospital part only, no drive time"])
+    if cal and "latest_year" in cal:
+        rows.append(["Is \"chance it's quickest\" honest?",
+                     f"Close. When it said {cal['example_predicted_090']:.0%}, that ER was quickest {cal['example_actual_090']:.0%} of the time "
+                     f"({cal['hospital_years']:,} hospital-years). An extra correction curve "
+                     + ("helped" if cal.get("calibration_helps_held_out") else "did not help")
+                     + " on unseen years, so " + ("it is applied" if cal.get("calibration_helps_held_out") else "the raw simulation is shown"),
+                     "Hospital part only, no drive time"])
+    if sw:
+        m = sw["results"][sw["main_challenger"]]
+        rows.append(["Switch models in turbulent years?",
+                     f"{'Promoted' if sw['promoted'] else 'Not promoted'}: {m['gain_vs_persistence']:+.1%} vs Persistence. "
+                     f"Even a perfect year-by-year switch would gain only {sw['best_possible_gain_main']:.1%}",
+                     "Needs ≥2% to ship"])
+    if eq:
+        rows.append(["Does it work as well for every kind of hospital?",
+                     ("No groups flagged" if not eq["flags"] else "Flagged: " + "; ".join(eq["flags"]))
+                     + f" (rural, ownership, ED size; coverage {min(g['coverage'] for g in eq['groups']):.0%}–"
+                     f"{max(g['coverage'] for g in eq['groups']):.0%})",
+                     f"{eq['held_out_releases']} held-out years"])
+    _table(pd.DataFrame(rows, columns=["Question", "Answer", "Note"]))
+    st.caption("Code: research/national_impact.py, calibrate_chance_fastest.py, regime_switch_test.py, equity_audit.py.")
+
 def render_forecast_model():
     st.title("Forecast Model")
     st.caption("The evidence behind ERNow, for anyone who wants to check it: tested on eligible reporting U.S. hospitals in the CMS archives, then applied to Boston.")
@@ -1218,6 +1264,7 @@ def render_forecast_model():
         if bt.get("hospitals"):
             st.caption(f"Boston backtest on the latest release: average error {bt['MAE_selected']:.1f} min across {bt['hospitals']} hospitals; "
                        f"rank correlation {bt['spearman_selected']:.2f}; fastest hospital predicted correctly: {'yes' if bt['fastest_pick_correct'] else 'no'}.")
+        render_extra_tests()
 
     with tabs[2]:
         st.caption("In plain terms: which information actually improves the forecast, and which doesn't.")

@@ -1,0 +1,123 @@
+{
+ "single_split": {
+  "baseline features": {
+   "Persistence baseline": [
+    11.804638265691958,
+    9.421458800099577
+   ],
+   "Ridge regression": [
+    13.035530123309869,
+    10.725907731699687
+   ],
+   "Partial pooling (shrink toward state & peer means)": [
+    11.603624375955716,
+    9.387127085141405
+   ],
+   "Gradient boosting": [
+    12.60643801492187,
+    10.287480663565976
+   ]
+  },
+  "+ respiratory (deployable)": {
+   "Persistence baseline": [
+    11.804638265691958,
+    9.421458800099577
+   ],
+   "Ridge regression": [
+    13.886977175837306,
+    10.947522625587704
+   ],
+   "Partial pooling (shrink toward state & peer means)": [
+    11.603624375955716,
+    9.387127085141405
+   ],
+   "Gradient boosting": [
+    12.777268247533346,
+    9.931329681743268
+   ]
+  },
+  "+ respiratory ORACLE (perfect future knowledge)": {
+   "Persistence baseline": [
+    11.804638265691958,
+    9.421458800099577
+   ],
+   "Ridge regression": [
+    13.738713904419368,
+    10.657056200573379
+   ],
+   "Partial pooling (shrink toward state & peer means)": [
+    11.603624375955716,
+    9.387127085141405
+   ],
+   "Gradient boosting": [
+    12.63641403524456,
+    9.661908997446705
+   ]
+  }
+ },
+ "rolling": [
+  {
+   "k": 2,
+   "release": "2020-10-01",
+   "persistence": 11.074101984426024,
+   "Ridge_base": 10.754500558193339,
+   "Gradi_base": 11.253021521709336,
+   "Ridge_resp": 10.81828945173904,
+   "Gradi_resp": 11.336767604356538
+  },
+  {
+   "k": 3,
+   "release": "2021-10-01",
+   "persistence": 15.888002059732235,
+   "Ridge_base": 15.388647376620469,
+   "Gradi_base": 15.390871522312183,
+   "Ridge_resp": 15.500132389327984,
+   "Gradi_resp": 15.38341394493582
+  },
+  {
+   "k": 4,
+   "release": "2022-07-01",
+   "persistence": 12.006629270780214,
+   "Ridge_base": 11.965017672309001,
+   "Gradi_base": 11.673587045180849,
+   "Ridge_resp": 12.34878071387966,
+   "Gradi_resp": 12.062711141826732
+  },
+  {
+   "k": 5,
+   "release": "2023-10-01",
+   "persistence": 14.487792725460887,
+   "Ridge_base": 14.281862626489346,
+   "Gradi_base": 13.76414127951077,
+   "Ridge_resp": 14.74038628131988,
+   "Gradi_resp": 13.966984111865886
+  },
+  {
+   "k": 6,
+   "release": "2024-10-01",
+   "persistence": 13.56710393541877,
+   "Ridge_base": 15.018392209031827,
+   "Gradi_base": 14.49285622841296,
+   "Ridge_resp": 14.097870886376223,
+   "Gradi_resp": 13.842133656720158
+  },
+  {
+   "k": 7,
+   "release": "2025-11-01",
+   "persistence": 11.804638265691958,
+   "Ridge_base": 13.035530123309869,
+   "Gradi_base": 12.60643801492187,
+   "Ridge_resp": 13.886977175837306,
+   "Gradi_resp": 12.777268247533346
+  },
+  {
+   "k": 8,
+   "release": "2026-08-01",
+   "persistence": 9.421458800099577,
+   "Ridge_base": 10.02329117433984,
+   "Gradi_base": 9.780900529844843,
+   "Ridge_resp": 9.932263385809268,
+   "Gradi_resp": 9.59799698875943
+  }
+ ]
+}

@@ -1,5 +1,5 @@
 {
- "method": "Isotonic regression of simulated chance-fastest vs whether the hospital truly had the lowest median, within U.S. counties with 3+ EDs, rolling held-out CMS releases (conformal ranges fit only on earlier releases).",
+ "method": "    python research/calibrate_chance_fastest.py",
  "hospital_years": 9861,
  "held_out_years": 6,
  "x": [
@@ -239,5 +239,12 @@
  "example_predicted_090": 0.879,
  "example_actual_090": 0.886,
  "brier_raw": 0.06203,
- "brier_calibrated": 0.06102
+ "brier_calibrated_in_sample": 0.06102,
+ "brier_calibrated_cross_fitted": 0.06282,
+ "latest_year": {
+  "hospital_years": 1633,
+  "brier_raw": 0.04196,
+  "brier_calibrated_on_earlier_years": 0.04216
+ },
+ "calibration_helps_held_out": false
 }

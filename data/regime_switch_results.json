@@ -1,0 +1,156 @@
+{
+ "method": "    python research/regime_switch_test.py Finding this builds on: learned models beat Persistence in the volatile 2020-2023 releases and lose in stable years. Rule written before running: - Signal (known before each forecast): how much hospital medians moved between the two most recently   published releases (mean absolute change, minutes). - Switch: use the challenger when the signal is above a threshold, Persistence otherwise. The threshold is   chosen only from earlier held-out releases (expanding window, candidates = earlier signals or \"never\"),   so each year is decided without seeing it. The first two releases are only used to choose. - Challenger fixed in advance: partial pooling (best validation challenger in the main study). Ridge and   gradient boosting are reported as sensitivity checks, not used to pick the winner. - Promote only if, over the evaluated releases, the switch beats Persistence by >= 2% MAE, the paired   hospital bootstrap 95% interval excludes zero, and county decision regret is not worse. Writes data/regime_switch_results.json. ",
+ "signal_by_release": {
+  "2020-10-01": 10.98,
+  "2021-10-01": 11.07,
+  "2022-07-01": 15.89,
+  "2023-10-01": 12.01,
+  "2024-10-01": 14.49,
+  "2025-11-01": 13.57,
+  "2026-08-01": 11.81
+ },
+ "main_challenger": "Partial pooling (shrink toward state & peer means)",
+ "results": {
+  "Partial pooling (shrink toward state & peer means)": {
+   "evaluated_releases": [
+    "2022-07-01",
+    "2023-10-01",
+    "2024-10-01",
+    "2025-11-01",
+    "2026-08-01"
+   ],
+   "choices": {
+    "2022-07-01": {
+     "threshold": 10.98,
+     "signal": 15.89,
+     "uses": "Partial pooling (shrink toward state & peer means)"
+    },
+    "2023-10-01": {
+     "threshold": 10.98,
+     "signal": 12.01,
+     "uses": "Partial pooling (shrink toward state & peer means)"
+    },
+    "2024-10-01": {
+     "threshold": 10.98,
+     "signal": 14.49,
+     "uses": "Partial pooling (shrink toward state & peer means)"
+    },
+    "2025-11-01": {
+     "threshold": 10.98,
+     "signal": 13.57,
+     "uses": "Partial pooling (shrink toward state & peer means)"
+    },
+    "2026-08-01": {
+     "threshold": 10.98,
+     "signal": 11.81,
+     "uses": "Partial pooling (shrink toward state & peer means)"
+    }
+   },
+   "persistence_MAE": 12.256,
+   "switch_MAE": 12.219,
+   "gain_vs_persistence": 0.003,
+   "gain_ci95": [
+    -0.0015,
+    0.0076
+   ],
+   "best_possible_switch_MAE": 12.159,
+   "county_regret_persistence": 3.34,
+   "county_regret_switch": 3.21
+  },
+  "Ridge regression": {
+   "evaluated_releases": [
+    "2022-07-01",
+    "2023-10-01",
+    "2024-10-01",
+    "2025-11-01",
+    "2026-08-01"
+   ],
+   "choices": {
+    "2022-07-01": {
+     "threshold": 10.98,
+     "signal": 15.89,
+     "uses": "Ridge regression"
+    },
+    "2023-10-01": {
+     "threshold": 10.98,
+     "signal": 12.01,
+     "uses": "Ridge regression"
+    },
+    "2024-10-01": {
+     "threshold": 10.98,
+     "signal": 14.49,
+     "uses": "Ridge regression"
+    },
+    "2025-11-01": {
+     "threshold": 14.49,
+     "signal": 13.57,
+     "uses": "Persistence baseline"
+    },
+    "2026-08-01": {
+     "threshold": 14.49,
+     "signal": 11.81,
+     "uses": "Persistence baseline"
+    }
+   },
+   "persistence_MAE": 12.256,
+   "switch_MAE": 12.496,
+   "gain_vs_persistence": -0.0196,
+   "gain_ci95": [
+    -0.028,
+    -0.0115
+   ],
+   "best_possible_switch_MAE": 12.206,
+   "county_regret_persistence": 3.34,
+   "county_regret_switch": 2.99
+  },
+  "Gradient boosting": {
+   "evaluated_releases": [
+    "2022-07-01",
+    "2023-10-01",
+    "2024-10-01",
+    "2025-11-01",
+    "2026-08-01"
+   ],
+   "choices": {
+    "2022-07-01": {
+     "threshold": 10.98,
+     "signal": 15.89,
+     "uses": "Gradient boosting"
+    },
+    "2023-10-01": {
+     "threshold": 10.98,
+     "signal": 12.01,
+     "uses": "Gradient boosting"
+    },
+    "2024-10-01": {
+     "threshold": 10.98,
+     "signal": 14.49,
+     "uses": "Gradient boosting"
+    },
+    "2025-11-01": {
+     "threshold": 10.98,
+     "signal": 13.57,
+     "uses": "Gradient boosting"
+    },
+    "2026-08-01": {
+     "threshold": 14.49,
+     "signal": 11.81,
+     "uses": "Persistence baseline"
+    }
+   },
+   "persistence_MAE": 12.256,
+   "switch_MAE": 12.389,
+   "gain_vs_persistence": -0.0108,
+   "gain_ci95": [
+    -0.0178,
+    -0.0039
+   ],
+   "best_possible_switch_MAE": 12.044,
+   "county_regret_persistence": 3.34,
+   "county_regret_switch": 3.04
+  }
+ },
+ "promoted": false,
+ "best_possible_gain_main": 0.0079,
+ "conclusion": "Not promoted: the volatility switch did not clear the pre-set rule, so Persistence stays."
+}

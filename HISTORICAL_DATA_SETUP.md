@@ -22,7 +22,7 @@ NBER also republishes historical Hospital Compare snapshots and lists `Timely_an
    `data/cms_archives/`
 
 3. Run:
-   `python cms_history_pipeline.py`
+   `python research/legacy/cms_history_pipeline.py`
 
 4. It creates:
    `data/cms_op18b_history.csv`

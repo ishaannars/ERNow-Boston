@@ -1,0 +1,61 @@
+{
+ "method": "    python research/national_impact.py",
+ "county_years": 2070,
+ "counties": 340,
+ "releases": 7,
+ "mean_minutes_saved_vs_random": 37.0,
+ "mean_minutes_saved_ci95_county_bootstrap": [
+  34.6,
+  39.4
+ ],
+ "median_minutes_saved_vs_random": 34.3,
+ "share_better_than_random": 0.956,
+ "mean_minutes_behind_quickest": 3.6,
+ "share_picked_true_quickest": 0.757,
+ "median_county_spread_minutes": 81.0,
+ "by_release": [
+  {
+   "release": "2020-10-01",
+   "county_years": 297,
+   "mean_saved": 32.1,
+   "share_true_quickest": 0.758
+  },
+  {
+   "release": "2021-10-01",
+   "county_years": 293,
+   "mean_saved": 33.7,
+   "share_true_quickest": 0.72
+  },
+  {
+   "release": "2022-07-01",
+   "county_years": 297,
+   "mean_saved": 36.0,
+   "share_true_quickest": 0.758
+  },
+  {
+   "release": "2023-10-01",
+   "county_years": 302,
+   "mean_saved": 39.3,
+   "share_true_quickest": 0.745
+  },
+  {
+   "release": "2024-10-01",
+   "county_years": 292,
+   "mean_saved": 38.9,
+   "share_true_quickest": 0.712
+  },
+  {
+   "release": "2025-11-01",
+   "county_years": 296,
+   "mean_saved": 39.1,
+   "share_true_quickest": 0.764
+  },
+  {
+   "release": "2026-08-01",
+   "county_years": 293,
+   "mean_saved": 40.0,
+   "share_true_quickest": 0.84
+  }
+ ],
+ "limits": "Hospital medians only (no drive time); counties with 3+ reporting EDs; medians, not individual visits."
+}

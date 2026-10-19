@@ -1,0 +1,103 @@
+{
+ "method": "    python research/equity_audit.py",
+ "hospital_years": 23768,
+ "held_out_releases": 6,
+ "overall": {
+  "MAE": 12.85,
+  "relative_error": 0.0819,
+  "coverage": 0.788
+ },
+ "groups": [
+  {
+   "dimension": "Hospital type",
+   "group": "Other acute hospitals",
+   "hospital_years": 17083,
+   "typical_visit_min": 167.0,
+   "MAE": 13.83,
+   "relative_error": 0.0802,
+   "relative_to_overall": 0.98,
+   "coverage": 0.778
+  },
+  {
+   "dimension": "Hospital type",
+   "group": "Rural (Critical Access)",
+   "hospital_years": 6498,
+   "typical_visit_min": 114.0,
+   "MAE": 10.24,
+   "relative_error": 0.0879,
+   "relative_to_overall": 1.07,
+   "coverage": 0.814
+  },
+  {
+   "dimension": "Ownership",
+   "group": "For-profit",
+   "hospital_years": 3786,
+   "typical_visit_min": 143.0,
+   "MAE": 12.87,
+   "relative_error": 0.0862,
+   "relative_to_overall": 1.05,
+   "coverage": 0.782
+  },
+  {
+   "dimension": "Ownership",
+   "group": "Government",
+   "hospital_years": 5164,
+   "typical_visit_min": 130.0,
+   "MAE": 12.53,
+   "relative_error": 0.0877,
+   "relative_to_overall": 1.07,
+   "coverage": 0.802
+  },
+  {
+   "dimension": "Ownership",
+   "group": "Nonprofit",
+   "hospital_years": 14818,
+   "typical_visit_min": 159.0,
+   "MAE": 12.95,
+   "relative_error": 0.0791,
+   "relative_to_overall": 0.97,
+   "coverage": 0.785
+  },
+  {
+   "dimension": "ED size",
+   "group": "1 (smallest)",
+   "hospital_years": 8677,
+   "typical_visit_min": 122.0,
+   "MAE": 10.79,
+   "relative_error": 0.0856,
+   "relative_to_overall": 1.04,
+   "coverage": 0.795
+  },
+  {
+   "dimension": "ED size",
+   "group": "2",
+   "hospital_years": 5433,
+   "typical_visit_min": 167.0,
+   "MAE": 13.86,
+   "relative_error": 0.0811,
+   "relative_to_overall": 0.99,
+   "coverage": 0.768
+  },
+  {
+   "dimension": "ED size",
+   "group": "3",
+   "hospital_years": 3254,
+   "typical_visit_min": 186.0,
+   "MAE": 14.74,
+   "relative_error": 0.0775,
+   "relative_to_overall": 0.95,
+   "coverage": 0.768
+  },
+  {
+   "dimension": "ED size",
+   "group": "4 (largest)",
+   "hospital_years": 3576,
+   "typical_visit_min": 193.0,
+   "MAE": 15.17,
+   "relative_error": 0.0767,
+   "relative_to_overall": 0.94,
+   "coverage": 0.778
+  }
+ ],
+ "flags": []
+}

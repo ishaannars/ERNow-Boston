@@ -51,6 +51,15 @@ def main():
             rows += [(k, pi, wi) for pi, wi in zip(p, win) if np.isfinite(pi)]
         print(f"held-out release {k}: done", flush=True)
     r = pd.DataFrame(rows, columns=["k", "p", "win"])
+    # Honest score: for each held-out year, fit the calibration curve on the OTHER years only,
+    # then score that year (cross-fitted). Also the strictest check: fit on earlier years, test on the latest.
+    cross = np.full(len(r), np.nan)
+    for k in sorted(r.k.unique()):
+        fit, test = r[r.k != k], r.k == k
+        cross[test.to_numpy()] = IsotonicRegression(y_min=0, y_max=1, out_of_bounds="clip").fit(fit.p, fit.win).predict(r.p[test])
+    latest = r.k.max()
+    early, last = r[r.k < latest], r[r.k == latest]
+    last_cal = IsotonicRegression(y_min=0, y_max=1, out_of_bounds="clip").fit(early.p, early.win).predict(last.p)
     iso = IsotonicRegression(y_min=0, y_max=1, out_of_bounds="clip").fit(r.p, r.win)
     xs = np.unique(np.round(iso.X_thresholds_, 4)); ys = iso.predict(xs)
     r["bin"] = pd.cut(r.p, [0, .01, .05, .2, .4, .6, .8, .95, .99, 1.0001], right=False)
@@ -60,9 +69,16 @@ def main():
            "x": [float(x) for x in xs], "y": [float(y) for y in ys],
            "bins": [{"range": str(t.bin), "n": int(t.n), "predicted": round(float(t.predicted), 4), "actual": round(float(t.actual), 4)} for t in tab.itertuples()],
            "example_predicted_090": round(float(ex.predicted), 3), "example_actual_090": round(float(ex.actual), 3),
-           "brier_raw": round(float(np.mean((r.p - r.win) ** 2)), 5), "brier_calibrated": round(float(np.mean((iso.predict(r.p) - r.win) ** 2)), 5)}
+           "brier_raw": round(float(np.mean((r.p - r.win) ** 2)), 5),
+           "brier_calibrated_in_sample": round(float(np.mean((iso.predict(r.p) - r.win) ** 2)), 5),
+           "brier_calibrated_cross_fitted": round(float(np.mean((cross - r.win) ** 2)), 5),
+           "latest_year": {"hospital_years": int(len(last)),
+                           "brier_raw": round(float(np.mean((last.p - last.win) ** 2)), 5),
+                           "brier_calibrated_on_earlier_years": round(float(np.mean((last_cal - last.win) ** 2)), 5)}}
+    out["calibration_helps_held_out"] = bool(out["brier_calibrated_cross_fitted"] < out["brier_raw"]
+                                             and out["latest_year"]["brier_calibrated_on_earlier_years"] < out["latest_year"]["brier_raw"])
     (ROOT / "data" / "chance_calibration.json").write_text(json.dumps(out, indent=1))
-    print(tab.to_string(index=False)); print(f"{len(r):,} hospital-years · Brier {out['brier_raw']} -> {out['brier_calibrated']}")
+    print(tab.to_string(index=False)); print(f"{len(r):,} hospital-years · Brier raw {out['brier_raw']} · cross-fitted {out['brier_calibrated_cross_fitted']} · latest year {out['latest_year']}")
 
 
 if __name__ == "__main__":

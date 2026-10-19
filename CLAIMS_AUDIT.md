@@ -29,7 +29,7 @@ Checked October 2, 2026. This distinguishes primary-source checks from reproduct
 ## Claims corrected or qualified
 
 - “Gets you seen/home fastest” is replaced by comparisons of estimated drive plus hospital medians. Clinical appropriateness and individual outcomes are not evaluated.
-- “Chance fastest” is labeled **Fastest in simulation**: 4,000 independent lognormal scenarios of uncertain hospital medians, with approximate spreads. Percentages are uncalibrated and exclude missing routes; they are not individual-patient probabilities.
+- “Chance fastest” is labeled **Fastest in simulation**: 4,000 independent lognormal scenarios of uncertain hospital medians, with approximate spreads. Percentages were checked on held-out years (raw shares track reality; a correction curve did not help, so none is applied) and exclude missing routes; they are not individual-patient probabilities.
 - “Last year's value” becomes latest reported value. Chronology is by release; reporting windows can overlap and are already historical when published. Two early next-available-release transitions skip a snapshot. The final test has no skipped transition. This is retrospective release-based validation.
 - The rolling ranking column measures **Persistence**, independently of the selected model column. The best challenger in each scored fold is a retrospective comparison, not a prospective selection.
 - Hospital-level associations and feature importance are not causes or quality-of-care scores. Peer matching uses public proxies, not complete clinical severity adjustment.

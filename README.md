@@ -1,5 +1,6 @@
 # ERNow Boston
 
+[![Tests](https://github.com/ishaannars/ERNow-Boston/actions/workflows/tests.yml/badge.svg)](https://github.com/ishaannars/ERNow-Boston/actions/workflows/tests.yml)
 
 **Project goal:** “Find the ER that gets you seen and home fastest, not just the closest, lowering the decision time between needing one and finding a good one you can use.”
 
@@ -20,6 +21,36 @@ ERNow uses historical CMS performance to compare seven general emergency departm
 [Try ERNow Boston](https://ernowboston.streamlit.app/)
 
 > Possible emergency? Call 911 or go to the nearest appropriate emergency department. Do not delay care or drive farther because of an ERNow estimate.
+
+## How it works
+
+```mermaid
+flowchart LR
+  A[10 CMS releases<br/>4,438 U.S. hospitals] --> B[National panel<br/>35,164 labeled pairs]
+  B --> C{Forecast contest<br/>Persistence vs 321 challengers<br/>pre-set 2% rule}
+  C -->|Persistence kept| D[Typical visit per ER]
+  B --> E[Conformal quantile ranges<br/>80% target]
+  B --> F[25 look-alike hospitals<br/>nearest neighbors]
+  D --> G[Drive time OSRM<br/>+ 4,000 what-if trips]
+  E --> G
+  G --> H[One answer card<br/>Open Directions]
+  B --> T[Tests and checks<br/>verify_claims.py, pytest, CI]
+```
+
+## More tests
+
+Each question below had its pass/fail rule written in the script before it was run. Results are read from `data/` and written here by `research/write_extra_tests.py`.
+
+<!-- EXTRA_TESTS:START -->
+| Question (rule written before running) | Result | Code |
+|---|---|---|
+| Across the U.S., does picking by forecast beat picking any ER in the same county? | Yes: **37 min** shorter typical visit (95% CI 35–39, county bootstrap), better in **96%** of 2,070 county-years across 340 counties and 7 held-out releases; true quickest picked 76% of the time. | `research/national_impact.py` |
+| Is "chance it's quickest" honest? | Close: when it said 88%, the ER was quickest 89% of the time (9,861 hospital-years, 6 held-out years). A correction curve did **not** improve unseen years (Brier 0.06203 raw vs 0.06282 cross-fitted), so the raw simulation is shown. | `research/calibrate_chance_fastest.py` |
+| Learned models win in turbulent years. Can a volatility signal pick the model each year? | **Not promoted.** Switching gained +0.3% (95% CI -0.1% to +0.8%); even a perfect year-by-year switch would gain only 0.8%, under the 2% bar. Persistence stays. | `research/regime_switch_test.py` |
+| Does it work as well for rural, government, for-profit, and small hospitals? | No group flagged (flag = error >1.25× overall or range coverage <70%). Coverage 77%–81% across groups; 23,768 hospital-years, 6 held-out releases. | `research/equity_audit.py` |
+<!-- EXTRA_TESTS:END -->
+
+Longer write-up: [When the baseline wins](research/WHEN_THE_BASELINE_WINS.md).
 
 ## Why historical performance is useful
 
@@ -106,7 +137,7 @@ The candidate point models compete rather than form an ensemble. The selected mo
 - **Type of emergency:** General or Eye, ear, nose, or throat. The latter brings Mass Eye and Ear into the comparison and identifies its specialist role; services and suitability vary.
 - **Other services:** specialist, pediatric, and veterans’ EDs listed with their service population. VA eligibility rules and hospital age policies vary.
 - **Each card:** sorted by Fastest overall by default (Closest remains available), with explicit forecast median used for drive + median totals, target-80% forecast range, peer difference, drive/distance, drive + forecast median, simulation share, and CMS OP-22 left-before-seen rate with the national median (2024).
-- **Fastest in simulation:** fraction of 4,000 independent lognormal hospital-median scenarios won by an ER. The spread is approximated from forecast bounds. These percentages are uncalibrated, exclude unavailable routes, and are not probabilities for an individual visit.
+- **Fastest in simulation:** fraction of 4,000 independent lognormal hospital-median scenarios won by an ER. The spread is approximated from forecast bounds. Checked against what happened in held-out years (see More tests below): the raw shares already track reality closely, so no correction is applied. They exclude unavailable routes and are not probabilities for an individual visit.
 - **Directions:** published ER street address; route estimates use approximate address coordinates without live traffic, parking, or ambulance conditions. Some original campus coordinates remain approximate.
 - **Context:** weather, latest weekly respiratory illness, and detected events. Context never changes median forecasts or ranking. Missing weather/illness feeds display as unavailable; event checks may fail or miss events.
 - **Methodology and Forecast Model:** model comparisons, release-by-release tests, uncertainty, structural associations, and data freshness.
@@ -155,3 +186,7 @@ An [expanded search](research/EXPANDED_RESULTS.md) evaluated 321 candidate confi
 Python · Streamlit · scikit-learn · pandas · NumPy · CMS · CHIA · CDC · National Weather Service · OpenStreetMap / OSRM
 
 © 2026 Ishaan Narasimhan. All rights reserved.
+
+## Earlier version
+
+The original ERNow modeled 36 hospital-period observations across 6 Boston hospitals (Ridge, Random Forest, Persistence). That was too little data to beat the baseline, so the project scaled to the 4,438-hospital national panel in `national_model.py`. The original pipeline is kept in [research/legacy/](research/legacy/).

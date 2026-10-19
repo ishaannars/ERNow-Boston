@@ -1,0 +1,30 @@
+name: CMS release check
+# Weekly: if CMS has published newer hospital data than ERNow's latest saved release, open one issue
+# with the refresh steps. Retraining runs locally with scripts/refresh_release.sh, which only commits
+# when every accuracy check passes.
+on:
+  schedule:
+    - cron: "0 13 * * 1"
+  workflow_dispatch:
+permissions:
+  issues: write
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install pandas requests
+      - id: cms
+        run: python scripts/check_new_cms_release.py
+      - if: steps.cms.outputs.new_release == 'yes'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title="New CMS hospital release (${{ steps.cms.outputs.modified }}): refresh ERNow"
+          if ! gh issue list --state open --search "$title in:title" --json title -q '.[].title' | grep -qF "$title"; then
+            gh issue create --title "$title" --body "CMS updated Timely and Effective Care - Hospital on ${{ steps.cms.outputs.modified }}. Download the new archive into data/cms_archives/ and run: bash scripts/refresh_release.sh"
+          fi

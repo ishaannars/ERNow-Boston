@@ -15,7 +15,7 @@ Train on earlier releases; choose on the penultimate saved transition; evaluate 
 ## Intervals and simulation
 Regime-adaptive conformalized quantile regression targets 80% coverage of hospital medians. Empirical rolling coverage is 55–97%; adaptive scaling and temporal dependence do not provide a guarantee for each future release or hospital. Deployment refits on earlier labeled data and calibrates on the latest completed transition; coverage of the next release remains unknown.
 
-Simulation draws independent lognormal hospital-median scenarios centered on the point forecast, with spread approximated from the log ratio of the interval bounds. Asymmetric bounds are not matched exactly. Shares are uncalibrated and are not probabilities for individual visit lengths.
+Simulation draws independent lognormal hospital-median scenarios centered on the point forecast, with spread approximated from the log ratio of the interval bounds. Asymmetric bounds are not matched exactly. Shares were checked against held-out years (`research/calibrate_chance_fastest.py`): a correction curve did not improve unseen years, so raw shares are shown. They are not probabilities for individual visit lengths.
 
 ## Results
 
