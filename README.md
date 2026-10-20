@@ -52,7 +52,7 @@ Only factors that make ERNow more accurate are used. Each rule was written befor
 | Drive time from where you are | OpenStreetMap routing | Yes | Added to the typical visit to find the lowest total | ✅ Your total time |
 | Respiratory-illness season | CDC FluView (ILINet) | Yes | No gain, even with perfect knowledge of the coming season (rolling error 12.71 with vs 12.71 min without) | ❌ No |
 | Model switching in turbulent years | CMS | Yes | +0.3%; even a perfect switch would gain only 0.8% | ❌ No |
-| Correction curve for "chance it's quickest" | CMS | Yes | Did not improve unseen years, so the raw simulation is shown | ❌ No |
+| Correction curve for "Likely quickest" | CMS | Yes | Did not improve unseen years, so the raw simulation is shown | ❌ No |
 | Hospital crowding, statewide (beds in use) | CDC NHSN | Yes | Learned model 6% better but only tied the center estimate; ranges 2.3% worse | ❌ No |
 | Hospital crowding, per hospital | HHS (reporting ended 2024) | No | Only 0.09 min better per year, and no longer published | ❌ No |
 | Extreme weather days | NOAA | Yes | Not tested yet | ⏳ Next to test |
@@ -65,7 +65,7 @@ Only factors that make ERNow more accurate are used. Each rule was written befor
 | Question (rule written before running) | Result | Code |
 |---|---|---|
 | Across the U.S., does picking by forecast beat picking any ER in the same county? | Yes: **37 min** shorter typical visit (95% CI 35–39, county bootstrap), better in **96%** of 2,070 county-years across 340 counties and 7 held-out releases; true quickest picked 76% of the time. | `research/national_impact.py` |
-| Is "chance it's quickest" honest? | Close: when it said 88%, the ER was quickest 89% of the time (9,861 hospital-years, 6 held-out years). A correction curve did **not** improve unseen years (Brier 0.06203 raw vs 0.06282 cross-fitted), so the raw simulation is shown. | `research/calibrate_chance_fastest.py` |
+| Is "Likely quickest" honest? | Close: when it said 88%, the ER was quickest 89% of the time (9,861 hospital-years, 6 held-out years). A correction curve did **not** improve unseen years (Brier 0.06203 raw vs 0.06282 cross-fitted), so the raw simulation is shown. | `research/calibrate_chance_fastest.py` |
 | Learned models win in turbulent years. Can a volatility signal pick the model each year? | **Not promoted.** Switching gained +0.3% (95% CI -0.1% to +0.8%); even a perfect year-by-year switch would gain only 0.8%, under the 2% bar. Persistence stays. | `research/regime_switch_test.py` |
 | Does it work as well for rural, government, for-profit, and small hospitals? | No group flagged (flag = error >1.25× overall or range coverage <70%). Coverage 77%–81% across groups; 23,768 hospital-years, 6 held-out releases. | `research/equity_audit.py` |
 | Does hospital crowding (beds in use) make the forecast more accurate? | **Not promoted.** Statewide crowding (still published weekly, so usable live) cut the gradient-boosting model's validation error 6% (12.6 → 11.8 min), the largest gain of any factor tested, but only brought it level with Persistence (11.8 min), short of the 2% bar. Per-hospital crowding (HHS, reporting ended 2024) lowered the learned model's rolling error by only 0.09 min over 4 years. Persistence stays. | `research/crowding_factor_test.py` |

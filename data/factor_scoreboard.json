@@ -43,7 +43,7 @@
    "result": "+0.3%; even a perfect switch would gain only 0.8%"
   },
   {
-   "factor": "Correction curve for \"chance it's quickest\"",
+   "factor": "Correction curve for \"Likely quickest\"",
    "data": "CMS",
    "live": true,
    "used": "",

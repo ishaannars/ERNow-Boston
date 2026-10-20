@@ -607,11 +607,15 @@ def render_home():
     with st.container(border=True):
         sel_l, sel_r = st.columns([1, 1.35])
         with sel_l:
-            em_type = st.radio("Type of emergency", ["General", "Eye, ear, nose, or throat"], index=0, horizontal=True,
+            if st.session_state.get("emergency_type") not in ("General", "Eye, ear, nose, or throat"):
+                st.session_state["emergency_type"] = "General"
+            em_type = st.radio("Type of emergency", ["General", "Eye, ear, nose, or throat"], horizontal=True,
                                key="emergency_type", help="Eye, ear, nose, or throat brings in Mass Eye and Ear, the specialist ED.")
             st.caption("Choose General unless this is an eye, ear, nose, or throat problem.")
         with sel_r:
-            my_system = st.selectbox("Your doctors' hospital system (optional)", SYSTEMS, index=0, key="my_system",
+            if st.session_state.get("my_system") not in SYSTEMS:
+                st.session_state["my_system"] = "Any"
+            my_system = st.selectbox("Your doctors' hospital system (optional)", SYSTEMS, key="my_system",
                                      help="Going to your own system can make follow-up easier, though record sharing varies. ERNow still ranks every ER by time.")
             st.caption("Pick your doctors’ system to highlight its ERs and see its quickest option. ERNow still ranks every ER by time.")
     status_slot = st.empty()
@@ -708,8 +712,8 @@ def render_home():
     st.subheader(f"Compare {len(ranked)} Boston ERs" + (" for this problem" if focus == "specialty" else ""))
     sort_opts = ["Closest", "Fastest overall"] + ([f"{my_system} first"] if my_system != "Any" else [])
     if st.session_state.get("er_sort") not in sort_opts:
-        st.session_state.pop("er_sort", None)
-    sort_by = st.radio("Sort by", sort_opts, index=1, horizontal=True, key="er_sort")
+        st.session_state["er_sort"] = "Fastest overall"
+    sort_by = st.radio("Sort by", sort_opts, horizontal=True, key="er_sort")
     if sort_by == "Closest":
         ranked = ranked.sort_values(["route_ok", "route_time_min"], ascending=[False, True]).reset_index(drop=True)
     elif sort_by.endswith(" first"):
@@ -1081,7 +1085,7 @@ def render_extra_tests():
                      f"better in {imp['share_better_than_random']:.0%} of {imp['county_years']:,} county-years",
                      "Hospital part only, no drive time"])
     if cal and "latest_year" in cal:
-        rows.append(["Is \"chance it's quickest\" honest?",
+        rows.append(["Is \"Likely quickest\" honest?",
                      f"Close. When it said {cal['example_predicted_090']:.0%}, that ER was quickest {cal['example_actual_090']:.0%} of the time "
                      f"({cal['hospital_years']:,} hospital-years). An extra correction curve "
                      + ("helped" if cal.get("calibration_helps_held_out") else "did not help")

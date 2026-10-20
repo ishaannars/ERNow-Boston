@@ -25,7 +25,7 @@ def block():
          f"better in **{imp['share_better_than_random']:.0%}** of {imp['county_years']:,} county-years across {imp['counties']} counties "
          f"and {imp['releases']} held-out releases; true quickest picked {imp['share_picked_true_quickest']:.0%} of the time.",
          "`research/national_impact.py`"),
-        ("Is \"chance it's quickest\" honest?",
+        ("Is \"Likely quickest\" honest?",
          f"Close: when it said {cal['example_predicted_090']:.0%}, the ER was quickest {cal['example_actual_090']:.0%} of the time "
          f"({cal['hospital_years']:,} hospital-years, {cal['held_out_years']} held-out years). A correction curve "
          + ("improved" if cal["calibration_helps_held_out"] else "did **not** improve")
@@ -121,7 +121,7 @@ def scoreboard():
                    f"with vs {resp['rolling_avg_MAE']['gradient_boosting']:.2f} min without)"},
         {"factor": "Model switching in turbulent years", "data": "CMS", "live": True, "used": "",
          "result": f"{sw['results'][sw['main_challenger']]['gain_vs_persistence']:+.1%}; even a perfect switch would gain only {sw['best_possible_gain_main']:.1%}"},
-        {"factor": "Correction curve for \"chance it's quickest\"", "data": "CMS", "live": True, "used": "",
+        {"factor": "Correction curve for \"Likely quickest\"", "data": "CMS", "live": True, "used": "",
          "result": "Did not improve unseen years, so the raw simulation is shown"},
     ]
     if (ROOT / "data" / "crowding_factor_results.json").exists():
