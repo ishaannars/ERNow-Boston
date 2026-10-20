@@ -10,3 +10,7 @@ AGENTS.md
 PROJECT_MEMORY.md
 _handoff/
 PLAN.md
+
+# Large raw crowding downloads (recreate with scripts/download_crowding_data.py)
+data/hhs_facility_capacity.csv.gz
+data/nhsn_state_hrd.csv.gz

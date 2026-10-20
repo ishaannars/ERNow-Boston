@@ -1,0 +1,78 @@
+{
+ "method": "    python research/crowding_range_test.py Crowding did not improve the center forecast enough to replace Persistence (crowding_factor_test.py). Ranges are a separate model (gradient-boosting quantile regression + conformal calibration), so this tests whether statewide crowding (CDC NHSN, still published weekly, usable live) helps them.",
+ "years_where_crowding_could_be_learned": {
+  "years": 3,
+  "years_crowding_better": 1,
+  "mean_score_without": 57.28,
+  "mean_score_with": 59.733
+ },
+ "years": [
+  {
+   "k": 4,
+   "release": "2022-07-01",
+   "hospitals": 3922,
+   "coverage_without": 0.9671,
+   "width_without": 67.83,
+   "score_without": 72.755,
+   "coverage_with": 0.9671,
+   "width_with": 67.83,
+   "score_with": 72.755
+  },
+  {
+   "k": 5,
+   "release": "2023-10-01",
+   "hospitals": 4014,
+   "coverage_without": 0.5456,
+   "width_without": 24.09,
+   "score_without": 76.425,
+   "coverage_with": 0.5456,
+   "width_with": 24.09,
+   "score_with": 76.425
+  },
+  {
+   "k": 6,
+   "release": "2024-10-01",
+   "hospitals": 3964,
+   "coverage_without": 0.8829,
+   "width_without": 53.56,
+   "score_without": 65.203,
+   "coverage_with": 0.86,
+   "width_with": 54.65,
+   "score_with": 69.793
+  },
+  {
+   "k": 7,
+   "release": "2025-11-01",
+   "hospitals": 3967,
+   "coverage_without": 0.8306,
+   "width_without": 45.25,
+   "score_without": 59.913,
+   "coverage_with": 0.8223,
+   "width_with": 47.46,
+   "score_with": 64.176
+  },
+  {
+   "k": 8,
+   "release": "2026-08-01",
+   "hospitals": 4017,
+   "coverage_without": 0.8474,
+   "width_without": 35.7,
+   "score_without": 46.724,
+   "coverage_with": 0.8417,
+   "width_with": 33.57,
+   "score_with": 45.229
+  }
+ ],
+ "years_tested": 5,
+ "mean_interval_score_without": 64.204,
+ "mean_interval_score_with": 65.676,
+ "interval_score_gain": -0.0229,
+ "years_better": 1,
+ "mean_width_without": 45.29,
+ "mean_width_with": 45.52,
+ "mean_coverage_without": 0.815,
+ "mean_coverage_with": 0.807,
+ "latest_year_coverage_with": 0.842,
+ "promoted": false,
+ "conclusion": "Not promoted: crowding did not make the ranges accurate enough to change them."
+}

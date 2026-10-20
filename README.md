@@ -37,6 +37,26 @@ flowchart LR
   B --> T[Tests and checks<br/>verify_claims.py, pytest, CI]
 ```
 
+## Every factor tested
+
+Only factors that make ERNow more accurate are used. Everything else is tested, reported, and left out.
+
+<!-- FACTORS:START -->
+| Factor | Data | Usable live? | Result | Used in ERNow? |
+|---|---|---|---|---|
+| Last published ED visit time | CMS (OP-18b) | Yes | Most accurate option: 9.4-min average error on 4,017 hospitals it never saw | ✅ Center estimate |
+| Past trend, other ED measures, hospital traits, state and peer averages | CMS | Yes | Made the center estimate less accurate (9.9–10.3 vs 9.4 min), so they're used only in the ranges and look-alike matching | ✅ Ranges and look-alike hospitals |
+| How much ED times swung nationally in the latest release | CMS | Yes | Ranges widen or narrow with recent swings; 85% held the true value (target 80%) | ✅ Ranges |
+| Drive time from where you are | OpenStreetMap routing | Yes | Added to the typical visit to find the lowest total | ✅ Your total time |
+| Respiratory-illness season | CDC FluView (ILINet) | Yes | No gain, even with perfect knowledge of the coming season (rolling error 12.71 with vs 12.71 min without) | ❌ No |
+| Model switching in turbulent years | CMS | Yes | +0.3%; even a perfect switch would gain only 0.8% | ❌ No |
+| Correction curve for "chance it's quickest" | CMS | Yes | Did not improve unseen years, so the raw simulation is shown | ❌ No |
+| Hospital crowding, statewide (beds in use) | CDC NHSN | Yes | Learned model 6% better but only tied the center estimate; ranges 2.3% worse | ❌ No |
+| Hospital crowding, per hospital | HHS (reporting ended 2024) | No | Only 0.09 min better per year, and no longer published | ❌ No |
+| Extreme weather days | NOAA | Yes | Not tested yet | ⏳ Next to test |
+| Community factors (uninsured rate, share aged 65+) | Census ACS | Yes | Not tested yet | ⏳ Next to test |
+<!-- FACTORS:END -->
+
 ## More tests
 
 Each question below had its pass/fail rule written in the script before it was run. Results are read from `data/` and written here by `research/write_extra_tests.py`.
@@ -48,9 +68,27 @@ Each question below had its pass/fail rule written in the script before it was r
 | Is "chance it's quickest" honest? | Close: when it said 88%, the ER was quickest 89% of the time (9,861 hospital-years, 6 held-out years). A correction curve did **not** improve unseen years (Brier 0.06203 raw vs 0.06282 cross-fitted), so the raw simulation is shown. | `research/calibrate_chance_fastest.py` |
 | Learned models win in turbulent years. Can a volatility signal pick the model each year? | **Not promoted.** Switching gained +0.3% (95% CI -0.1% to +0.8%); even a perfect year-by-year switch would gain only 0.8%, under the 2% bar. Persistence stays. | `research/regime_switch_test.py` |
 | Does it work as well for rural, government, for-profit, and small hospitals? | No group flagged (flag = error >1.25× overall or range coverage <70%). Coverage 77%–81% across groups; 23,768 hospital-years, 6 held-out releases. | `research/equity_audit.py` |
+| Does hospital crowding (beds in use) make the forecast more accurate? | **Not promoted.** Statewide crowding (still published weekly, so usable live) cut the gradient-boosting model's validation error 6% (12.6 → 11.8 min), the largest gain of any factor tested, but only brought it level with Persistence (11.8 min), short of the 2% bar. Per-hospital crowding (HHS, reporting ended 2024) lowered the learned model's rolling error by only 0.09 min over 4 years. Persistence stays. | `research/crowding_factor_test.py` |
+| Does crowding make the 80% ranges more accurate? | **Not promoted.** Interval score 64.2 without vs 65.7 with crowding (lower is better, so 2.3% worse). In the 3 years where the model had crowding history to learn from, crowding helped in 1. Ranges stay as they are. | `research/crowding_range_test.py` |
 <!-- EXTRA_TESTS:END -->
 
 Longer write-up: [When the baseline wins](research/WHEN_THE_BASELINE_WINS.md).
+
+## How ERNow compares
+
+Checked October 2026. ERNow does not claim to be the only tool; this is what each option does.
+
+| Option | What it gives you | What ERNow adds |
+|---|---|---|
+| CMS Care Compare | The official CMS numbers, looked up one hospital at a time, already 9–12 months old | Every Boston general ER side by side, forecast forward, with your drive time |
+| ProPublica's ER Wait Watchers (launched 2013) | Average waits from CMS data for ERs near a ZIP code, not current waits | A tested forecast with honest ranges, total visit time plus drive, one clear answer |
+| Hospital-system apps (for example, Inova's) | Live waits, but only at that system's own ERs | A comparison across every system |
+| Paid wait-time apps (for example, a $6.99 App Store app) | Advertised real-time waits; the listing does not say where the times come from | Free; every number traced to public data and tested |
+| "ER near me" search | The closest ER | At 83% of 2,001 sampled Boston-area locations, a different ER had the lowest estimated drive + typical visit |
+
+## Future direction
+
+ERNow stays free for patients. The same national model works for any U.S. city with CMS-reporting hospitals, so the natural next steps are more cities and, for organizations that route people to care (concierge practices, employers, hotel concierge desks), a licensed version. Live hospital data plugs in the day hospitals publish it.
 
 ## Why historical performance is useful
 

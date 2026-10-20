@@ -74,6 +74,43 @@ def test_equity_flags_follow_their_rule():
     assert len(eq["flags"]) == expected
 
 
+def test_crowding_follows_its_rule():
+    path = DATA / "crowding_factor_results.json"
+    if not path.exists():
+        pytest.skip("crowding test not run")
+    cr = json.loads(path.read_text())
+    should = (cr["statewide_validation_gain_vs_persistence"] >= 0.02
+              and cr["rolling_gbm_minutes_change_statewide"] is not None and cr["rolling_gbm_minutes_change_statewide"] < 0)
+    assert cr["promoted"] == should
+
+
+def test_crowding_ranges_follow_their_rule():
+    path = DATA / "crowding_range_results.json"
+    if not path.exists():
+        pytest.skip("crowding range test not run")
+    rg = json.loads(path.read_text())
+    should = rg["interval_score_gain"] >= 0.02 and rg["mean_coverage_gap_with"] <= rg["mean_coverage_gap_without"]
+    assert rg["promoted"] == should
+
+
+def test_crowding_ranges_follow_their_rule():
+    path = DATA / "crowding_range_results.json"
+    if not path.exists():
+        pytest.skip("crowding range test not run")
+    rr = json.loads(path.read_text())
+    should = (rr["interval_score_gain"] >= 0.02 and rr["years_better"] > rr["years_tested"] / 2
+              and 0.75 <= rr["latest_year_coverage_with"] <= 0.85)
+    assert rr["promoted"] == should
+
+
+def test_factor_scoreboard_is_current():
+    sys.path.insert(0, str(ROOT / "research"))
+    import write_extra_tests as w
+    rows = w.scoreboard()
+    assert json.loads((DATA / "factor_scoreboard.json").read_text())["rows"] == rows
+    assert w.factor_block(rows) in (ROOT / "README.md").read_text()
+
+
 def test_readme_more_tests_block_is_current():
     sys.path.insert(0, str(ROOT / "research"))
     import write_extra_tests as w

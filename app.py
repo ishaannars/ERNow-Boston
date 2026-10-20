@@ -845,15 +845,18 @@ def render_home():
         st.markdown('<div class="er-list er-list-3">' + "".join(ocards) + '</div>', unsafe_allow_html=True)
 
     with st.expander("About today's Boston conditions"):
-        st.write("Today's weather, respiratory illness, and major events are shown so you can judge for yourself. We tested adding "
-                 "respiratory-illness season (CDC data for every state, 2016–2026) to the forecast: it didn't make it more accurate, "
-                 "even with perfect knowledge of the coming season, so it isn't used. Hospital crowding is next to test; only factors "
-                 "that improve accuracy get added.")
+        _fs = _extra_json("factor_scoreboard.json")
+        _n = _fs["extra_factors_tested_not_used"] if _fs else None
+        st.write("Today's weather, respiratory illness, and major events are shown so you can judge for yourself. "
+                 + (f"ERNow tested {_n} extra factors, including hospital crowding and flu season, against last year's published "
+                    "visit times. None made the estimate more accurate, so it uses the published times. "
+                    if _n else "")
+                 + "Only factors that improve accuracy get added. The full list is on the Forecast model page.")
         if major_events:
             st.caption("Major event sources detected: " + "; ".join(major_events[:4]))
         else:
             st.caption("No major event found today. Event sources can be incomplete, so this isn't a guarantee.")
-        st.caption("ER cards combine public hospital data, tested forecasts of typical visit times, drive estimates, and a calibrated chance each ER is quickest.")
+        st.caption("ER cards combine public hospital data, tested forecasts of typical visit times, drive estimates, and a tested chance each ER is quickest.")
 
     st.subheader("Map")
     map_df = pd.concat([ranked[["hospital", "latitude", "longitude"]], others[["hospital", "latitude", "longitude"]]], ignore_index=True)
@@ -1101,7 +1104,7 @@ def render_extra_tests():
     cal, imp = _extra_json("chance_calibration.json"), _extra_json("national_impact.json")
     sw, eq = _extra_json("regime_switch_results.json"), _extra_json("equity_audit.json")
     if not any((cal, imp, sw, eq)):
-        return
+        return  # nothing saved yet
     st.subheader("More tests, every rule set before running")
     rows = []
     if imp:
@@ -1123,6 +1126,20 @@ def render_extra_tests():
                      f"{'Promoted' if sw['promoted'] else 'Not promoted'}: {m['gain_vs_persistence']:+.1%} vs Persistence. "
                      f"Even a perfect year-by-year switch would gain only {sw['best_possible_gain_main']:.1%}",
                      "Needs ≥2% to ship"])
+    cr = _extra_json("crowding_factor_results.json")
+    if cr:
+        rows.append(["Does hospital crowding help the forecast?",
+                     f"{'Promoted' if cr['promoted'] else 'Not promoted'}: statewide crowding cut the learned model's error "
+                     f"{cr['gbm_gain_from_crowding_validation']:.0%}, but only to the level of last year's number "
+                     f"({cr['gbm_validation_with_crowding']:.1f} vs {cr['persistence_validation']:.1f} min)",
+                     "Needs ≥2% to ship"])
+    rg = _extra_json("crowding_range_results.json")
+    if rg:
+        rows.append(["Does crowding make the ranges more accurate?",
+                     f"{'Promoted' if rg['promoted'] else 'Not promoted'}: ranges were {abs(rg['interval_score_gain']):.1%} {'more' if rg['interval_score_gain'] > 0 else 'less'} accurate with crowding "
+                     f"(helped in {rg['years_where_crowding_could_be_learned']['years_crowding_better']} of "
+                     f"{rg['years_where_crowding_could_be_learned']['years']} years it could be learned)",
+                     "Needs ≥2% to ship"])
     if eq:
         rows.append(["Does it work as well for every kind of hospital?",
                      ("No groups flagged" if not eq["flags"] else "Flagged: " + "; ".join(eq["flags"]))
@@ -1130,7 +1147,7 @@ def render_extra_tests():
                      f"{max(g['coverage'] for g in eq['groups']):.0%})",
                      f"{eq['held_out_releases']} held-out years"])
     _table(pd.DataFrame(rows, columns=["Question", "Answer", "Note"]))
-    st.caption("Code: research/national_impact.py, calibrate_chance_fastest.py, regime_switch_test.py, equity_audit.py.")
+    st.caption("Code: research/national_impact.py, calibrate_chance_fastest.py, regime_switch_test.py, equity_audit.py, crowding_factor_test.py, crowding_range_test.py.")
 
 def render_forecast_model():
     st.title("Forecast Model")
@@ -1268,6 +1285,15 @@ def render_forecast_model():
 
     with tabs[2]:
         st.caption("In plain terms: which information actually improves the forecast, and which doesn't.")
+        _fs = _extra_json("factor_scoreboard.json")
+        if _fs:
+            st.subheader("Every factor tested")
+            def _used(u):
+                return "Next to test" if u == "Next to test" else (f"Yes: {u}" if u else "No")
+            _table(pd.DataFrame([{"Factor": r["factor"], "Data": r["data"], "Usable live": "Yes" if r["live"] else "No",
+                                  "Result": r["result"], "Used in ERNow": _used(r["used"])} for r in _fs["rows"]]))
+            st.caption("Only factors that make ERNow more accurate are used. Every rule was written before its test ran. "
+                       "Code and results: research/ and data/ in the repository.")
         st.subheader("Did extra data help? (ablation)")
         ab_names = {"Persistence (no features)": "Nothing extra: latest reported value (Persistence)",
                     "History only": "Past ED times only",

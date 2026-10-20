@@ -1,0 +1,173 @@
+{
+ "single_split": {
+  "baseline features": {
+   "Persistence baseline": [
+    11.804638265691958,
+    9.421458800099577
+   ],
+   "Ridge regression": [
+    13.034766211447533,
+    10.725353485737166
+   ],
+   "Partial pooling (shrink toward state & peer means)": [
+    11.603624375955716,
+    9.387127085141405
+   ],
+   "Gradient boosting": [
+    12.60643801492187,
+    10.287480663565976
+   ]
+  },
+  "+ statewide crowding (live-usable)": {
+   "Persistence baseline": [
+    11.804638265691958,
+    9.421458800099577
+   ],
+   "Ridge regression": [
+    13.166746301955525,
+    11.18856562544581
+   ],
+   "Partial pooling (shrink toward state & peer means)": [
+    11.603624375955716,
+    9.387127085141405
+   ],
+   "Gradient boosting": [
+    11.829642507812371,
+    9.724891392638925
+   ]
+  },
+  "+ statewide crowding ORACLE": {
+   "Persistence baseline": [
+    11.804638265691958,
+    9.421458800099577
+   ],
+   "Ridge regression": [
+    13.196909450050702,
+    11.204729206268706
+   ],
+   "Partial pooling (shrink toward state & peer means)": [
+    11.603624375955716,
+    9.387127085141405
+   ],
+   "Gradient boosting": [
+    11.75448668377201,
+    9.738917737485497
+   ]
+  }
+ },
+ "rolling": [
+  {
+   "k": 2,
+   "release": "2020-10-01",
+   "persistence": 11.074101984426024,
+   "Ridge_base": 10.754503199758982,
+   "Gradi_base": 11.253021521709336,
+   "Ridge_state": 10.754503199758982,
+   "Gradi_state": 11.253021521709336
+  },
+  {
+   "k": 3,
+   "release": "2021-10-01",
+   "persistence": 15.888002059732235,
+   "Ridge_base": 15.388705189160563,
+   "Gradi_base": 15.390871522312183,
+   "Ridge_state": 15.388705189160563,
+   "Gradi_state": 15.390871522312183
+  },
+  {
+   "k": 4,
+   "release": "2022-07-01",
+   "persistence": 12.006629270780214,
+   "Ridge_base": 11.965926843855957,
+   "Gradi_base": 11.673587045180849,
+   "Ridge_state": 11.965926843855957,
+   "Gradi_state": 11.673587045180849,
+   "Ridge_hosp": 11.926795154599061,
+   "Gradi_hosp": 11.247186621396336
+  },
+  {
+   "k": 5,
+   "release": "2023-10-01",
+   "persistence": 14.487792725460887,
+   "Ridge_base": 14.281987724467431,
+   "Gradi_base": 13.76414127951077,
+   "Ridge_state": 14.225158634288736,
+   "Gradi_state": 13.718756195316674,
+   "Ridge_hosp": 13.995342690670064,
+   "Gradi_hosp": 13.571192347892698
+  },
+  {
+   "k": 6,
+   "release": "2024-10-01",
+   "persistence": 13.56710393541877,
+   "Ridge_base": 15.018348302673273,
+   "Gradi_base": 14.49285622841296,
+   "Ridge_state": 14.964733626864579,
+   "Gradi_state": 15.18836890426203,
+   "Ridge_hosp": 15.204698557648216,
+   "Gradi_hosp": 15.39400444849363
+  },
+  {
+   "k": 7,
+   "release": "2025-11-01",
+   "persistence": 11.804638265691958,
+   "Ridge_base": 13.034766211447533,
+   "Gradi_base": 12.60643801492187,
+   "Ridge_state": 13.166746301955525,
+   "Gradi_state": 11.829642507812371,
+   "Ridge_hosp": 13.130933926144985,
+   "Gradi_hosp": 11.98106531406808
+  },
+  {
+   "k": 8,
+   "release": "2026-08-01",
+   "persistence": 9.421458800099577,
+   "Ridge_base": 10.02322867496925,
+   "Gradi_base": 9.780900529844843,
+   "Ridge_state": 10.11176072433883,
+   "Gradi_state": 9.424911961676038
+  }
+ ],
+ "coverage_by_target_release": {
+  "statewide (live-usable)": {
+   "2018-10-01": 0.0,
+   "2019-10-01": 0.0,
+   "2020-10-01": 0.0,
+   "2021-10-01": 0.0,
+   "2022-07-01": 0.978,
+   "2023-10-01": 1.0,
+   "2024-10-01": 1.0,
+   "2025-11-01": 1.0,
+   "2026-08-01": 1.0
+  },
+  "per hospital (ended 2024)": {
+   "2018-10-01": 0.0,
+   "2019-10-01": 0.0,
+   "2020-10-01": 0.0,
+   "2021-10-01": 0.0,
+   "2022-07-01": 0.891,
+   "2023-10-01": 0.934,
+   "2024-10-01": 0.931,
+   "2025-11-01": 0.926,
+   "2026-08-01": 0.0
+  }
+ },
+ "method": "    python research/crowding_factor_test.py Data (download with scripts/download_crowding_data.py): - Statewide: CDC NHSN Weekly Hospital Respiratory Data by Jurisdiction (ua7e-t2fy), % of inpatient beds   occupied, Aug 2020 to now. Still published weekly, so ERNow COULD use it live. - Per hospital: HHS COVID-19 Reported Patient Impact and Hospital Capacity by Facility (anag-cw7u), beds in   use / beds, ICU in use / ICU beds, Jan 2020 to Apr 2024. Reporting ended May 2024, so ERNow could NOT use   it live; tested only as an upper bound (\"if hospital-level crowding were public, would it help?\").",
+ "statewide_best_challenger": "Partial pooling (shrink toward state & peer means)",
+ "statewide_validation_gain_vs_persistence": 0.017,
+ "statewide_oracle_validation_gain_vs_persistence": 0.017,
+ "rolling_gbm_minutes_change_statewide": -0.069,
+ "rolling_years_statewide": 7,
+ "rolling_gbm_minutes_change_per_hospital": -0.086,
+ "rolling_years_per_hospital": 4,
+ "gbm_validation_without_crowding": 12.606,
+ "gbm_validation_with_crowding": 11.83,
+ "gbm_validation_with_crowding_ORACLE": 11.754,
+ "gbm_test_without_crowding": 10.287,
+ "gbm_test_with_crowding": 9.725,
+ "persistence_validation": 11.805,
+ "persistence_test": 9.421,
+ "gbm_gain_from_crowding_validation": 0.0616,
+ "promoted": false,
+ "conclusion": "Not promoted: statewide crowding did not clear the pre-set rule, so Persistence stays."
+}

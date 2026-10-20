@@ -1,0 +1,82 @@
+{
+ "rows": [
+  {
+   "factor": "Last published ED visit time",
+   "data": "CMS (OP-18b)",
+   "live": true,
+   "used": "Center estimate",
+   "result": "Most accurate option: 9.4-min average error on 4,017 hospitals it never saw"
+  },
+  {
+   "factor": "Past trend, other ED measures, hospital traits, state and peer averages",
+   "data": "CMS",
+   "live": true,
+   "used": "Ranges and look-alike hospitals",
+   "result": "Made the center estimate less accurate (9.9\u201310.3 vs 9.4 min), so they're used only in the ranges and look-alike matching"
+  },
+  {
+   "factor": "How much ED times swung nationally in the latest release",
+   "data": "CMS",
+   "live": true,
+   "used": "Ranges",
+   "result": "Ranges widen or narrow with recent swings; 85% held the true value (target 80%)"
+  },
+  {
+   "factor": "Drive time from where you are",
+   "data": "OpenStreetMap routing",
+   "live": true,
+   "used": "Your total time",
+   "result": "Added to the typical visit to find the lowest total"
+  },
+  {
+   "factor": "Respiratory-illness season",
+   "data": "CDC FluView (ILINet)",
+   "live": true,
+   "used": "",
+   "result": "No gain, even with perfect knowledge of the coming season (rolling error 12.71 with vs 12.71 min without)"
+  },
+  {
+   "factor": "Model switching in turbulent years",
+   "data": "CMS",
+   "live": true,
+   "used": "",
+   "result": "+0.3%; even a perfect switch would gain only 0.8%"
+  },
+  {
+   "factor": "Correction curve for \"chance it's quickest\"",
+   "data": "CMS",
+   "live": true,
+   "used": "",
+   "result": "Did not improve unseen years, so the raw simulation is shown"
+  },
+  {
+   "factor": "Hospital crowding, statewide (beds in use)",
+   "data": "CDC NHSN",
+   "live": true,
+   "used": "",
+   "result": "Learned model 6% better but only tied the center estimate; ranges 2.3% worse"
+  },
+  {
+   "factor": "Hospital crowding, per hospital",
+   "data": "HHS (reporting ended 2024)",
+   "live": false,
+   "used": "",
+   "result": "Only 0.09 min better per year, and no longer published"
+  },
+  {
+   "factor": "Extreme weather days",
+   "data": "NOAA",
+   "live": true,
+   "used": "Next to test",
+   "result": "Not tested yet"
+  },
+  {
+   "factor": "Community factors (uninsured rate, share aged 65+)",
+   "data": "Census ACS",
+   "live": true,
+   "used": "Next to test",
+   "result": "Not tested yet"
+  }
+ ],
+ "extra_factors_tested_not_used": 5
+}

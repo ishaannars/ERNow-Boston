@@ -43,17 +43,107 @@ def block():
          f"{eq['hospital_years']:,} hospital-years, {eq['held_out_releases']} held-out releases.",
          "`research/equity_audit.py`"),
     ]
+    cr_path = ROOT / "data" / "crowding_factor_results.json"
+    if cr_path.exists():
+        cr = json.loads(cr_path.read_text())
+        rows.append((
+            "Does hospital crowding (beds in use) make the forecast more accurate?",
+            f"**{'Promoted' if cr['promoted'] else 'Not promoted'}.** Statewide crowding (still published weekly, so usable live) "
+            f"cut the gradient-boosting model's validation error {cr['gbm_gain_from_crowding_validation']:.0%} "
+            f"({cr['gbm_validation_without_crowding']:.1f} → {cr['gbm_validation_with_crowding']:.1f} min), the largest gain of any factor tested, "
+            f"but only brought it level with Persistence ({cr['persistence_validation']:.1f} min), short of the 2% bar. "
+            f"Per-hospital crowding (HHS, reporting ended 2024) {'lowered' if cr['rolling_gbm_minutes_change_per_hospital'] < 0 else 'raised'} "
+            f"the learned model's rolling error by only {abs(cr['rolling_gbm_minutes_change_per_hospital']):.2f} min "
+            f"over {cr['rolling_years_per_hospital']} years. Persistence stays.",
+            "`research/crowding_factor_test.py`"))
+    rg_path = ROOT / "data" / "crowding_range_results.json"
+    if rg_path.exists():
+        rg = json.loads(rg_path.read_text())
+        lt = rg["years_where_crowding_could_be_learned"]
+        rows.append((
+            "Does crowding make the 80% ranges more accurate?",
+            f"**{'Promoted' if rg['promoted'] else 'Not promoted'}.** Interval score {rg['mean_interval_score_without']:.1f} without vs "
+            f"{rg['mean_interval_score_with']:.1f} with crowding (lower is better, so {abs(rg['interval_score_gain']):.1%} {'better' if rg['interval_score_gain'] > 0 else 'worse'}). In the {lt['years']} years "
+            f"where the model had crowding history to learn from, crowding helped in {lt['years_crowding_better']}. Ranges stay as they are.",
+            "`research/crowding_range_test.py`"))
     lines = ["| Question (rule written before running) | Result | Code |", "|---|---|---|"]
     lines += [f"| {q} | {a} | {c} |" for q, a, c in rows]
     return "\n".join(lines)
 
 
+FSTART, FEND = "<!-- FACTORS:START -->", "<!-- FACTORS:END -->"
+
+
+def scoreboard():
+    """Every factor ERNow has tested, in plain English, built from the saved result files."""
+    nat, resp = load("national_results.json"), load("respiratory_factor_results.json")
+    sw, cal = load("regime_switch_results.json"), load("chance_calibration.json")
+    ab = {a["features"]: a["test_MAE"] for a in nat["ablation"]}
+    base = ab["Persistence (no features)"]
+    extra = [v for k, v in ab.items() if k != "Persistence (no features)"]
+    test_rows = nat["split"]["test_rows"]
+    rows = [
+        {"factor": "Last published ED visit time", "data": "CMS (OP-18b)", "live": True, "used": "Center estimate",
+         "result": f"Most accurate option: {base:.1f}-min average error on {test_rows:,} hospitals it never saw"},
+        {"factor": "Past trend, other ED measures, hospital traits, state and peer averages", "data": "CMS", "live": True,
+         "used": "Ranges and look-alike hospitals",
+         "result": f"Made the center estimate less accurate ({min(extra):.1f}–{max(extra):.1f} vs {base:.1f} min), so they're used only in the ranges and look-alike matching"},
+        {"factor": "How much ED times swung nationally in the latest release", "data": "CMS", "live": True, "used": "Ranges",
+         "result": f"Ranges widen or narrow with recent swings; {nat['intervals']['test_coverage']:.0%} held the true value (target 80%)"},
+        {"factor": "Drive time from where you are", "data": "OpenStreetMap routing", "live": True, "used": "Your total time",
+         "result": "Added to the typical visit to find the lowest total"},
+        {"factor": "Respiratory-illness season", "data": "CDC FluView (ILINet)", "live": True, "used": "",
+         "result": f"No gain, even with perfect knowledge of the coming season (rolling error {resp['rolling_avg_MAE']['gradient_boosting_plus_respiratory']:.2f} "
+                   f"with vs {resp['rolling_avg_MAE']['gradient_boosting']:.2f} min without)"},
+        {"factor": "Model switching in turbulent years", "data": "CMS", "live": True, "used": "",
+         "result": f"{sw['results'][sw['main_challenger']]['gain_vs_persistence']:+.1%}; even a perfect switch would gain only {sw['best_possible_gain_main']:.1%}"},
+        {"factor": "Correction curve for \"chance it's quickest\"", "data": "CMS", "live": True, "used": "",
+         "result": "Did not improve unseen years, so the raw simulation is shown"},
+    ]
+    if (ROOT / "data" / "crowding_factor_results.json").exists():
+        cr = load("crowding_factor_results.json")
+        rr = load("crowding_range_results.json") if (ROOT / "data" / "crowding_range_results.json").exists() else None
+        rows.append({"factor": "Hospital crowding, statewide (beds in use)", "data": "CDC NHSN", "live": True, "used": "",
+                     "result": f"Learned model {cr['gbm_gain_from_crowding_validation']:.0%} better but only tied the center estimate"
+                               + ("" if rr is None else f"; ranges {abs(rr['interval_score_gain']):.1%} {'better' if rr['interval_score_gain'] > 0 else 'worse'}")})
+        rows.append({"factor": "Hospital crowding, per hospital", "data": "HHS (reporting ended 2024)", "live": False, "used": "",
+                     "result": f"Only {abs(cr['rolling_gbm_minutes_change_per_hospital']):.2f} min better per year, and no longer published"})
+    rows += [
+        {"factor": "Extreme weather days", "data": "NOAA", "live": True, "used": "Next to test", "result": "Not tested yet"},
+        {"factor": "Community factors (uninsured rate, share aged 65+)", "data": "Census ACS", "live": True, "used": "Next to test",
+         "result": "Not tested yet"},
+    ]
+    return rows
+
+
+def tested_extra_count(rows=None):
+    rows = rows or scoreboard()
+    return sum(1 for r in rows if r["used"] == "")
+
+
+def factor_block(rows=None):
+    rows = rows or scoreboard()
+    lines = ["| Factor | Data | Usable live? | Result | Used in ERNow? |", "|---|---|---|---|---|"]
+    for r in rows:
+        used = r["used"] if r["used"] else "No"
+        mark = "✅ " + used if used not in ("No", "Next to test") else ("⏳ Next to test" if used == "Next to test" else "❌ No")
+        lines.append(f"| {r['factor']} | {r['data']} | {'Yes' if r['live'] else 'No'} | {r['result']} | {mark} |")
+    return "\n".join(lines)
+
+
+def _replace(body, start, end, text):
+    i, j = body.index(start) + len(start), body.index(end)
+    return body[:i] + "\n" + text + "\n" + body[j:]
+
+
 def main():
     p = ROOT / "README.md"
-    body = p.read_text()
-    i, j = body.index(START) + len(START), body.index(END)
-    p.write_text(body[:i] + "\n" + block() + "\n" + body[j:])
-    print("README More tests block updated.")
+    rows = scoreboard()
+    (ROOT / "data" / "factor_scoreboard.json").write_text(json.dumps({"rows": rows, "extra_factors_tested_not_used": tested_extra_count(rows)}, indent=1))
+    body = _replace(p.read_text(), START, END, block())
+    body = _replace(body, FSTART, FEND, factor_block(rows))
+    p.write_text(body)
+    print("README More tests and factor blocks updated; data/factor_scoreboard.json written.")
 
 
 if __name__ == "__main__":
