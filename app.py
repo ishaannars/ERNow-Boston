@@ -723,7 +723,9 @@ def render_home():
     if specialist is not None:   # the eye/ENT specialist leads when that's the emergency
         ranked = pd.concat([ranked[ranked["hospital"] == specialist["hospital"]],
                             ranked[ranked["hospital"] != specialist["hospital"]]]).reset_index(drop=True)
-    st.caption("Typical times from public hospital reports, not live waits. Drive times don't include live traffic. \"Likely quickest\" is checked against past years; ERs without a route are left out.")
+    st.caption("Typical times from public hospital reports, not live waits. Drive times don't include live traffic. "
+               "\"Usually quickest\" marks the ER with the lowest drive + typical visit. \"Likely quickest\" is how often that ER came out "
+               "quickest in 4,000 what-if trips, checked against past years. ERs without a route are left out.")
     closest_name = None if closest is None else closest["hospital"]
 
     cards = []
@@ -957,7 +959,7 @@ def render_methodology():
             ("Ranking test", f"{rk['fastest_pick_accuracy']:.0%} vs {rk['fastest_pick_random_baseline']:.0%}",
              f"Picked the shortest observed hospital median in {rk['local_groups']} local areas {rk['fastest_pick_accuracy']:.0%} of the time, versus {rk['fastest_pick_random_baseline']:.0%} by chance."),
             ("Chance it's quickest", "4,000 scenarios, calibrated",
-             "A trip simulation (Monte Carlo) replays your drive with each hospital's tested range 4,000 times, summarizing simulated hospital-median scenarios. They are then calibrated against 6 held-out years (9,861 hospital-years): when it said 88%, that ER really had the shortest typical time 89% of the time. It describes typical hospital times, not your individual visit."),
+             "A trip simulation (Monte Carlo) replays your drive with each hospital's tested range 4,000 times, summarizing simulated hospital-median scenarios. The shares were checked against 6 held-out years (9,861 hospital-years): when it said 88%, that ER really had the shortest typical time 89% of the time, so no correction is applied. It describes typical hospital times, not your individual visit."),
             ("Peer comparison", "25 nearest peers",
              "Nearest-neighbor matching on ED volume, hospital type, ownership, star rating, and case complexity (heart-attack and stroke volume, cardiac surgery, inpatient volume)."),
             ("Drivers & ablation", "Honest by design",
@@ -1007,7 +1009,7 @@ def render_methodology():
         ], columns=["Component", "Consumer output", "Changes time ranking?"]))
         st.caption(f"The combined consumer calculation is verified against the saved forecasts. "
                    f"Range coverage was {iv['test_coverage']:.1%} in the final test, but varied by historical release. "
-                   "Routing has not been validated against observed trip times, the chance-quickest calibration covers typical hospital times (not individual visits), and the full comparison "
+                   "Routing has not been validated against observed trip times, the Likely quickest check covers typical hospital times (not individual visits), and the full comparison "
                    "has not been tested against individual treatment or discharge outcomes. The nine-second result measures decision time.")
 
     st.subheader("Reading an ER card")
@@ -1016,7 +1018,8 @@ def render_methodology():
     - **Similar U.S. hospitals:** that time vs 25 look-alike hospitals nationwide (k-nearest neighbors on ED volume, type, ownership, star rating, and case-complexity proxies).
     - **Drive:** real road route from where you are (OpenStreetMap/OSRM), without live traffic.
     - **Drive + typical visit:** the two added together, which is how ERNow ranks "usually quickest" (drive plus a predicted median, not a personal expected duration).
-    - **Chance it's quickest:** the fraction of 4,000 independent hospital-median scenarios where this ER has the lowest drive + median. It is calibrated on 9,861 held-out hospital-years and describes typical hospital times, not individual visits; missing routes are excluded.
+    - **Usually quickest:** the badge on the ER with the lowest drive + typical visit.
+    - **Likely quickest:** the share of 4,000 what-if trips where this ER has the lowest drive + typical visit. Checked against 9,861 held-out hospital-years: when it said 88%, that ER was quickest 89% of the time. It describes typical hospital times, and ERs without a route are left out.
     - **Left before seen (2024):** the share of patients who left before being seen (CMS OP-22). This is an association with ED conditions, not a direct wait-time measurement.
     - **Hospital system:** the network each ER belongs to. If you pick your doctors' system, ERNow tags its ERs and names the quickest one in it, to support care continuity; record sharing varies. Ranking stays time-based.
     - **Insurance:** not a ranking factor. Medicare-participating ERs must screen and stabilize emergency conditions or appropriately transfer patients (EMTALA). Most private plans have protections for covered out-of-network emergency services; exceptions apply.
