@@ -1,0 +1,59 @@
+{
+ "method": "Uses the final held-out release (the same test year as the headline 9.4-minute error) and the production forecast (Persistence: the last published median). Reports how errors are distributed, which hospitals ERNow misses most, and whether the misses could have been seen coming. Writes data/error_analysis.json. ",
+ "test_release": "2026-08-01",
+ "hospitals": 4017,
+ "MAE": 9.42,
+ "median_abs_error": 7.0,
+ "share_within_15": 0.821,
+ "share_within_30": 0.972,
+ "share_over_60": 0.003,
+ "worst_10pct_share_of_total_error": 0.316,
+ "worst_10pct_min_error": 20.0,
+ "share_underestimates": 0.492,
+ "worst_10pct_share_underestimates": 0.511,
+ "rank_corr_last_change_vs_error": 0.15,
+ "by_last_change": [
+  {
+   "last_change": "0\u20135 min",
+   "hospitals": 1329,
+   "MAE": 8.2
+  },
+  {
+   "last_change": "5\u201315 min",
+   "hospitals": 1569,
+   "MAE": 9.0
+  },
+  {
+   "last_change": "15\u201330 min",
+   "hospitals": 788,
+   "MAE": 10.6
+  },
+  {
+   "last_change": "30+ min",
+   "hospitals": 246,
+   "MAE": 13.4
+  }
+ ],
+ "by_ed_size": [
+  {
+   "size": "1 (smallest)",
+   "hospitals": 1568,
+   "MAE": 8.1
+  },
+  {
+   "size": "2",
+   "hospitals": 939,
+   "MAE": 10.0
+  },
+  {
+   "size": "3",
+   "hospitals": 572,
+   "MAE": 10.6
+  },
+  {
+   "size": "4 (largest)",
+   "hospitals": 671,
+   "MAE": 10.6
+  }
+ ]
+}

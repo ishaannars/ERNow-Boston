@@ -111,6 +111,21 @@ def test_factor_scoreboard_is_current():
     assert w.factor_block(rows) in (ROOT / "README.md").read_text()
 
 
+def test_readme_headline_matches_results():
+    sys.path.insert(0, str(ROOT / "research"))
+    import write_extra_tests as w
+    readme = (ROOT / "README.md").read_text()
+    nat, imp = load("national_results.json"), load("national_impact.json")
+    sel = {m["model"]: m for m in nat["models"]}[nat["selected_model"]]
+    rk = nat["ranking"]["selected"]
+    assert f"**{sel['MAE']:.1f}-minute average error** (R² {sel['R2']:.2f}) on {nat['split']['test_rows']:,}" in readme
+    assert f"quickest ER in {rk['fastest_pick_accuracy']:.0%} of counties**, compared with {rk['fastest_pick_random_baseline']:.0%}" in readme
+    assert f"**{imp['mean_minutes_saved_vs_random']:.0f} minutes shorter**" in readme
+    assert f"{nat['intervals']['test_coverage']:.0%} of real values" in readme
+    assert f"I also tested {w.tested_extra_count()} extra ideas" in readme
+    assert w.errors_block() in readme
+
+
 def test_readme_more_tests_block_is_current():
     sys.path.insert(0, str(ROOT / "research"))
     import write_extra_tests as w

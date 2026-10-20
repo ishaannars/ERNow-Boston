@@ -72,6 +72,30 @@ def block():
 
 
 FSTART, FEND = "<!-- FACTORS:START -->", "<!-- FACTORS:END -->"
+ESTART, EEND = "<!-- ERRORS:START -->", "<!-- ERRORS:END -->"
+
+
+def errors_block():
+    e = load("error_analysis.json")
+    ch = {r["last_change"]: r["MAE"] for r in e["by_last_change"]}
+    sz = {r["size"]: r["MAE"] for r in e["by_ed_size"]}
+    lines = [
+        f"Test year {e['test_release'][:7]}, {e['hospitals']:,} hospitals. From `research/error_analysis.py`.",
+        "",
+        f"- **Most estimates are close.** Half were within {e['median_abs_error']:.0f} minutes. "
+        f"{e['share_within_15']:.0%} were within 15 minutes and {e['share_within_30']:.0%} within 30. "
+        f"Only {e['share_over_60']:.1%} missed by more than an hour.",
+        f"- **The misses are concentrated.** The worst 10% of hospitals (off by {e['worst_10pct_min_error']:.0f}+ minutes) "
+        f"account for {e['worst_10pct_share_of_total_error']:.0%} of all error.",
+        f"- **It doesn't lean one way.** It guessed too low for {e['share_underestimates']:.0%} of hospitals and too high for the rest.",
+        f"- **Hospitals that just changed a lot are harder.** Error was {ch['0–5 min']:.1f} minutes when a hospital moved "
+        f"0–5 minutes in its last release and {ch['30+ min']:.1f} minutes when it moved 30+.",
+        f"- **Bigger EDs are harder.** Error was {sz['1 (smallest)']:.1f} minutes for the smallest EDs and "
+        f"{sz['4 (largest)']:.1f} for the largest.",
+        "",
+        "The range model uses each hospital's latest change and national swings as inputs, so ranges are wider where misses are more likely.",
+    ]
+    return "\n".join(lines)
 
 
 def scoreboard():
@@ -142,6 +166,8 @@ def main():
     (ROOT / "data" / "factor_scoreboard.json").write_text(json.dumps({"rows": rows, "extra_factors_tested_not_used": tested_extra_count(rows)}, indent=1))
     body = _replace(p.read_text(), START, END, block())
     body = _replace(body, FSTART, FEND, factor_block(rows))
+    if ESTART in body and (ROOT / "data" / "error_analysis.json").exists():
+        body = _replace(body, ESTART, EEND, errors_block())
     p.write_text(body)
     print("README More tests and factor blocks updated; data/factor_scoreboard.json written.")
 

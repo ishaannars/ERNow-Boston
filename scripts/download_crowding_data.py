@@ -33,7 +33,7 @@ def get(url, params, tries=4):
         except requests.RequestException as e:
             print(f"   retry {i + 1}/{tries}: {e}")
             time.sleep(5 * (i + 1))
-    raise SystemExit(f"Could not download {url}. Send Claude this message.")
+    raise SystemExit(f"Could not download {url}. Check your connection and try again.")
 
 
 def pick(cols, *patterns):
