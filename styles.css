@@ -562,9 +562,9 @@ iframe[title="ernow_geo"]{height:0 !important;min-height:0 !important;border:0 !
 /* ===== Final polish: text floor, tap targets, press feedback, walking and transit ===== */
 .mini-label,.evidence-source,.live-k,.live-t,.best-label,.closest-label,.er-flag,.opt-rows span,.rank-chip,.answer-k,.live-title,.model-k,.er-stat-k,.live-measured,.model-chip,.er-reason,.live-c,.ds-tag,.er-system,.er-wait-label{font-size:.78rem !important;}
 .er-directions,.er-transit{font-size:.82rem !important;}
-.er-walk{font-size:.78rem;color:#5d5a52;margin-top:.15rem;line-height:1.3;}
+.er-walk{font-size:.78rem;color:var(--soft-ink);margin-top:.15rem;line-height:1.3;}
 .er-actions{display:flex;align-items:center;gap:.9rem;flex-wrap:wrap;}
-.er-transit{color:#8C2F2F;font-weight:600;text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(140,47,47,.35);}
+.er-transit{color:var(--beni);font-weight:600;text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(140,47,47,.35);}
 .er-transit:hover{text-decoration-color:#8C2F2F;}
 [data-testid="stButton"] > button,.er-directions{transition:transform .08s ease,background-color .15s ease !important;}
 [data-testid="stButton"] > button:active,.er-directions:active,.er-transit:active{transform:scale(.97) !important;}
@@ -575,3 +575,27 @@ iframe[title="ernow_geo"]{height:0 !important;min-height:0 !important;border:0 !
     .er-transit{display:inline-flex;align-items:center;min-height:44px;}
     [data-testid="stTextInput"] input,[data-baseweb="select"] input{font-size:16px !important;}
 }
+
+/* Shared with iCinema: koke (moss) marks what is running right now, with a slow pulse. */
+:root{--koke:#8B7D3A}
+.model-dot{background:var(--koke) !important;animation:koke-pulse 2.2s ease-out infinite !important;}
+@keyframes koke-pulse{0%{box-shadow:0 0 0 0 rgba(139,125,58,.55)}70%{box-shadow:0 0 0 6px rgba(139,125,58,0)}100%{box-shadow:0 0 0 0 rgba(139,125,58,0)}}
+@media(prefers-reduced-motion:reduce){.model-dot{animation:none !important}}
+
+/* How it works: three steps, four results, plain limits. Same cards, type, and spacing as the rest of ERNow. */
+.how-steps,.how-stats{display:grid;gap:.75rem;margin:.2rem 0 .6rem}
+.how-steps{grid-template-columns:repeat(3,minmax(0,1fr))}
+.how-stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+.how-step-card,.how-stat{background:var(--shell);border:1px solid rgba(28,27,25,.14);border-radius:14px;padding:1rem 1.05rem}
+.how-step-n{width:1.7rem;height:1.7rem;border-radius:50%;border:1px solid rgba(28,27,25,.25);display:flex;align-items:center;
+    justify-content:center;font-size:.8rem;font-weight:700;color:var(--ink);margin-bottom:.55rem}
+.how-step-t,.how-stat-t{font-size:.95rem;font-weight:700;color:var(--ink);margin-bottom:.25rem}
+.how-step-c,.how-stat-c{font-size:.86rem;line-height:1.5;color:var(--soft-ink)}
+.how-stat-v{font-family:Georgia,"Times New Roman",serif;font-size:1.7rem;line-height:1.1;color:var(--ink);margin-bottom:.35rem;
+    font-variant-numeric:tabular-nums}
+.how-limits{margin:.2rem 0 1rem;padding-left:1.1rem}
+.how-limits li{font-size:.92rem;line-height:1.55;color:var(--soft-ink);margin:.25rem 0}
+.how-limits li strong{color:var(--ink)}
+.er-actions .er-directions + .er-directions{margin-left:0}
+@media(max-width:900px){.how-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.how-steps,.how-stats{grid-template-columns:1fr}}

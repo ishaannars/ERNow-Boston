@@ -807,7 +807,7 @@ def render_home():
         <div class="er-stat"><div class="er-stat-k">Left before seen</div><div class="er-stat-v">{lwbs} <span>{lwbs_sub}</span></div></div>
       </div>
       <div class="er-actions"><a class="er-directions" href="{directions_url}" target="_blank" rel="noopener noreferrer">Open Directions</a>
-        <a class="er-transit" href="{transit_url}" target="_blank" rel="noopener noreferrer">By transit</a></div>
+        <a class="er-directions" href="{transit_url}" target="_blank" rel="noopener noreferrer">By transit</a></div>
     </div>""")
     st.markdown('<div class="er-list">' + "".join(cards) + '</div>', unsafe_allow_html=True)
     st.caption("The 7 general ERs in Boston are compared here (Carney Hospital's ER closed in 2024). "
@@ -854,7 +854,7 @@ def render_home():
                  + (f"ERNow tested {_n} extra factors, including hospital crowding and flu season, against last year's published "
                     "visit times. None made the estimate more accurate, so it uses the published times. "
                     if _n else "")
-                 + "Only factors that improve accuracy get added. The full list is on the Forecast model page.")
+                 + "Only factors that improve accuracy get added. The full list is on the Model page.")
         if major_events:
             st.caption("Major event sources detected: " + "; ".join(major_events[:4]))
         else:
@@ -888,212 +888,104 @@ def _pct(v):
 
 
 def render_methodology():
-    st.title("Methodology")
-    st.caption("Why ERNow exists, how it decides, and where every number comes from, in plain terms.")
-    national, forecast = load_national()
+    """How it works, for everyone: what ERNow does, how sure it is, what it can't do. Details sit in one expander."""
+    st.title("How it works")
+    st.caption("What ERNow does, how sure it is, and what it can’t do.")
+    national, _ = load_national()
     ev = (national or {}).get("evidence", {})
-
-    st.markdown("""
-    <div class="ds-card">
-      <div class="ds-title">The mission: compare typical ED visit times alongside the drive</div>
-      <div class="ds-sub"><strong>ERNow compares published performance now: models built on 4,400+ reporting U.S. hospitals compare median ED visit times alongside driving estimates.</strong> The nearest-ER search used in the timing protocol compares location. ERNow adds historical hospital medians. Differences may reflect case mix, staffing, and operations; this model does not establish their causes. ERNow assembles the data from CMS, CHIA, the CDC, the Weather Service, and road routing into one screen, labels every number by source and period, and is built so live hospital data can plug in the day it exists.</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.subheader("Why this matters")
-    if ev:
-        cards = [
-            (fmt_minutes(ev["boston_spread_min"]),
-             f"Gap in median ED visit time between Boston's fastest ({ev['boston_fastest']}, {fmt_minutes(ev['boston_fastest_min'])}) and slowest ({ev['boston_slowest']}, {fmt_minutes(ev['boston_slowest_min'])}) ED.",
-             "CMS OP-18b, latest release"),
-            (f"{ev['data_lag_months_min']:.0f}–{ev['data_lag_months_max']:.0f} months",
-             "How long after a reporting period ends CMS publishes its ED data.",
-             f"Computed across {ev['releases']} CMS releases"),
-            ("~33% → ~44%",
-             "Massachusetts treat-and-release ED visits over 4 hours: Oct–Dec 2019 vs Jul–Sep 2025.",
-             "CHIA quarterly ED databook, sheet VI-1 (Sept 2026)"),
-            (f"{ev['hospitals_with_op18b_latest']:,}",
-             "U.S. hospitals with public ED-time data the same pipeline already covers. Boston is the first city deployed.",
-             "CMS Hospital Compare archives"),
-        ]
-        st.markdown('<div class="evidence-grid">' + "".join(
-            f'<div class="evidence-card"><div class="evidence-value">{html.escape(v)}</div>'
-            f'<div class="evidence-copy">{html.escape(c)}</div><div class="evidence-source">{html.escape(src)}</div></div>'
-            for v, c, src in cards) + '</div>', unsafe_allow_html=True)
-
+    sc = (_scorecard().get("summary") or {})
     choice_path = Path(__file__).resolve().parent / "data" / "boston_choice.json"
-    if choice_path.exists():
-        ch = json.loads(choice_path.read_text())
-        st.markdown(
-            f'<div class="choice-callout"><div class="v">Lowest estimated total differs from closest at {ch["closest_not_fastest_share"]:.0%} of sampled points</div>'
-            f'<div class="c">Across {ch["locations"]:,} sampled points near Boston ERs, for urgent but non-life-threatening visits, a different ER than the closest had the shortest '
-            f'drive plus hospital median visit at {ch["closest_not_fastest_share"]:.0%} of grid points, typically about {fmt_minutes(ch["median_minutes_saved_when_different"])} shorter '
-            f'for about {fmt_minutes(ch["median_extra_drive_min_when_different"])} more driving. Drive times in this analysis are estimated from distance '
-            + (f'(the finding holds at {ch["sensitivity"]["share_min"]:.0%}–{ch["sensitivity"]["share_max"]:.0%} under assumed driving speeds of 5–30 mph); ' if ch.get("sensitivity") else '; ')
-            + 'the app uses real road routing. In an emergency, call 911 or go to the nearest appropriate ER.</div></div>', unsafe_allow_html=True)
+    ch = json.loads(choice_path.read_text()) if choice_path.exists() else {}
 
-    if national and ev:
-        sel_m = {m["model"]: m for m in national["models"]}[national["selected_model"]]
-        rk_m = national["ranking"]["selected"]
-        st.subheader("Why it works without live data")
-        why = [
-            ("Differences persist", f"R² {sel_m['R2']:.2f}",
-             f"The latest reported median predicts the next release’s median across {national['split']['hospitals']:,} U.S. hospitals. "
-             "This is an association in published medians, not a causal explanation."),
-            ("Boston's order holds", f"Rank correlation {national['boston_backtest']['spearman_selected']:.2f}",
-             f"Last year's public data put Boston's {national['boston_backtest']['hospitals']} EDs in the same order as the following year"
-             + (", including the fastest one." if national["boston_backtest"].get("fastest_pick_correct") else ".")),
-            ("The gaps are big", fmt_minutes(ev["boston_spread_min"]),
-             "Between Boston's fastest and slowest EDs. Published median differences do not establish their causes or tonight’s waits."),
-        ]
-        st.markdown('<div class="model-grid">' + "".join(
-            f'<div class="model-card"><div class="model-k">{html.escape(k)}</div><div class="model-value">{html.escape(v)}</div>'
-            f'<div class="model-copy">{html.escape(c)}</div></div>' for k, v, c in why) + '</div>', unsafe_allow_html=True)
-        st.markdown('<div class="note"><strong>Like restaurants:</strong> you don\'t need a live feed to know which place on your block is usually packed. '
-                    '<strong>What ERNow can\'t see:</strong> a usually fast ED having a bad night. This model does not measure tonight’s conditions, '
-                    'which is why ERNow shows tested ranges, labels everything "typical, not live," and is built to plug in live hospital data the day it exists.</div>',
-                    unsafe_allow_html=True)
-
-    ds = decision_summary()
-    if "ernow" in ds and ({"full", "quick"} & set(ds)):
-        e = fmt_seconds(ds["ernow"]["median_seconds"])
-        cards = []
-        if "quick" in ds:
-            share = (f" At {ch['closest_not_fastest_share']:.0%} of sampled grid points near Boston ERs, the closest isn't the fastest overall." if choice_path.exists() else "")
-            cards.append(("ERNow vs the usual search", f'{e} vs {fmt_seconds(ds["quick"]["median_seconds"])}',
-                          f'Recorded medians in a convenience sample: {ds["ernow"]["participants"]} ERNow and {ds["quick"]["participants"]} search participants. Search protocol: choose the nearest ER. This does not establish a population-wide speed benefit.{share}'))
-        if "full" in ds:
-            cards.append(("Information ERNow assembles", f'{fmt_seconds(ds["full"]["median_seconds"])} by hand',
-                          f"Recorded full-comparison median from {ds['full']['participants']} participant; ERNow assembles these fields on one screen."))
-        st.markdown('<div class="answer-grid">' + "".join(
-            f'<div class="answer-card"><div class="answer-k">{html.escape(k)}</div><div class="answer-v">{html.escape(v)}</div>'
-            f'<div class="answer-sub">{html.escape(c)}</div></div>' for k, v, c in cards) + '</div>', unsafe_allow_html=True)
-        st.caption("Timed with the protocol in TIMING_TEST.md.")
+    st.subheader("What it does")
+    steps = [
+        ("1", "Drive time", "A real road route from where you are to each ER (OpenStreetMap), plus walking time when it’s close."),
+        ("2", "Typical visit time", "How long a visit usually takes at each ER, forecast from the hospital’s public Medicare (CMS) data."),
+        ("3", "One ranking", "ERNow adds the two and ranks the ERs. The top one is the ER that usually gets people in and out fastest."),
+    ]
+    st.markdown('<div class="how-steps">' + "".join(
+        f'<div class="how-step-card"><div class="how-step-n">{n}</div><div class="how-step-t">{html.escape(t)}</div>'
+        f'<div class="how-step-c">{html.escape(c)}</div></div>' for n, t, c in steps) + '</div>', unsafe_allow_html=True)
 
     if national:
-        sp, iv, rk = national["split"], national["intervals"], national["ranking"]["selected"]
-        vals = {m["model"]: m for m in national["models"]}
-        sel = vals[national["selected_model"]]
-        st.subheader("The models behind it, in plain terms")
-        tiles = [
-            ("National forecaster", f"{sel['MAE']:.1f} min avg. error",
-             f"Four models compared on {sp['hospitals']:,} reporting U.S. hospitals ({sp['total_rows']:,} labeled release pairs): Persistence, Ridge, partial pooling, gradient boosting. "
-             f"The best challenger was only {(vals[national['selected_model']]['validation_MAE'] - vals[national['best_learned_model']]['validation_MAE']) / vals[national['selected_model']]['validation_MAE']:.1%} better on validation, under the 2% bar, so ERNow keeps {national['selected_model']} (R² {sel['R2']:.2f})."),
-            ("Tested ranges", f"{iv['test_coverage']:.0%} coverage, latest year",
-             f"Conformal prediction builds each target-80% range from real errors and recent volatility. Median width {fmt_minutes(iv['median_width_min'])}, "
-             f"{iv['old_fixed_band_median_width_min'] / max(iv['median_width_min'], 1):.1f}× narrower than ERNow's early fixed range."
-             + (f" Across {len(national.get('rolling') or [])} held-out years coverage ran "
-                f"{min(r['coverage'] for r in national['rolling'] if r.get('coverage') is not None):.0%}–"
-                f"{max(r['coverage'] for r in national['rolling'] if r.get('coverage') is not None):.0%}, missing most in volatile years."
-                if any(r.get('coverage') is not None for r in (national.get('rolling') or [])) else "")),
-            ("Ranking test", f"{rk['fastest_pick_accuracy']:.0%} vs {rk['fastest_pick_random_baseline']:.0%}",
-             f"Picked the shortest observed hospital median in {rk['local_groups']} local areas {rk['fastest_pick_accuracy']:.0%} of the time, versus {rk['fastest_pick_random_baseline']:.0%} by chance."),
-            ("Chance it's quickest", "4,000 scenarios, calibrated",
-             "A trip simulation (Monte Carlo) replays your drive with each hospital's tested range 4,000 times, summarizing simulated hospital-median scenarios. The shares were checked against 6 held-out years (9,861 hospital-years): when it said 88%, that ER really had the shortest typical time 89% of the time, so no correction is applied. It describes typical hospital times, not your individual visit."),
-            ("Peer comparison", "25 nearest peers",
-             "Nearest-neighbor matching on ED volume, hospital type, ownership, star rating, and case complexity (heart-attack and stroke volume, cardiac surgery, inpatient volume)."),
-            ("Drivers & ablation", "Honest by design",
-             "Permutation importance measures predictive inputs, not causes of ED time; ablation shows extra features did not beat Persistence, so ERNow keeps the simpler model."),
+        sel = {m["model"]: m for m in national["models"]}[national["selected_model"]]
+        rk = national["ranking"]["selected"]
+        iv = national.get("intervals") or {}
+        st.subheader("How sure is it?")
+        cards = [
+            (f"{rk['fastest_pick_accuracy']:.0%} vs {rk['fastest_pick_random_baseline']:.0%}",
+             "Picks the quickest ER",
+             f"In {rk['local_groups']} U.S. areas, in a year it never saw, versus picking at random."),
+            (f"{sel['MAE']:.0f} min", "Average miss",
+             f"On a hospital’s typical visit time, across {national['split']['test_rows']:,} hospitals it never saw."),
+            (f"{iv.get('test_coverage', 0):.0%}", "Ranges that held",
+             "Real values landed inside the range shown on each card (aim: 80%)."),
         ]
-        st.markdown('<div class="model-grid">' + "".join(
-            f'<div class="model-card"><div class="model-k">{html.escape(k)}</div><div class="model-value">{html.escape(v)}</div>'
-            f'<div class="model-copy">{html.escape(c)}</div></div>' for k, v, c in tiles) + '</div>', unsafe_allow_html=True)
-        st.caption("Full results, tables, and validation details are on the Forecast Model page.")
+        if sc.get("releases_checked"):
+            cards.append((f"{sc['fastest_held']} of {sc['releases_checked']}", "Held in Boston",
+                          "The ER forecast as quickest was still quickest in CMS’s next release."))
+        st.markdown('<div class="how-stats">' + "".join(
+            f'<div class="how-stat"><div class="how-stat-v">{html.escape(v)}</div><div class="how-stat-t">{html.escape(t)}</div>'
+            f'<div class="how-stat-c">{html.escape(c)}</div></div>' for v, t, c in cards) + '</div>', unsafe_allow_html=True)
+        ci = iv.get("test_coverage_ci95") or []
+        st.caption("The first three results come from thousands of hospitals, so they’re statistically solid"
+                   + (f" (ranges: {ci[0]:.0%}–{ci[1]:.0%} with 95% confidence)" if len(ci) == 2 else "")
+                   + ". The Boston check covers six ERs over five releases, so read it as a sanity check.")
 
-        st.subheader("Historical accuracy of every candidate")
-        names = {"Persistence baseline": "Persistence (latest published median)",
-                 "Partial pooling (shrink toward state & peer means)": "Partial pooling",
-                 "Ridge regression": "Ridge regression", "Gradient boosting": "Gradient boosting"}
-        historical = []
-        for result in national["models"]:
-            errors = [fold["maes"][result["model"]] for fold in national.get("rolling", [])]
-            historical.append({
-                "Candidate": names.get(result["model"], result["model"]),
-                "Selection-release MAE": f"{result['validation_MAE']:.2f} min",
-                "Final-test MAE": f"{result['MAE']:.2f} min",
-                "Final-test R²": f"{result['R2']:.3f}",
-                "Rolling MAE, min–max": f"{min(errors):.2f}–{max(errors):.2f} min" if errors else "—",
-            })
-        _table(pd.DataFrame(historical))
-        st.caption(f"MAE is average absolute error predicting a published hospital median, not an individual stay. "
-                   f"Final test: {sp['test_rows']:,} hospitals; model selected on the preceding release. "
-                   f"Rolling results span {len(national.get('rolling', []))} held-out releases, training each candidate only on earlier releases. "
-                   "Rolling fits use all earlier labeled pairs; the final selection test reserves a separate validation release, so their training windows differ.")
-        bt = national.get("boston_backtest", {})
-        if bt.get("hospitals"):
-            st.caption(f"Boston's {bt['hospitals']} general EDs: {bt['MAE_selected']:.1f}-minute hospital-median error and "
-                       f"rank correlation {bt['spearman_selected']:.2f} in one held-out release. This is a small local test. "
-                       "Release chronology is retrospective; reporting windows can overlap.")
+    if ev and ch:
+        lo = (ch.get("sensitivity") or {}).get("share_min")
+        st.subheader("Why it matters in Boston")
+        st.markdown(
+            f'<div class="choice-callout"><div class="v">The closest ER usually isn’t the quickest</div>'
+            f'<div class="c">Typical visits at Boston’s ERs differ by {fmt_minutes(ev["boston_spread_min"])}. From '
+            + (f'{lo:.0%}–{ch["closest_not_fastest_share"]:.0%}' if lo else f'{ch["closest_not_fastest_share"]:.0%}')
+            + f' of {ch["locations"]:,} spots around the city, a different ER had the shortest drive plus typical visit, '
+            f'usually about {fmt_minutes(ch["median_minutes_saved_when_different"])} shorter for '
+            f'{fmt_minutes(ch["median_extra_drive_min_when_different"])} more driving.</div></div>',
+            unsafe_allow_html=True)
 
-        st.subheader("How the pieces combine on your screen")
-        st.write("The four point forecasters compete; their predictions are not averaged together. The model selected on validation supplies "
-                 "each card's forecast median. A separate conformal model supplies the range. Estimated road travel is added to that median "
-                 "to rank ERs by lowest estimated total time. Peer matching and simulation add context without changing that ranking.")
-        _table(pd.DataFrame([
-            ["Selected point forecaster", "Forecast median; added to drive for total", "Yes"],
-            ["Conformal range model", "Target-80% median range; spread for simulation", "No"],
-            ["OSRM road routing", "Drive minutes and distance", "Yes"],
-            ["Nearest-neighbor peers", "Median difference versus similar hospitals", "No"],
-            ["4,000-scenario simulation", "Calibrated chance it's quickest", "No"],
-            ["CMS OP-22 and external context", "Left-before-seen rate and contextual information", "No"],
-        ], columns=["Component", "Consumer output", "Changes time ranking?"]))
-        st.caption(f"The combined consumer calculation is verified against the saved forecasts. "
-                   f"Range coverage was {iv['test_coverage']:.1%} in the final test, but varied by historical release. "
-                   "Routing has not been validated against observed trip times, the Likely quickest check covers typical hospital times (not individual visits), and the full comparison "
-                   "has not been tested against individual treatment or discharge outcomes. The nine-second result measures decision time.")
+    st.subheader("What it can’t do")
+    lag = (f"{ev['data_lag_months_min']:.0f}–{ev['data_lag_months_max']:.0f} months" if ev else "about a year")
+    st.markdown(
+        '<ul class="how-limits">'
+        '<li><strong>It isn’t a live wait time.</strong> No Boston hospital publishes one yet. ERNow shows typical performance.</li>'
+        f'<li><strong>The data is {html.escape(lag)} old</strong> when CMS publishes it, so each card shows a range.</li>'
+        '<li><strong>Drive times skip live traffic</strong>, parking, and ambulance transport.</li>'
+        '<li><strong>It doesn’t judge what care you need.</strong> If it might be an emergency, call 911 or go to the nearest ER.</li>'
+        '</ul>', unsafe_allow_html=True)
 
-    st.subheader("Reading an ER card")
-    st.markdown("""
-    - **Typical ED visit:** the hospital median ED visit duration for eligible discharged patients (CMS OP-18b; excludes psychiatric/mental-health and transfer visits). The range targets 80% coverage of hospital medians, not individual visits; observed national coverage varied by release.
-    - **Similar U.S. hospitals:** that time vs 25 look-alike hospitals nationwide (k-nearest neighbors on ED volume, type, ownership, star rating, and case-complexity proxies).
-    - **Drive:** real road route from where you are (OpenStreetMap/OSRM), without live traffic.
-    - **Drive + typical visit:** the two added together, which is how ERNow ranks "usually quickest" (drive plus a predicted median, not a personal expected duration).
-    - **Usually quickest:** the badge on the ER with the lowest drive + typical visit.
-    - **Likely quickest:** the share of 4,000 what-if trips where this ER has the lowest drive + typical visit. Checked against 9,861 held-out hospital-years: when it said 88%, that ER was quickest 89% of the time. It describes typical hospital times, and ERs without a route are left out.
-    - **Left before seen (2024):** the share of patients who left before being seen (CMS OP-22). This is an association with ED conditions, not a direct wait-time measurement.
-    - **Hospital system:** the network each ER belongs to. If you pick your doctors' system, ERNow tags its ERs and names the quickest one in it, to support care continuity; record sharing varies. Ranking stays time-based.
-    - **Insurance:** not a ranking factor. Medicare-participating ERs must screen and stabilize emergency conditions or appropriately transfer patients (EMTALA). Most private plans have protections for covered out-of-network emergency services; exceptions apply.
-    """)
-    st.caption("Sort by Closest (the default) or by Fastest overall (drive + typical visit). ERs without a route are listed last. "
-               "For an eye, ear, nose, or throat emergency, choosing that type of emergency adds Mass Eye and Ear to the comparison.")
-
-    st.subheader("What would make it live")
-    st.write("ERNow is built so that live hospital data could plug in directly. If Boston hospitals published these fields, ERNow could switch from typical performance to current conditions:")
-    st.markdown("""
-    - Current median time from arrival to first provider, updated hourly.
-    - Number of patients waiting to be seen, by triage level.
-    - Number of admitted patients boarding in the ED.
-    - Ambulance diversion status.
-    """)
-    st.caption("Until then, every ERNow number is labeled with its source and period, so nothing is presented as live.")
-
-    st.subheader("Data sources and freshness")
-    fresh = pd.DataFrame([
-        ["National model + ED visit time", "CMS Hospital Compare (OP-18b, OP-18c, OP-22, ED volume)", f"{len((national or {}).get('releases', []))} releases", "Annual-period medians; published 9–12 months later"],
-        ["Case complexity (peers)", "CMS Complications & Deaths (patient volumes)", "Latest release", "Heart-attack/stroke volume, cardiac surgery, inpatient volume"],
-        ["Hospital utilization", "CHIA Hospital Profiles", "HFY 2024", "Verified HFY 2024 ED visits and inpatient occupancy; not ED crowding"],
-        ["Left before being seen", "CMS Hospital Compare OP-22", "2024", "Shown on each ER card"],
-        ["Hospital system", "Public hospital lists + CHIA profiles", "Checked Oct 2, 2026", "Shown on each card; optional hospital-system preference"],
-        ["Provider wait", "CMS Hospital Compare OP-20 (no longer published)", "2019 or earlier; unverified archive values", "Context table on the Forecast Model page only"],
-        ["Weather", "National Weather Service", "Current observation + alerts", "Boston-wide context"],
-        ["Respiratory illness", "CDC Massachusetts ARI", "Latest available reporting week", "Statewide context"],
-        ["Major events", "Boston-area public sources", "Detection attempted; cached 15 minutes", "Boston-wide context"],
-        ["Route", "OpenStreetMap / OSRM (public demo server)", "Cached up to 5 minutes", "Approximate address coordinates; no live traffic"],
-    ], columns=["Factor", "Source", "Freshness", "Meaning"])
-    _table(fresh)
-
-    st.subheader("Limitations")
-    st.markdown("""
-    - ERNow cannot see live triage, staffing, open rooms, boarding, or how many people are waiting right now.
-    - The forecast describes typical ED performance for a CMS period. The app has no verified live wait feed for these hospitals.
-    - OP-18b covers discharged patients. Peer matching adjusts for case complexity with public proxies, not for each patient's severity.
-    - Travel time excludes live traffic, parking, and ambulance transport.
-    """)
-    st.markdown('<div class="note"><strong>Left out on purpose:</strong> hour-by-hour or day-of-week patterns (no public hospital-level data), '
-                'traffic-aware drive times (not integrated), live waits (no verified feed integrated), Cambridge and other cities (next on the roadmap), '
-                'and a respiratory-surge forecast (planned). Each was skipped because it would need data ERNow can\'t get or test today.</div>',
-                unsafe_allow_html=True)
-
+    if national:
+        with st.expander("How these numbers were calculated"):
+            sel_name = national["selected_model"]
+            rows = [{"Model": m["model"].split(" (")[0], "Avg. miss, unseen year": f"{m['MAE']:.1f} min",
+                     "R²": f"{m['R2']:.3f}", "Used": "Yes" if m["model"] == sel_name else "No"} for m in national["models"]]
+            _table(pd.DataFrame(rows))
+            iv = national.get("intervals") or {}
+            fs = _extra_json("factor_scoreboard.json") or {}
+            eq = _extra_json("equity_audit.json") or {}
+            cal = _extra_json("chance_calibration.json") or {}
+            st.markdown(
+                f"- **The forecast.** Four models were trained on {national['split']['total_rows']:,} hospital-years "
+                f"({national['split']['hospitals']:,} U.S. hospitals, 10 CMS releases) and tested on a later year they never saw. "
+                f"A model replaces the simpler one only if it’s at least {national['promotion_margin']:.0%} more accurate on a held-out year. "
+                "None cleared that bar, so ERNow uses each hospital’s last published time, which tested as the most reliable.\n"
+                f"- **The ranges.** Conformal prediction sets each card’s range from real past errors "
+                f"(median width {iv.get('median_width_min', 0):.0f} min).\n"
+                "- **Likely quickest.** 4,000 simulated trips replay your drive with each hospital’s range"
+                + (f", checked against {cal['hospital_years']:,} held-out hospital-years." if cal.get("hospital_years") else ".") + "\n"
+                "- **Similar U.S. hospitals.** The 25 nearest matches on ED volume, hospital type, and case mix.\n"
+                + (f"- **Factors tested and left out.** {fs['extra_factors_tested_not_used']} extra factors, including hospital "
+                   "crowding and flu season, didn’t make the forecast more accurate, so they’re shown as context only.\n"
+                   if fs.get("extra_factors_tested_not_used") else "")
+                + (f"- **Fairness check.** Accuracy was compared across hospital types (rural, safety-net, large and small) on "
+                   f"{eq['hospital_years']:,} hospital-years; no group did notably worse.\n"
+                   if eq.get("hospital_years") and not eq.get("flags") else "")
+                + "- **Decision time.** In a small informal test, people picked an ER in 9 seconds with ERNow vs 20 seconds with "
+                "an “ER near me” search (5 people each). That’s too few people for statistical significance; a larger test is planned.\n"
+                "- **Data.** CMS Hospital Compare (visit times, left-before-seen), CMS case-mix measures, CHIA hospital profiles, "
+                "OpenStreetMap routing, National Weather Service and CDC for context."
+            )
+            st.caption("Full results, rolling backtests, and code are on the Model page and in the GitHub README.")
 
 
 def _extra_json(name):
@@ -1188,8 +1080,8 @@ def render_scorecard():
 
 
 def render_forecast_model():
-    st.title("Forecast Model")
-    st.caption("The evidence behind ERNow, for anyone who wants to check it: tested on eligible reporting U.S. hospitals in the CMS archives, then applied to Boston.")
+    st.title("The model")
+    st.caption("For anyone who wants to check the work: how each model was built and tested on U.S. hospitals, then applied to Boston.")
     national, forecast = load_national()
     if not national:
         st.info("Run `python national_model.py` to build the national model results.")
@@ -1426,7 +1318,7 @@ def render_forecast_model():
         **Peers:** nearest neighbors on ED volume, CMS star rating, hospital type, ownership, and case complexity (heart-attack and stroke patient volume, cardiac-surgery capability, inpatient volume from CMS Complications & Deaths).
         """)
     st.divider()
-    st.caption("ERNow Forecast Model · National CMS model · Not a live queue model.")
+    st.caption("ERNow · National CMS model · Not a live wait time.")
 
 
 def _set_ernow_view(view_name):
@@ -1447,7 +1339,7 @@ st.markdown("""
 st.markdown('<div class="ernow-nav-rule"></div>', unsafe_allow_html=True)
 
 current_view = st.session_state["ernow_view"]
-nav1, nav2, nav3, _ = st.columns([1.10, 1.45, 1.45, 3.00])
+nav1, nav2, nav3, _ = st.columns([1.10, 1.45, 1.30, 3.15])
 
 with nav1:
     st.button(
@@ -1462,7 +1354,7 @@ with nav1:
 
 with nav2:
     st.button(
-        "Methodology",
+        "How it works",
         icon=":material/menu_book:",
         use_container_width=True,
         key="nav_methodology",
@@ -1473,7 +1365,7 @@ with nav2:
 
 with nav3:
     st.button(
-        "Forecast Model",
+        "The model",
         icon=":material/monitoring:",
         use_container_width=True,
         key="nav_model",

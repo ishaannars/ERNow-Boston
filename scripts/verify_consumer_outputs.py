@@ -72,14 +72,13 @@ def main():
         assert not at.exception, [e.message for e in at.exception]
         assert at.session_state['ernow_view'] == view
         if view == 'Methodology':
-            assert any(h.value == 'Historical accuracy of every candidate' for h in at.subheader)
+            heads = {h.value for h in at.subheader}
+            assert {'What it does', 'How sure is it?', 'What it can’t do'} <= heads, heads
             markup = '\n'.join(m.value for m in at.markdown if not m.value.startswith('<style>'))
             results = json.loads((ROOT / 'data/national_results.json').read_text())
             for model in results['models']:
-                assert f"{model['MAE']:.2f} min" in markup
+                assert f"{model['MAE']:.1f} min" in markup
                 assert f"{model['R2']:.3f}" in markup
-            assert 'Selected point forecaster' in markup and 'Conformal range model' in markup
-            assert 'Changes time ranking?' in markup
         assert at.session_state['origin'][2] == 'Verification location'
         # The selected navigation button is the sole primary button.
         assert at.button(key=key).proto.type == 'primary'
