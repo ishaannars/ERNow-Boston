@@ -17,6 +17,7 @@ I built ERNow because live ER wait times could be years away, and comparing Bost
 - **Picked the quickest ER in 83% of counties**, compared with 24% by chance.
 - **37 minutes shorter** typical visit than picking any ER in the same county, across 340 counties.
 - **Honest ranges:** 85% of real values landed inside the 80% range in the test year.
+- **Did the forecast hold in Boston?** The fastest-ER call held in 5 of 5 past CMS releases. Boston's typical visit times moved more than most hospitals' (18-minute average miss), which is why every card shows a range.
 
 ## What I learned
 

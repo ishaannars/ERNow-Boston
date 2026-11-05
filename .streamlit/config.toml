@@ -8,6 +8,7 @@ font = "sans serif"
 
 [client]
 toolbarMode = "minimal"
+showErrorDetails = "none"
 
 [ui]
 hideTopBar = true

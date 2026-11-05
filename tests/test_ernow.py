@@ -137,3 +137,17 @@ def test_startup_styling_never_raises():
     sys.path.insert(0, str(ROOT))
     import startup_theme
     startup_theme.install_startup_theme()
+
+
+def test_forecast_scorecard_is_reproducible():
+    import json
+    import sys
+    from pathlib import Path
+    import pandas as pd
+    root = Path(__file__).resolve().parents[1]
+    sys.path.insert(0, str(root / "research"))
+    from forecast_scorecard import scorecard
+    out = scorecard(pd.read_csv(root / "data" / "cms_op18b_history.csv"))
+    saved = json.loads((root / "data" / "forecast_scorecard.json").read_text())
+    assert out["summary"] == saved["summary"]
+    assert out["summary"]["fastest_held"] <= out["summary"]["releases_checked"]

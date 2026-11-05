@@ -1,4 +1,4 @@
-"""ERNow update 38: can a volatility signal pick the right model each year?
+"""Can a volatility signal pick the right model each year?
 
     python research/regime_switch_test.py
 

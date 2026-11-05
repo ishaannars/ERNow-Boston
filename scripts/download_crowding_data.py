@@ -1,4 +1,4 @@
-"""Download the two hospital-crowding datasets for ERNow's crowding factor test (update 42).
+"""Download the two hospital-crowding datasets for ERNow's crowding factor test.
 
     python scripts/download_crowding_data.py
 

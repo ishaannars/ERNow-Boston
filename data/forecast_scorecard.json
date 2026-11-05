@@ -1,0 +1,258 @@
+{
+  "method": "python research/forecast_scorecard.py",
+  "model": "Persistence (previous published median)",
+  "checks": [
+    {
+      "release": "2022-07-01",
+      "period": "2020-10-01 to 2021-09-30",
+      "hospitals": 6,
+      "mae_min": 21.7,
+      "within_15": 3,
+      "forecast_fastest": "Tufts Medical Center",
+      "actual_fastest": "Tufts Medical Center",
+      "fastest_held": true,
+      "rank_corr": 0.6,
+      "rows": [
+        {
+          "hospital": "Tufts Medical Center",
+          "forecast": 179.0,
+          "actual": 173.0,
+          "miss": -6.0
+        },
+        {
+          "hospital": "Brigham and Women's Faulkner Hospital",
+          "forecast": 235.0,
+          "actual": 241.0,
+          "miss": 6.0
+        },
+        {
+          "hospital": "Boston Medical Center",
+          "forecast": 234.0,
+          "actual": 244.0,
+          "miss": 10.0
+        },
+        {
+          "hospital": "Massachusetts General Hospital",
+          "forecast": 280.0,
+          "actual": 260.0,
+          "miss": -20.0
+        },
+        {
+          "hospital": "Brigham and Women's Hospital",
+          "forecast": 228.0,
+          "actual": 298.0,
+          "miss": 70.0
+        },
+        {
+          "hospital": "Beth Israel Deaconess Medical Center",
+          "forecast": 334.0,
+          "actual": 316.0,
+          "miss": -18.0
+        }
+      ]
+    },
+    {
+      "release": "2023-10-01",
+      "period": "2021-10-01 to 2022-09-30",
+      "hospitals": 6,
+      "mae_min": 19.0,
+      "within_15": 1,
+      "forecast_fastest": "Tufts Medical Center",
+      "actual_fastest": "Tufts Medical Center",
+      "fastest_held": true,
+      "rank_corr": 0.99,
+      "rows": [
+        {
+          "hospital": "Tufts Medical Center",
+          "forecast": 173.0,
+          "actual": 200.0,
+          "miss": 27.0
+        },
+        {
+          "hospital": "Boston Medical Center",
+          "forecast": 244.0,
+          "actual": 265.0,
+          "miss": 21.0
+        },
+        {
+          "hospital": "Brigham and Women's Faulkner Hospital",
+          "forecast": 241.0,
+          "actual": 265.0,
+          "miss": 24.0
+        },
+        {
+          "hospital": "Massachusetts General Hospital",
+          "forecast": 260.0,
+          "actual": 280.0,
+          "miss": 20.0
+        },
+        {
+          "hospital": "Brigham and Women's Hospital",
+          "forecast": 298.0,
+          "actual": 316.0,
+          "miss": 18.0
+        },
+        {
+          "hospital": "Beth Israel Deaconess Medical Center",
+          "forecast": 316.0,
+          "actual": 320.0,
+          "miss": 4.0
+        }
+      ]
+    },
+    {
+      "release": "2024-10-01",
+      "period": "2023-01-01 to 2023-12-31",
+      "hospitals": 6,
+      "mae_min": 15.2,
+      "within_15": 4,
+      "forecast_fastest": "Tufts Medical Center",
+      "actual_fastest": "Tufts Medical Center",
+      "fastest_held": true,
+      "rank_corr": 0.99,
+      "rows": [
+        {
+          "hospital": "Tufts Medical Center",
+          "forecast": 200.0,
+          "actual": 207.0,
+          "miss": 7.0
+        },
+        {
+          "hospital": "Brigham and Women's Faulkner Hospital",
+          "forecast": 265.0,
+          "actual": 258.0,
+          "miss": -7.0
+        },
+        {
+          "hospital": "Boston Medical Center",
+          "forecast": 265.0,
+          "actual": 261.0,
+          "miss": -4.0
+        },
+        {
+          "hospital": "Massachusetts General Hospital",
+          "forecast": 280.0,
+          "actual": 303.0,
+          "miss": 23.0
+        },
+        {
+          "hospital": "Brigham and Women's Hospital",
+          "forecast": 316.0,
+          "actual": 321.0,
+          "miss": 5.0
+        },
+        {
+          "hospital": "Beth Israel Deaconess Medical Center",
+          "forecast": 320.0,
+          "actual": 365.0,
+          "miss": 45.0
+        }
+      ]
+    },
+    {
+      "release": "2025-11-01",
+      "period": "2024-01-01 to 2024-12-31",
+      "hospitals": 6,
+      "mae_min": 14.5,
+      "within_15": 3,
+      "forecast_fastest": "Tufts Medical Center",
+      "actual_fastest": "Tufts Medical Center",
+      "fastest_held": true,
+      "rank_corr": 0.94,
+      "rows": [
+        {
+          "hospital": "Tufts Medical Center",
+          "forecast": 207.0,
+          "actual": 240.0,
+          "miss": 33.0
+        },
+        {
+          "hospital": "Boston Medical Center",
+          "forecast": 261.0,
+          "actual": 251.0,
+          "miss": -10.0
+        },
+        {
+          "hospital": "Brigham and Women's Faulkner Hospital",
+          "forecast": 258.0,
+          "actual": 275.0,
+          "miss": 17.0
+        },
+        {
+          "hospital": "Massachusetts General Hospital",
+          "forecast": 303.0,
+          "actual": 283.0,
+          "miss": -20.0
+        },
+        {
+          "hospital": "Brigham and Women's Hospital",
+          "forecast": 321.0,
+          "actual": 317.0,
+          "miss": -4.0
+        },
+        {
+          "hospital": "Beth Israel Deaconess Medical Center",
+          "forecast": 365.0,
+          "actual": 362.0,
+          "miss": -3.0
+        }
+      ]
+    },
+    {
+      "release": "2026-08-01",
+      "period": "2024-10-01 to 2025-09-30",
+      "hospitals": 6,
+      "mae_min": 20.5,
+      "within_15": 1,
+      "forecast_fastest": "Tufts Medical Center",
+      "actual_fastest": "Tufts Medical Center",
+      "fastest_held": true,
+      "rank_corr": 1.0,
+      "rows": [
+        {
+          "hospital": "Tufts Medical Center",
+          "forecast": 240.0,
+          "actual": 208.0,
+          "miss": -32.0
+        },
+        {
+          "hospital": "Boston Medical Center",
+          "forecast": 251.0,
+          "actual": 227.0,
+          "miss": -24.0
+        },
+        {
+          "hospital": "Brigham and Women's Faulkner Hospital",
+          "forecast": 275.0,
+          "actual": 256.0,
+          "miss": -19.0
+        },
+        {
+          "hospital": "Massachusetts General Hospital",
+          "forecast": 283.0,
+          "actual": 288.0,
+          "miss": 5.0
+        },
+        {
+          "hospital": "Brigham and Women's Hospital",
+          "forecast": 317.0,
+          "actual": 300.0,
+          "miss": -17.0
+        },
+        {
+          "hospital": "Beth Israel Deaconess Medical Center",
+          "forecast": 362.0,
+          "actual": 336.0,
+          "miss": -26.0
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "forecasts_checked": 30,
+    "releases_checked": 5,
+    "mae_min": 18.2,
+    "within_15_share": 0.4,
+    "fastest_held": 5
+  }
+}

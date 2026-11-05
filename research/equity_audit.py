@@ -1,4 +1,4 @@
-"""ERNow update 39: does ERNow work equally well for every kind of hospital?
+"""Does ERNow work equally well for every kind of hospital?
 
     python research/equity_audit.py
 

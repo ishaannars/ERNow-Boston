@@ -1,4 +1,4 @@
-"""ERNow update 42b: does hospital crowding make the 80% ranges more accurate?
+"""Does hospital crowding make the 80% ranges more accurate?
 
     python research/crowding_range_test.py
 

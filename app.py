@@ -25,7 +25,7 @@ from concurrent.futures import ThreadPoolExecutor
 from threading import current_thread
 from streamlit.runtime.scriptrunner import add_script_run_ctx, get_script_run_ctx
 
-st.set_page_config(page_title="ERNow Boston", page_icon="✚", layout="wide")
+st.set_page_config(page_title="ERNow Boston", page_icon=str(Path(__file__).parent / "assets" / "favicon.png"), layout="wide")
 # Send the shared theme before any view content or data loading.
 st.markdown(
     "<style>" + (Path(__file__).parent / "styles.css").read_text() + "</style>",
@@ -90,6 +90,7 @@ URLS = {
     "boston_traffic_rss": "https://www.boston.com/tag/traffic/feed/",
     "ticketmaster": "https://app.ticketmaster.com/discovery/v2/events.json",
     "osrm": "https://router.project-osrm.org/route/v1/driving/{olon},{olat};{dlon},{dlat}",
+    "osrm_foot_table": "https://routing.openstreetmap.de/routed-foot/table/v1/driving/{coords}",
 }
 
 HEADERS = {
@@ -412,6 +413,20 @@ def route_estimate(origin_lat, origin_lon, dest_lat, dest_lon):
         return None
 
 
+@st.cache_data(ttl=300, show_spinner=False)
+def walk_minutes(origin_lat, origin_lon, destinations):
+    """Walking minutes to every ER in one request (OpenStreetMap foot routing), or {} if unavailable."""
+    coords = ";".join(f"{lon},{lat}" for lat, lon in [(origin_lat, origin_lon), *destinations])
+    r = safe_get(URLS["osrm_foot_table"].format(coords=coords), params={"sources": "0"}, timeout=10)
+    if not r:
+        return {}
+    try:
+        row = r.json()["durations"][0][1:]
+        return {d: (sec / 60.0 if sec is not None else None) for d, sec in zip(destinations, row)}
+    except (ValueError, KeyError, IndexError, TypeError):
+        return {}
+
+
 def fmt_minutes(v):
     if pd.isna(v):
         return "—"
@@ -501,12 +516,15 @@ def render_home():
         tiles = "".join(f'<div class="live-tile"><div class="live-k">{html.escape(k)}</div><div class="live-v">{html.escape(v)}</div>'
                         f'<div class="live-c">{html.escape(c)}</div><div class="live-t">{html.escape(t)}</div></div>'
                         for (k, v, c), t in zip(live, techniques))
+        _sm = (_scorecard().get("summary") or {})
+        _held = (f" · in Boston, its fastest-ER call held in {_sm['fastest_held']} of {_sm['releases_checked']} past releases"
+                 if _sm.get("releases_checked") else "")
         st.markdown(
             f"""<div class="model-bar">
       <div class="live-head"><span class="model-dot"></span><span class="live-title">4 models behind every comparison</span></div>
       {measured}
       <div class="live-meta">{sp['hospitals']:,} U.S. hospitals · {sp['total_rows']:,} hospital-years of data · CMS {html.escape(national['releases'][0][:4])}–{html.escape(national['releases'][-1][:4])} ·
-      typical-visit forecasts off by {next(m['MAE'] for m in national['models'] if m['model'] == national['selected_model']):.1f} min on average · in a year it never saw, it picked the fastest local ER {rk['fastest_pick_accuracy']:.0%} of the time vs {rk['fastest_pick_random_baseline']:.0%} by chance</div>
+      typical-visit forecasts off by {next(m['MAE'] for m in national['models'] if m['model'] == national['selected_model']):.1f} min on average · in a year it never saw, it picked the fastest local ER {rk['fastest_pick_accuracy']:.0%} of the time vs {rk['fastest_pick_random_baseline']:.0%} by chance{_held}</div>
       <div class="live-grid">{tiles}</div>
     </div>""",
             unsafe_allow_html=True,
@@ -629,13 +647,15 @@ def render_home():
     def fetch_routes():
         values = parallel_calls([(route_estimate, (origin_lat, origin_lon, lat, lon)) for lat, lon in destinations])
         return dict(zip(destinations, values))
-    weather_obs, alerts, ari, major_events, routes = parallel_calls([
+    weather_obs, alerts, ari, major_events, routes, walks = parallel_calls([
         (fetch_current_weather, (origin_lat, origin_lon)),
         (fetch_nws_alerts, (origin_lat, origin_lon)),
         (fetch_cdc_ari, ()),
         (major_event_titles, (now_dt,)),
         (fetch_routes, ()),
+        (walk_minutes, (origin_lat, origin_lon, tuple(destinations))),
     ], max_workers=6)
+    walks = walks or {}
     ranked, context = build_model(df, origin_lat, origin_lon, now_dt, weather_obs, alerts, ari, major_events, routes=routes)
 
     weather_status = weather_obs.get("description", "Unavailable") if weather_obs else "Unavailable"
@@ -760,6 +780,15 @@ def render_home():
         lwbs = "—" if pd.isna(lw) else f"{lw:.0f}%"
         lwbs_sub = "2024" if pd.isna(lw_us) else f"U.S. {lw_us:.0f}% · 2024"
         flag = ('<span class="er-flag">Unusual change since prior release</span>' if row.get("change_flag") else "")
+        _walk = walks.get((row["latitude"], row["longitude"]))
+        walk_line = (f'<div class="er-walk">or about {fmt_minutes(_walk)} on foot</div>'
+                     if _walk is not None and _walk <= 45 else "")
+        transit_url = (
+            "https://www.google.com/maps/dir/?api=1"
+            f"&origin={origin_lat},{origin_lon}"
+            f"&destination={quote(str(row['address']))}"
+            "&travelmode=transit"
+        )
         directions_url = (
             "https://www.google.com/maps/dir/?api=1"
             f"&origin={origin_lat},{origin_lon}"
@@ -772,12 +801,13 @@ def render_home():
       <div class="er-system">{html.escape(str(sys_map.get(row['hospital'], '')))}</div>
       <div class="er-wait-label" title="Likely range for this hospital's typical visit, not your individual visit. Latest public data ends {row['visit_period_end']}.">Typical visit {fmt_minutes(row["visit_mid"])} · likely range</div><div class="er-wait">{visit_range}</div>{peer}
       <div class="er-stats">
-        <div class="er-stat"><div class="er-stat-k">Drive</div><div class="er-stat-v">{drive} <span>{drive_sub}</span></div></div>
+        <div class="er-stat"><div class="er-stat-k">Drive</div><div class="er-stat-v">{drive} <span>{drive_sub}</span></div>{walk_line}</div>
         <div class="er-stat"><div class="er-stat-k">Drive + typical visit</div><div class="er-stat-v">{total}</div></div>
         <div class="er-stat"><div class="er-stat-k">Likely quickest</div><div class="er-stat-v">{chance}</div></div>
         <div class="er-stat"><div class="er-stat-k">Left before seen</div><div class="er-stat-v">{lwbs} <span>{lwbs_sub}</span></div></div>
       </div>
-      <div class="er-actions"><a class="er-directions" href="{directions_url}" target="_blank" rel="noopener noreferrer">Open Directions</a></div>
+      <div class="er-actions"><a class="er-directions" href="{directions_url}" target="_blank" rel="noopener noreferrer">Open Directions</a>
+        <a class="er-transit" href="{transit_url}" target="_blank" rel="noopener noreferrer">By transit</a></div>
     </div>""")
     st.markdown('<div class="er-list">' + "".join(cards) + '</div>', unsafe_allow_html=True)
     st.caption("The 7 general ERs in Boston are compared here (Carney Hospital's ER closed in 2024). "
@@ -1074,7 +1104,7 @@ def _extra_json(name):
 
 
 def render_extra_tests():
-    """Updates 36-39: held-out calibration, national impact, model switching, equity. All read from data/."""
+    """Held-out calibration, national impact, model switching, equity. All read from data/."""
     cal, imp = _extra_json("chance_calibration.json"), _extra_json("national_impact.json")
     sw, eq = _extra_json("regime_switch_results.json"), _extra_json("equity_audit.json")
     if not any((cal, imp, sw, eq)):
@@ -1122,6 +1152,40 @@ def render_extra_tests():
                      f"{eq['held_out_releases']} held-out years"])
     _table(pd.DataFrame(rows, columns=["Question", "Answer", "Note"]))
     st.caption("Code: research/national_impact.py, calibrate_chance_fastest.py, regime_switch_test.py, equity_audit.py, crowding_factor_test.py, crowding_range_test.py.")
+
+def _scorecard():
+    try:
+        return json.loads((Path(__file__).parent / "data" / "forecast_scorecard.json").read_text())
+    except Exception:
+        return {}
+
+
+def render_scorecard():
+    """Did the forecast hold? Each past Boston forecast against what CMS published next."""
+    sc = _scorecard()
+    sm, checks = sc.get("summary") or {}, sc.get("checks") or []
+    if not checks:
+        return
+    st.subheader("Did the forecast hold?")
+    st.caption(
+        f"Every forecast ERNow would have made for these six Boston ERs, checked against what CMS published next. "
+        f"The fastest-ER call held in {sm['fastest_held']} of {sm['releases_checked']} releases. "
+        f"Typical-visit times were off by {sm['mae_min']:.0f} minutes on average, because Boston ERs shift more year to year "
+        f"than most U.S. hospitals, so the ranges matter more than the single number."
+    )
+    rows = [{
+        "CMS release": pd.Timestamp(c["release"]).strftime("%b %Y"),
+        "Forecast fastest": c["forecast_fastest"],
+        "Actually fastest": c["actual_fastest"],
+        "Held?": "Yes" if c["fastest_held"] else "No",
+        "Avg. miss": f"{c['mae_min']:.0f} min",
+        "Within 15 min": f"{c['within_15']} of {c['hospitals']}",
+        "Order match": f"{c['rank_corr']:.2f}",
+    } for c in reversed(checks)]
+    _table(pd.DataFrame(rows))
+    st.caption("Order match is the rank correlation between forecast and published order (1.00 means the same order). "
+               "Code: research/forecast_scorecard.py.")
+
 
 def render_forecast_model():
     st.title("Forecast Model")
@@ -1186,6 +1250,7 @@ def render_forecast_model():
 
     with tabs[1]:
         st.caption("In plain terms: we hid the most recent year from the models, then checked how often they got it right.")
+        render_scorecard()
         roll = national.get("rolling") or []
         if roll:
             st.subheader("Year by year (rolling backtest)")
@@ -1429,6 +1494,15 @@ with view_slot.container():
             render_forecast_model()
         else:
             render_home()
+    except Exception as exc:
+        if type(exc).__name__ in {"RerunException", "StopException"}:
+            raise
+        import sys
+        import traceback
+        print("ERNow error:", "".join(traceback.format_exception(exc)), file=sys.stderr, flush=True)
+        st.markdown('<div class="friendly-error">This page didn’t finish loading. Refresh to try again. '
+                    'If you may be having an emergency, call 911 or go to the nearest emergency department now.</div>',
+                    unsafe_allow_html=True)
     finally:
         # Clear the one loader after all cards, specialist routes, and the map render.
         loading_slot.empty()

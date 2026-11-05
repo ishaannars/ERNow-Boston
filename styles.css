@@ -362,7 +362,7 @@ hr, [data-testid="stDivider"] {margin:.55rem 0 .35rem !important}
 .live-proof{font-size:.82rem;line-height:1.45;color:var(--soft-ink);background:var(--kakishibu-wash);border-left:3px solid var(--moss);border-radius:8px;padding:.45rem .65rem;margin:.4rem 0 .3rem}
 .live-proof b{color:var(--ink);font-weight:650}
 
-/* ===== V3.3: one loader, centered button text, option cards ===== */
+/* ===== One loader, centered button text, option cards ===== */
 [data-testid="stStatusWidget"],[data-testid="stSpinner"],[data-testid="stDecoration"],.stSpinner,
 [data-testid="stToolbar"] [data-testid="stStatusWidget"]{display:none !important}
 [data-testid="stButton"] > button, .er-directions{display:inline-flex !important;align-items:center !important;justify-content:center !important;text-align:center !important}
@@ -558,3 +558,20 @@ iframe[title="ernow_geo"]{height:0 !important;min-height:0 !important;border:0 !
 /* One status indicator only: hide Streamlit's "RUNNING…" status and the Stop / Fork / GitHub toolbar */
 [data-testid="stToolbar"],[data-testid="stStatusWidget"],[data-testid="stAppDeployButton"],[data-testid="stMainMenu"],
 [data-testid="stDecoration"],[data-testid="stToolbarActions"],.stAppToolbar,header[data-testid="stHeader"]{display:none !important;visibility:hidden !important}
+
+/* ===== Final polish: text floor, tap targets, press feedback, walking and transit ===== */
+.mini-label,.evidence-source,.live-k,.live-t,.best-label,.closest-label,.er-flag,.opt-rows span,.rank-chip,.answer-k,.live-title,.model-k,.er-stat-k,.live-measured,.model-chip,.er-reason,.live-c,.ds-tag,.er-system,.er-wait-label{font-size:.78rem !important;}
+.er-directions,.er-transit{font-size:.82rem !important;}
+.er-walk{font-size:.78rem;color:#5d5a52;margin-top:.15rem;line-height:1.3;}
+.er-actions{display:flex;align-items:center;gap:.9rem;flex-wrap:wrap;}
+.er-transit{color:#8C2F2F;font-weight:600;text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(140,47,47,.35);}
+.er-transit:hover{text-decoration-color:#8C2F2F;}
+[data-testid="stButton"] > button,.er-directions{transition:transform .08s ease,background-color .15s ease !important;}
+[data-testid="stButton"] > button:active,.er-directions:active,.er-transit:active{transform:scale(.97) !important;}
+[data-testid="stButton"] > button:focus-visible,.er-directions:focus-visible,.er-transit:focus-visible{outline:2px solid #8C2F2F !important;outline-offset:2px;}
+.friendly-error{font-size:.95rem;line-height:1.5;padding:1rem 1.1rem;border:1px solid rgba(28,27,25,.15);border-radius:12px;background:#FFFDF5;margin:1rem 0;}
+@media (max-width:650px){
+    [data-testid="stButton"] > button,.er-directions{min-height:44px !important;}
+    .er-transit{display:inline-flex;align-items:center;min-height:44px;}
+    [data-testid="stTextInput"] input,[data-baseweb="select"] input{font-size:16px !important;}
+}

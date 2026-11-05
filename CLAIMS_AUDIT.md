@@ -1,4 +1,4 @@
-# Version 27 claims audit
+# Claims audit
 
 Checked October 2, 2026. This distinguishes primary-source checks from reproduction of saved outputs.
 

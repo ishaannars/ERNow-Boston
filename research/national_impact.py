@@ -1,4 +1,4 @@
-"""ERNow update 37: what choosing by ERNow's forecast is worth across the U.S.
+"""What choosing by ERNow's forecast is worth across the U.S.
 
     python research/national_impact.py
 

@@ -1,4 +1,4 @@
-"""ERNow update 42: does hospital crowding (inpatient beds in use) make the forecast more accurate?
+"""Does hospital crowding (inpatient beds in use) make the forecast more accurate?
 
     python research/crowding_factor_test.py
 
